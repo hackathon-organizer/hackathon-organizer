@@ -1,4 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @tailwind base;
+
+.ho-section {
+  @apply rounded-2xl mb-6;
+}
+
 @tailwind components;
 @tailwind utilities;
+
+
