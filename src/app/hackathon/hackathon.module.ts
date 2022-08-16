@@ -7,7 +7,10 @@ import { HackathonsComponent } from './hackathons/hackathons.component';
 
 @NgModule({
   declarations: [
-  
+
+    HackathonsComponent
+  ],
+  exports: [
     HackathonsComponent
   ],
   imports: [
