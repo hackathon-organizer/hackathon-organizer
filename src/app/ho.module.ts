@@ -7,6 +7,7 @@ import { HoComponent } from './ho.component';
 import { HackathonProfileComponent } from './hackathon/hackathon-profile/hackathon-profile.component';
 import { FooterComponent } from './core/footer/footer.component';
 import {HackathonModule} from "./hackathon/hackathon.module";
+import {UserModule} from "./user/user.module";
 
 @NgModule({
   declarations: [
@@ -15,11 +16,12 @@ import {HackathonModule} from "./hackathon/hackathon.module";
     HackathonProfileComponent,
     FooterComponent
   ],
-  imports: [
-    BrowserModule,
-    HoRoutingModule,
-    HackathonModule
-  ],
+    imports: [
+        BrowserModule,
+        HoRoutingModule,
+        HackathonModule,
+        UserModule
+    ],
   providers: [],
   bootstrap: [HoComponent]
 })
