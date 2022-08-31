@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { HoRoutingModule } from './ho-routing.module';
@@ -8,6 +8,9 @@ import { HackathonProfileComponent } from './hackathon/hackathon-profile/hackath
 import { FooterComponent } from './core/footer/footer.component';
 import {HackathonModule} from "./hackathon/hackathon.module";
 import {UserModule} from "./user/user.module";
+import {initializeKeycloak} from "./init/keycloak-init.factory";
+import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -18,11 +21,20 @@ import {UserModule} from "./user/user.module";
   ],
     imports: [
         BrowserModule,
+        HttpClientModule,
+        KeycloakAngularModule,
         HoRoutingModule,
         HackathonModule,
         UserModule
     ],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService],
+    }
+  ],
   bootstrap: [HoComponent]
 })
 export class HoModule { }
