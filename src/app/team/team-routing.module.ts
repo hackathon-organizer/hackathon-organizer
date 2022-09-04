@@ -5,10 +5,8 @@ import {UserSerachComponent} from "../shared/user-serach/user-serach.component";
 
 
 const routes: Routes = [
-  {path: '', component: TeamProfileComponent, children: [
-      {path: 'invite', component: UserSerachComponent},
-    ]},
-
+  {path: '', component: TeamProfileComponent},
+  {path: 'invite', component: UserSerachComponent},
 ];
 
 @NgModule({
