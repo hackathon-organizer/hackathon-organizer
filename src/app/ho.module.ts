@@ -11,20 +11,26 @@ import {UserModule} from "./user/user.module";
 import {initializeKeycloak} from "./init/keycloak-init.factory";
 import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 import {HttpClientModule} from "@angular/common/http";
+import {TeamModule} from "./team/team.module";
+import { HomepageComponent } from './core/homepage/homepage.component';
+import {TeamRoutingModule} from "./team/team-routing.module";
 
 @NgModule({
   declarations: [
     MenuComponent,
     HoComponent,
     HackathonProfileComponent,
-    FooterComponent
+    FooterComponent,
+    HomepageComponent
   ],
     imports: [
         BrowserModule,
         HttpClientModule,
         KeycloakAngularModule,
         HoRoutingModule,
+        TeamModule,
         HackathonModule,
+        TeamRoutingModule,
         UserModule
     ],
   providers: [

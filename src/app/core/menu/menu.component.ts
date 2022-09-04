@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {Client} from "@stomp/stompjs";
+import {KeycloakService} from "keycloak-angular";
 
 @Component({
   selector: 'ho-menu',
@@ -7,9 +9,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MenuComponent implements OnInit {
 
-  constructor() { }
+
+  // TODO find a better place to open ws connection
+
+
+  constructor() {
+  }
 
   ngOnInit(): void {
   }
+
 
 }
