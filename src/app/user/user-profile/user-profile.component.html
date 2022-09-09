@@ -14,7 +14,7 @@
 
 
     <div id="user-data" class="flex flex-col text-2xl">
-      <h4>Username</h4>
+      <h4>Username: {{ user.username }}</h4>
 
       <h4 class="mt-8">Team: </h4>
 
@@ -22,6 +22,8 @@
         <h4>About:</h4>
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.</p>
       </div>
+
+      <button (click)="inviteToTeam()">Invite to team</button>
     </div>
 
     <div class="col-span-2">

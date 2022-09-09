@@ -31,7 +31,7 @@ export class TeamProfileComponent implements OnInit {
 
 
   startSerach() {
-    this.userService.findUserByUsername(this.searchUser).subscribe(
+    this.userService.findUsersByUsername(this.searchUser).subscribe(
       user => {
         console.log(user)  ;
 

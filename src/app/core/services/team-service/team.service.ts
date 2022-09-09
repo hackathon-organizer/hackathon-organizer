@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
+import {logExperimentalWarnings} from "@angular-devkit/build-angular/src/builders/browser-esbuild/experimental-warnings";
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +15,13 @@ export class TeamService {
 
   }
 
-  sendInv(userKeycloakId: string): Observable<any> {
-    const teamInv = new TeamInvitation(12, 12, "PENDING", "XXX");
 
-    return this.http.post("http://localhost:9090/teams/1/invite/" + userKeycloakId, teamInv);
+  sendTeamInvitation(userKeyCloakId: string, teamId: number): Observable<any> {
+
+    return this.http.post("http://localhost:9090/teams/" + teamId + "/invite/" + userKeyCloakId, "null", {
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
   }
 }

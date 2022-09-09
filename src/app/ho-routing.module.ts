@@ -9,6 +9,11 @@ const routes: Routes = [
   { path: '', component: HomepageComponent , canActivate: [AuthGuard]},
   // { path: '**', redirectTo: '' }
   {
+    path: 'user',
+    loadChildren: () => import('./user/user.module').then((m) => m.UserModule),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'team',
     loadChildren: () =>
       import('./team/team.module').then((m) => m.TeamModule),

@@ -14,6 +14,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
 import {TeamRoutingModule} from "./team/team-routing.module";
+import {UserRoutingModule} from "./user/user-routing.module";
 
 @NgModule({
   declarations: [
@@ -30,7 +31,6 @@ import {TeamRoutingModule} from "./team/team-routing.module";
         HoRoutingModule,
         TeamModule,
         HackathonModule,
-        TeamRoutingModule,
         UserModule
     ],
   providers: [
