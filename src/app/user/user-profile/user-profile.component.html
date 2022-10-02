@@ -14,7 +14,7 @@
 
 
     <div id="user-data" class="flex flex-col text-2xl">
-      <h4>Username: {{ user.username }}</h4>
+      <h4 *ngIf="user">Username: {{ user.username }}</h4>
 
       <h4 class="mt-8">Team: </h4>
 
@@ -39,6 +39,20 @@
 
 <!--      <button class="btn btn-outline btn-success rounded-full px-8 m-5 w-24 h-full">Save</button>-->
       </div>
+    </div>
+
+    <div>
+      Notifications:
+
+      <div *ngFor="let not of notificationsArray; let i = index;">
+
+        User {{ not.fromUserName }} invited you to team {{ not.teamName }}.
+
+        <button class="m-5" (click)="acceptInvitation(i, true)">Accept</button>
+        <button class="m-5" (click)="acceptInvitation(i,false)">Reject</button>
+
+      </div>
+
     </div>
 
 

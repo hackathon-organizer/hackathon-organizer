@@ -4,17 +4,20 @@ import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
 import {Client} from "@stomp/stompjs";
 import {UserResponseDto} from "../../../user/model/UserResponseDto";
-import {TeamInvitation} from "../../../user/model/TeamInvitation";
+import {TeamInvitation} from "../../../team/model/TeamInvitation";
+import {User} from "../../../user/model/User";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private userNotifications: BehaviorSubject<any> = new BehaviorSubject<any>([]);
+  private userNotifications: BehaviorSubject<TeamInvitation[]> = new BehaviorSubject<TeamInvitation[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
 
-  keycloakUserId = "";
+  user!: User;
+
+  private keycloakUserId = "";
 
   constructor(private http: HttpClient, private keycloakService: KeycloakService) {
 
@@ -22,7 +25,7 @@ export class UserService {
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {
-    return this.http.get<UserResponseDto[]>('http://localhost:9090/users?username=' + username);
+    return this.http.get<UserResponseDto[]>('http://localhost:9090/api/v1/read/users?username=' + username);
   }
 
   // Open ws connection
@@ -39,6 +42,8 @@ export class UserService {
       this.keycloakUserId = v!;
 
       this.openWsConn(this.keycloakUserId);
+
+      this.fetchUserData();
     });
   }
 
@@ -60,11 +65,11 @@ export class UserService {
       client.subscribe('/user/topic/private-notifications', (message: any) => {
         // called when the client receives a STOMP message from the server
 
-        const invite = message.body as TeamInvitation;
+        const invite: TeamInvitation = JSON.parse(message.body) as TeamInvitation;
 
-        console.log(invite);
+        console.log(invite as TeamInvitation);
 
-        this.userNotifications.next(Object.assign([], invite));
+        this.userNotifications.next(this.userNotifications.value.concat(invite));
       });
     };
 
@@ -77,6 +82,38 @@ export class UserService {
   }
 
   getUserById(userId: number): Observable<UserResponseDto> {
-    return this.http.get<UserResponseDto>("http://localhost:9090/users/" + userId);
+    return this.http.get<UserResponseDto>("http://localhost:9090/api/v1/read/users/" + userId);
+  }
+
+  public getKcId(): string {
+
+    if (!this.keycloakUserId) {
+      console.log('Erorr')   ;
+    }
+
+    return this.keycloakUserId;
+  }
+
+  private fetchUserInvites() {
+    this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
+      this.userNotifications.next(userInvites);
+  });
+  }
+
+  private fetchUserData() {
+    this.http.get<User>('http://localhost:9090/api/v1/read/users/kc/' + this.getKcId()).subscribe(userData => {
+      this.user = userData;
+      console.log(userData);
+
+      this.fetchUserInvites();
+    });
+  }
+
+  getUsername(): string {
+    if (this.user) {
+      return this.user.username;
+    } else {
+      throw new Error("User not loaded yet!");
+    }
   }
 }

@@ -1,14 +1,18 @@
 export class TeamInvitation {
-  fromUserId: number;
-  toUserId: number;
+
+  id: number;
+  fromUserName: string;
+  toUserKeycloakId: string;
   invitationStatus: string;
   teamName: string;
+  teamId: number;
 
-
-  constructor(fromUserId: number, toUserId: number, invitationStatus: string, teamName: string) {
-    this.fromUserId = fromUserId;
-    this.toUserId = toUserId;
-    this.invitationStatus = "PENDING";
-    this.teamName = "TEST TEAM";
+  constructor(id: number, fromUserName: string, toUserKeycloakId: string, invitationStatus: string, teamName: string, teamId: number) {
+    this.id = id;
+    this.fromUserName = fromUserName;
+    this.toUserKeycloakId = toUserKeycloakId;
+    this.invitationStatus = invitationStatus;
+    this.teamName = teamName;
+    this.teamId = teamId;
   }
 }
