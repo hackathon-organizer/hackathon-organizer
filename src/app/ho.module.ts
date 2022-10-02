@@ -20,7 +20,6 @@ import {UserRoutingModule} from "./user/user-routing.module";
   declarations: [
     MenuComponent,
     HoComponent,
-    HackathonProfileComponent,
     FooterComponent,
     HomepageComponent
   ],

@@ -1,8 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {UserProfileComponent} from "./user/user-profile/user-profile.component";
 import {AuthGuard} from "./guard/auth.guard";
-import {TeamProfileComponent} from "./team/team-profile/team-profile.component";
 import {HomepageComponent} from "./core/homepage/homepage.component";
 
 const routes: Routes = [
@@ -12,6 +10,11 @@ const routes: Routes = [
     path: 'user',
     loadChildren: () => import('./user/user.module').then((m) => m.UserModule),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'hackathon',
+    loadChildren: () =>
+      import('./hackathon/hackathon.module').then((m) => m.HackathonModule)
   },
   {
     path: 'team',

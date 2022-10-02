@@ -9,10 +9,6 @@ import {KeycloakService} from "keycloak-angular";
 })
 export class MenuComponent implements OnInit {
 
-
-  // TODO find a better place to open ws connection
-
-
   constructor() {
   }
 
