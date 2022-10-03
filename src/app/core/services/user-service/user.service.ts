@@ -116,4 +116,12 @@ export class UserService {
       throw new Error("User not loaded yet!");
     }
   }
+
+  getUserId(): number {
+     if (this.user.id) {
+       return this.user.id;
+     } else {
+       throw new Error("User not loaded yet!");
+     }
+  }
 }

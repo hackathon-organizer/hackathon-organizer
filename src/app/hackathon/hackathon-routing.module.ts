@@ -8,6 +8,7 @@ import {HackathonProfileComponent} from "./hackathon-profile/hackathon-profile.c
 const routes: Routes = [
   {path: '', component: HackathonsComponent},
   {path: 'new', component: NewHackathonFormComponent},
+  {path: ':id', component: HackathonProfileComponent}
 ];
 
 @NgModule({

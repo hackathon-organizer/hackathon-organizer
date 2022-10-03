@@ -5,12 +5,14 @@ import {FormsModule} from "@angular/forms";
 import {SharedModule} from "../shared/shared.module";
 import {TeamRoutingModule} from "./team-routing.module";
 import {Router, RouterModule} from "@angular/router";
+import { NewTeamFormComponent } from './new-team-form/new-team-form.component';
 
 
 
 @NgModule({
     declarations: [
-        TeamRoutingModule.components
+        TeamRoutingModule.components,
+        NewTeamFormComponent
     ],
     exports: [
         TeamProfileComponent,

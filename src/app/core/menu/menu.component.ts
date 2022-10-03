@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Client} from "@stomp/stompjs";
 import {KeycloakService} from "keycloak-angular";
+import {UserService} from "../services/user-service/user.service";
 
 @Component({
   selector: 'ho-menu',

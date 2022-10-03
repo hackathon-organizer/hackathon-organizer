@@ -11,13 +11,18 @@ export class HackathonService {
 
   constructor(private http: HttpClient) { }
 
-  BASE_URL = 'http://localhost:9090/api/v1/write/hackathons';
+  BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/hackathons';
+  BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
 
   createHackathon(hackathon: HackathonRequest): Observable<any> {
 
     hackathon = this.formatDate(hackathon);
 
-    return this.http.post(this.BASE_URL, hackathon);
+    return this.http.post(this.BASE_URL_WRITE, hackathon);
+  }
+
+  getHackathonDetailsById(id: number): Observable<any> {
+    return this.http.get(this.BASE_URL_READ + '/' + id);
   }
 
   private formatDate(hackathon: HackathonRequest): HackathonRequest {
