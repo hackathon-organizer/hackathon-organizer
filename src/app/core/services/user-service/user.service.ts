@@ -20,8 +20,6 @@ export class UserService {
   private keycloakUserId = "";
 
   constructor(private http: HttpClient, private keycloakService: KeycloakService) {
-
-    this.initWsConn();
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {

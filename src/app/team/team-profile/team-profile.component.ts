@@ -13,20 +13,20 @@ export class TeamProfileComponent implements OnInit {
 
   searchUser: string = "";
 
-  constructor(private userService: UserService, private keycloakService: KeycloakService, private teamService: TeamService) { }
+  constructor(private userService: UserService, private teamService: TeamService) { }
 
-  async getKeycloakUserId(): Promise<string | undefined> {
-    let userDetails = await this.keycloakService.loadUserProfile();
-    return userDetails.id;
-  }
+  // async getKeycloakUserId(): Promise<string | undefined> {
+  //   let userDetails = await this.keycloakService.loadUserProfile();
+  //   return userDetails.id;
+  // }
 
   ngOnInit(): void {
 
     let keycloakUserId: string = "";
 
-    this.getKeycloakUserId().then(v => {
-
-    });
+    // this.getKeycloakUserId().then(v => {
+    //
+    // });
   }
 
 

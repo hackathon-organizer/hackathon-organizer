@@ -15,6 +15,7 @@ import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
 import {TeamRoutingModule} from "./team/team-routing.module";
 import {UserRoutingModule} from "./user/user-routing.module";
+import {UserService} from "./core/services/user-service/user.service";
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import {UserRoutingModule} from "./user/user-routing.module";
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService],
-    }
+    },
+    UserService
   ],
   bootstrap: [HoComponent]
 })

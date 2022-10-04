@@ -26,6 +26,8 @@ export class HackathonService {
   }
 
   getAllHackathons():Observable<any> {
+    console.log("sending req")
+
     return this.http.get(this.BASE_URL_READ);
   }
 
