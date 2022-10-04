@@ -25,6 +25,10 @@ export class HackathonService {
     return this.http.get(this.BASE_URL_READ + '/' + id);
   }
 
+  getAllHackathons():Observable<any> {
+    return this.http.get(this.BASE_URL_READ);
+  }
+
   private formatDate(hackathon: HackathonRequest): HackathonRequest {
 
     hackathon.eventStartDate = dayjs(hackathon.eventStartDate).format("HH:mm:ss DD-MM-YYYY");

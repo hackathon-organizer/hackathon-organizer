@@ -124,4 +124,12 @@ export class UserService {
        throw new Error("User not loaded yet!");
      }
   }
+
+  logout() {
+    this.keycloakService.logout('http://localhost:4200').then((success) => {
+      console.log("--> log: logout success ", success );
+    }).catch((error) => {
+      console.log("--> log: logout error ", error );
+    });
+  }
 }
