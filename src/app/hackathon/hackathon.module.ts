@@ -5,9 +5,6 @@ import {HackathonRoutingModule} from "./hackathon-routing.module";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
 
-
-
-
 @NgModule({
   declarations: [
     HackathonRoutingModule.components

@@ -1,1 +1,43 @@
-<p>new-team-form works!</p>
+<section id="add-new-team">
+
+  <div class="w-full p-4 mx-auto md:w-4/5 lg:w-3/5 xl:w-2/5 lg:p-16">
+    <div class="p-4 border-2 border-black rounded-lg lg:p-8">
+
+      <h2 class="m-4 mb-6 text-3xl">Create new team for hackathon ...</h2>
+
+      <form id="create-team-form" novalidate (ngSubmit)="createTeam()" [formGroup]="newTeamForm"
+            class="flex flex-col items-center justify-center">
+        <input id="teamNameId" formControlName="teamName" type="text" class="w-4/5 my-3"
+               placeholder="Team name (required)" [ngClass]="{'is-invalid': (newTeamForm.get('teamName')?.touched
+          ||
+          newTeamForm.get('teamName')?.dirty) &&
+          !newTeamForm.get('teamName')?.valid }"/>
+
+        <span class="error-message" *ngIf="newTeamForm.get('teamName')?.errors?.required &&
+          newTeamForm.get('teamName')?.touched">Please enter hackathon name.</span>
+        <span class="error-message" *ngIf="newTeamForm.get('teamName')?.errors?.minlength">The team name must be longer
+          than 3 characters.</span>
+
+        <input id="descriptionId" formControlName="description" type="text" class="w-4/5"
+               placeholder="Description (required)" [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
+          ||
+          newTeamForm.get('description')?.dirty) &&
+          !newTeamForm.get('description')?.valid }"/>
+
+        <span class="error-message"
+              *ngIf="newTeamForm.get('description')?.errors?.minlength">The description must be longer than 15 characters.</span>
+
+        <div class="w-24" *ngFor="let tag of tags; let i = index">
+          <label>
+          <input type="checkbox" [formControlName]="tag.id" />     {{ tags[i].name }}
+          </label>
+        </div>
+
+        <input type="submit" class="btn btn-primary" value="Create">
+      </form>
+
+    </div>
+
+  </div>
+
+</section>

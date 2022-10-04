@@ -17,6 +17,6 @@ const routes: Routes = [
 })
 export class TeamRoutingModule {
   static components = [
-     TeamProfileComponent
+     TeamProfileComponent, NewTeamFormComponent
   ];
 }

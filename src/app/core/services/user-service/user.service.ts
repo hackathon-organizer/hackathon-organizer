@@ -6,6 +6,7 @@ import {Client} from "@stomp/stompjs";
 import {UserResponseDto} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
+import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -101,6 +102,7 @@ export class UserService {
   }
 
   private fetchUserData() {
+
     this.http.get<User>('http://localhost:9090/api/v1/read/users/kc/' + this.getKcId()).subscribe(userData => {
       this.user = userData;
       console.log(userData);
