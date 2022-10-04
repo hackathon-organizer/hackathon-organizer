@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../core/services/user-service/user.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest} from "../model/TeamRequest";
 import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'ho-new-team-form',
@@ -13,19 +14,28 @@ import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
 })
 export class NewTeamFormComponent implements OnInit {
 
+  private routeSubscription: Subscription = new Subscription();
+
   newTeamForm!: FormGroup;
   hackathon!: HackathonRequest;
   tags: Tag[] = [];
   errorMsg = '';
+  hackathonId: number = 0;
 
   constructor(
     private formBuilder: FormBuilder,
     private teamService: TeamService,
     private userService: UserService,
     private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+
+    this.routeSubscription = this.route.params.subscribe(params => {
+
+     this.hackathonId = params['id'];
+    });
 
     this.teamService.getAvailableTags().subscribe(result => this.tags = result);
 
@@ -51,6 +61,8 @@ export class NewTeamFormComponent implements OnInit {
   createTeam() {
 
     const team: TeamRequest = {
+      ownerId: this.userService.getUserId(),
+      hackathonId: this.hackathonId,
       name: this.newTeamForm.get('teamName')?.value,
       description: this.newTeamForm.get('description')?.value,
       tags: this.tags,
@@ -60,11 +72,11 @@ export class NewTeamFormComponent implements OnInit {
     console.log(team);
     console.log('');
 
-    // this.teamService.createTeam(team).subscribe(res => {
-    //   console.log(res);
-    //
-    //   this.router.navigateByUrl('/team/' + res.id);
-    // });
+    this.teamService.createTeam(team).subscribe(res => {
+      console.log(res);
+
+      this.router.navigateByUrl('/team/' + res.id);
+    });
   }
 
 }

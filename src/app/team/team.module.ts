@@ -6,12 +6,14 @@ import {SharedModule} from "../shared/shared.module";
 import {TeamRoutingModule} from "./team-routing.module";
 import {Router, RouterModule} from "@angular/router";
 import { NewTeamFormComponent } from './new-team-form/new-team-form.component';
+import { TeamsComponent } from './teams/teams.component';
 
 
 
 @NgModule({
     declarations: [
-        TeamRoutingModule.components
+        TeamRoutingModule.components,
+        TeamsComponent
     ],
     exports: [
         TeamProfileComponent,

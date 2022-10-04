@@ -4,7 +4,7 @@ import {Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
-import {Tag, TeamRequest} from "../../../team/model/TeamRequest";
+import {Tag, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -45,8 +45,8 @@ export class TeamService {
     });
   }
 
-  createTeam(team: TeamRequest): Observable<any> {
-     return this.http.post('', team);
+  createTeam(team: TeamRequest): Observable<TeamResponse> {
+     return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
   }
 
   getAvailableTags(): Observable<Tag[]> {

@@ -45,4 +45,8 @@ export class HackathonService {
 
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null);
   }
+
+  getHackathonTeamsById(hackathonId: number): Observable<any> {
+    return this.http.get(this.BASE_URL_READ + '/' + hackathonId + '/teams');
+  }
 }

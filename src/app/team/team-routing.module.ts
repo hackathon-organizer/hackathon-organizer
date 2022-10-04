@@ -8,7 +8,7 @@ import {NewTeamFormComponent} from "./new-team-form/new-team-form.component";
 const routes: Routes = [
   {path: '', component: TeamProfileComponent},
   {path: 'invite', component: UserSerachComponent},
-  {path: 'new', component: NewTeamFormComponent}
+  // {path: 'new', component: NewTeamFormComponent}
 ];
 
 @NgModule({
