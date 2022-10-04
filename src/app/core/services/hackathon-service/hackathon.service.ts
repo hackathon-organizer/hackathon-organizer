@@ -3,13 +3,14 @@ import {HttpClient} from "@angular/common/http";
 import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
+import {UserService} from "../user-service/user.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class HackathonService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private userService: UserService) { }
 
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/hackathons';
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
@@ -37,5 +38,11 @@ export class HackathonService {
     hackathon.eventEndDate = dayjs(hackathon.eventEndDate).format("HH:mm:ss DD-MM-YYYY");
 
     return hackathon;
+  }
+
+  addUserToHackathon(hackathonId: number):Observable<any> {
+    const userId = this.userService.getUserId();
+
+    return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null);
   }
 }
