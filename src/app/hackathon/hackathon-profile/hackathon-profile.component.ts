@@ -13,6 +13,7 @@ export class HackathonProfileComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   hcTitle: string = '';
+  hcId: number = 0;
 
   constructor(private hackathonService: HackathonService, private route: ActivatedRoute) { }
 
@@ -21,8 +22,14 @@ export class HackathonProfileComponent implements OnInit {
 
     this.routeSubscription = this.route.params.subscribe(params => {
 
-      this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hc => this.hcTitle = hc.name);
+      this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hc => {
+        this.hcTitle = hc.name;
+        this.hcId = hc.id;
+      });
     });
   }
 
+  joinHackathon() {
+     this.hackathonService.addUserToHackathon(this.hcId).subscribe(res => console.log("User added to hackathon" + this.hcId));
+  }
 }

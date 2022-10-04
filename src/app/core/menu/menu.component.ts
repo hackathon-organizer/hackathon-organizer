@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {Client} from "@stomp/stompjs";
-import {KeycloakService} from "keycloak-angular";
 import {UserService} from "../services/user-service/user.service";
 
 @Component({
@@ -10,11 +8,14 @@ import {UserService} from "../services/user-service/user.service";
 })
 export class MenuComponent implements OnInit {
 
-  constructor() {
+  constructor(private userService: UserService) {
   }
 
   ngOnInit(): void {
+    this.userService.initWsConn();
   }
 
-
+  logout() {
+    this.userService.logout();
+  }
 }

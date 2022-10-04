@@ -21,8 +21,6 @@ export class UserService {
   private keycloakUserId = "";
 
   constructor(private http: HttpClient, private keycloakService: KeycloakService) {
-
-    this.initWsConn();
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {
@@ -125,5 +123,13 @@ export class UserService {
      } else {
        throw new Error("User not loaded yet!");
      }
+  }
+
+  logout() {
+    this.keycloakService.logout('http://localhost:4200').then((success) => {
+      console.log("--> log: logout success ", success );
+    }).catch((error) => {
+      console.log("--> log: logout error ", error );
+    });
   }
 }

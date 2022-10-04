@@ -15,7 +15,6 @@ import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
 import {TeamRoutingModule} from "./team/team-routing.module";
 import {UserRoutingModule} from "./user/user-routing.module";
-import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
