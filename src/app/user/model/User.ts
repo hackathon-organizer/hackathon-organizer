@@ -5,6 +5,6 @@ export interface User {
   id: number;
   username: string;
   keyCloakId: string;
-  userCurrentHackathonId?: number;
-  userCurrentTeamId?: number;
+  currentHackathonId?: number;
+  currentTeamId?: number;
 }

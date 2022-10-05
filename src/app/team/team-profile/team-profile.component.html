@@ -1,5 +1,4 @@
 
-<button (click)="sendInviteToUser()">Send invite to user</button>
 
 <router-outlet></router-outlet>
 
@@ -20,14 +19,18 @@
 
     <div id="user-data" class="flex flex-col text-2xl">
 
-      <h4 class="mt-8">Team name: </h4>
+      <h4 class="mt-8">Team name: {{ team.name }}</h4>
 
       <div class="mt-8" id="about">
         <h4>About:</h4>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.
+        <br/>
+          {{ team.description }}
+        </p>
       </div>
 
       <a routerLink="/team/invite"><button class="btn btn-success w-36 self-center m-5" >Invite user</button></a>
+      <a *ngIf="team.isOpen" routerLink="/"><button (click)="joinToTeam()" class="btn btn-success w-36 self-center m-5" >Join to team</button></a>
 
     </div>
 

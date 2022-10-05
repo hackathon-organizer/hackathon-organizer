@@ -1,4 +1,4 @@
 <div *ngFor="let team of teams">
 
-  <p> {{ team.name }}</p>
+  <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}"><p> {{ team.name }}</p>       </a>
 </div>

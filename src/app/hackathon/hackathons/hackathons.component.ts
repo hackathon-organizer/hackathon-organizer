@@ -20,6 +20,7 @@ export class HackathonsComponent implements OnInit {
   getHackathons() {
     this.hackathonService.getAllHackathons().subscribe(hack =>
     {
+      console.log(hack)
       this.hackathons = hack;
     });
   }

@@ -16,3 +16,11 @@ export interface TeamResponse {
   ownerId: number;
   hackathonId: number;
 }
+
+export interface Team {
+  id: number;
+  name: string;
+  description: string;
+  isOpen: boolean;
+  tags: Tag[];
+}

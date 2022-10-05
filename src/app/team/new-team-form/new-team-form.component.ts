@@ -75,7 +75,7 @@ export class NewTeamFormComponent implements OnInit {
     this.teamService.createTeam(team).subscribe(res => {
       console.log(res);
 
-      this.router.navigateByUrl('/team/' + res.id);
+      this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + res.id);
     });
   }
 

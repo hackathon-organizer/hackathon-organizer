@@ -95,6 +95,8 @@ export class UserService {
 
   private fetchUserInvites() {
     this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
+      console.log('invites');
+      console.log(userInvites) ;
       this.userNotifications.next(userInvites);
   });
   }

@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
 import {Client} from "@stomp/stompjs";
 import {KeycloakService} from "keycloak-angular";
 import {TeamService} from "../../core/services/team-service/team.service";
+import {ActivatedRoute} from "@angular/router";
+import {Subscription} from "rxjs";
+import {Team, TeamResponse} from "../model/TeamRequest";
 
 @Component({
   selector: 'ho-team-profile',
@@ -11,37 +14,31 @@ import {TeamService} from "../../core/services/team-service/team.service";
 })
 export class TeamProfileComponent implements OnInit {
 
+  private routeSubscription: Subscription = new Subscription();
+
   searchUser: string = "";
+  teamId: number = 0;
+  team!: Team;
 
-  constructor(private userService: UserService, private teamService: TeamService) { }
-
-  // async getKeycloakUserId(): Promise<string | undefined> {
-  //   let userDetails = await this.keycloakService.loadUserProfile();
-  //   return userDetails.id;
-  // }
+  constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute) {
+  }
 
   ngOnInit(): void {
 
-    let keycloakUserId: string = "";
+    this.routeSubscription = this.route.params.subscribe(params => {
+        this.teamId = params['teamId'];
+    });
 
-    // this.getKeycloakUserId().then(v => {
-    //
-    // });
+    this.teamService.getTeamById(this.teamId).subscribe(team => {
+      this.team = team;
+    });
+
+
+
   }
 
 
-  startSerach() {
-    this.userService.findUsersByUsername(this.searchUser).subscribe(
-      user => {
-        console.log(user)  ;
-
-      }
-    );
-  }
-
-  sendInviteToUser() {
-
-    // this.teamService.sendInv(this.userKeycloakId);
-
+  joinToTeam() {
+    this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).subscribe(res => console.log(res));
   }
 }

@@ -4,12 +4,15 @@ import {Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
-import {Tag, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
+import {Tag, Team, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService {
+
+  BASE_URL_READ = 'http://localhost:9090/api/v1/read/teams';
+  BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/teams';
 
   constructor(private http: HttpClient, private userService: UserService) { }
 
@@ -51,5 +54,13 @@ export class TeamService {
 
   getAvailableTags(): Observable<Tag[]> {
     return this.http.get<Tag[]>('http://localhost:9090/api/v1/read/teams/tags');
+  }
+
+  getTeamById(teamId: number): Observable<Team>{
+      return this.http.get<Team>(this.BASE_URL_READ + '/' + teamId);
+  }
+
+  addUserToTeam(teamId: number, userId: number): Observable<any> {
+      return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
 }

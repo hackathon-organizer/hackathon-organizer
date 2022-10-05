@@ -34,6 +34,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
       this.userService.getUserById(params['id']).subscribe(user => this.user = user);
     })
+
+    console.log("current user");
+    console.log(this.userService.user);
   }
 
   ngOnDestroy(): void {
@@ -42,7 +45,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   inviteToTeam() {
 
-    const teamId = 100;
+    console.log(this.userService.user.currentTeamId);
+
+    const teamId = this.userService.user.currentTeamId!;
     this.teamService.sendTeamInvitation(this.user.id, teamId).subscribe();
   }
 
