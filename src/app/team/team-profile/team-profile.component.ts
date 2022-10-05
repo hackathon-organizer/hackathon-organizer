@@ -32,13 +32,14 @@ export class TeamProfileComponent implements OnInit {
     this.teamService.getTeamById(this.teamId).subscribe(team => {
       this.team = team;
     });
-
-
-
   }
 
 
   joinToTeam() {
     this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).subscribe(res => console.log(res));
+  }
+
+  get isOwner() {
+    return true;
   }
 }
