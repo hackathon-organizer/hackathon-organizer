@@ -1,8 +1,29 @@
-<p>{{ hcTitle }}</p>
+<section id="hackathon-profile">
 
-<a routerLink="/hackathon/{{ hcId }}/team/new"><button class="btn">Create team</button></a>
+  <div class="flex justify-center items-center flex-col">
+    <h1 class="text-7xl font-bold mb-8">{{ hcTitle }}</h1>
+
+    <img src="https://via.placeholder.com/800x400">
+  </div>
+
+  <div class="mt-12 flex justify-center">
+
+    <a routerLink="/hackathon/{{ hcId }}/team/new">
+      <button class="btn">Create team</button>
+    </a>
 
 
-<a class="m-12"><button (click)="joinHackathon()" class="btn">Join hackathon</button></a>
+    <a class="m-12">
+      <button (click)="joinHackathon()" class="btn">Join hackathon</button>
+    </a>
 
-<button routerLink="/hackathon/{{ hcId }}/teams">Show teams</button>
+    <a routerLink="/hackathon/{{ hcId }}/teams"><button class="btn">Show teams</button></a>
+
+  </div>
+
+  <div id="hackathon-description">
+    <article class="mx-4">
+      <p>{{ hackathon.description }}</p>
+    </article>
+  </div>
+</section>

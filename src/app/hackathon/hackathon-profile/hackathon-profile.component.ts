@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
+import {HackathonDto} from "../model/Hackathon";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -15,6 +16,8 @@ export class HackathonProfileComponent implements OnInit {
   hcTitle: string = '';
   hcId: number = 0;
 
+  hackathon!: HackathonDto;
+
   constructor(private hackathonService: HackathonService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -25,6 +28,7 @@ export class HackathonProfileComponent implements OnInit {
       this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hc => {
         this.hcTitle = hc.name;
         this.hcId = hc.id;
+        this.hackathon = hc;
       });
     });
   }
