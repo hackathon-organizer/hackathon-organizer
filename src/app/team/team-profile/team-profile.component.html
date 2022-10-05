@@ -1,0 +1,75 @@
+
+
+<router-outlet></router-outlet>
+
+<section id="team-profile">
+
+  <div class="grid grid-cols-2 gap-4">
+
+    <div class="m-12 flex justify-center" id="profile-image-wrapper">
+
+      <div class="avatar">
+        <div class="w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+          <img src="https://placeimg.com/300/300/people"  alt="profile image"/>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div id="user-data" class="flex flex-col text-2xl">
+
+      <h4 class="mt-8">Team name: {{ team.name }}</h4>
+
+      <div class="mt-8" id="about">
+        <h4>About:</h4>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.
+        <br/>
+          {{ team.description }}
+        </p>
+      </div>
+
+      <a routerLink="/team/invite"><button class="btn btn-success w-36 self-center m-5" >Invite user</button></a>
+      <a *ngIf="team.isOpen" routerLink="/"><button (click)="joinToTeam()" class="btn btn-success w-36 self-center m-5" >Join to team</button></a>
+
+    </div>
+
+    <div class="col-span-2">
+      <div class="flex flex-col">
+        <h4 class="text-3xl font-bold mb-5">User tags</h4>
+
+        <div class="flex flex-wrap">
+          <!--        TODO use checkbox later -->
+          <div id="java-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-red-600 flex justify-center items-center cursor-pointer hover:bg-red-500 hover:text-white">Java</div>
+          <div id="html-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center cursor-pointer hover:bg-white hover:text-black">HTML</div>
+          <div id="js-pill " class="py-2 px-6 rounded-full border-2 w-auto m-2 border-yellow-600 flex justify-center items-center cursor-pointer hover:bg-yellow-500 hover:text-white">JavaScript</div>
+        </div>
+
+        <!--      <button class="btn btn-outline btn-success rounded-full px-8 m-5 w-24 h-full">Save</button>-->
+      </div>
+    </div>
+
+
+
+    <div>
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+  </div>
+
+
+
+
+
+</section>

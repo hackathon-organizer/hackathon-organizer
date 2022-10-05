@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {UserService} from "../services/user-service/user.service";
 
 @Component({
   selector: 'ho-menu',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MenuComponent implements OnInit {
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor(private userService: UserService) {
   }
 
+  ngOnInit(): void {
+    this.userService.initWsConn();
+  }
+
+  logout() {
+    this.userService.logout();
+  }
 }

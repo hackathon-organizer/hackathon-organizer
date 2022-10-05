@@ -1,1 +1,8 @@
-<p>hackathon-profile works!</p>
+<p>{{ hcTitle }}</p>
+
+<a routerLink="/hackathon/{{ hcId }}/team/new"><button class="btn">Create team</button></a>
+
+
+<a class="m-12"><button (click)="joinHackathon()" class="btn">Join hackathon</button></a>
+
+<button routerLink="/hackathon/{{ hcId }}/teams">Show teams</button>

@@ -1,0 +1,73 @@
+<section id="user-serach">
+
+  <div class="w-4/5 flex m-5 mx-auto">
+    <input type="text" placeholder="Type here" class="input input-bordered input-primary w-full" [(ngModel)]="searchUserUsername" />
+
+<!--    <input type="text" placeholder="Search user" [(ngModel)]="searchUserUsername">-->
+<button class="btn btn-active btn-primary ml-4" (click)="startSerach()">Search</button>
+  </div>
+
+  <div id="search-results" class="w-4/5 mx-auto mt-12">
+
+    <div class="overflow-x-auto w-full">
+      <table class="table w-full">
+        <!-- head -->
+        <thead>
+        <tr>
+          <th>
+
+          </th>
+          <th>Username</th>
+          <th>Tags</th>
+          <th>Favorite Color</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- row 1 -->
+        <tr *ngFor="let user of userSearchList">
+          <th>
+            <label>
+              1
+            </label>
+          </th>
+          <td>
+            <div class="flex items-center space-x-3">
+              <div class="avatar">
+                <div class="mask mask-squircle w-12 h-12">
+                  <img src="" alt="Avatar Tailwind CSS Component" />
+                </div>
+              </div>
+              <div>
+                <div class="font-bold">{{ user.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            Tags...
+            <br>
+            <span class="badge badge-ghost badge-sm">Desktop Support Technician</span>
+          </td>
+          <td>Purple</td>
+          <th>
+            <a routerLink="/user/{{ user.id }}"><button class="btn btn-ghost btn-xs">details</button></a>
+          </th>
+        </tr>
+        <!-- foot -->
+        <tfoot>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Job</th>
+          <th>Favorite Color</th>
+          <th></th>
+        </tr>
+        </tfoot>
+
+      </table>
+    </div>
+
+  </div>
+
+
+</section>
