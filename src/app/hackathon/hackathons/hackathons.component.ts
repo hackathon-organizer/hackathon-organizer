@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
+import {HackathonDto} from "../model/Hackathon";
 
 @Component({
   selector: 'ho-hackathons',
@@ -8,7 +9,7 @@ import {HackathonService} from "../../core/services/hackathon-service/hackathon.
 })
 export class HackathonsComponent implements OnInit {
 
-  hackathons: any[] = [];
+  hackathons: HackathonDto[] = [];
 
   constructor(private hackathonService: HackathonService) { }
 

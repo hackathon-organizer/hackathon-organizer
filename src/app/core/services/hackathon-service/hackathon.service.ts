@@ -4,6 +4,7 @@ import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
+import {HackathonDto} from "../../../hackathon/model/Hackathon";
 
 @Injectable({
   providedIn: 'root'
@@ -26,10 +27,9 @@ export class HackathonService {
     return this.http.get(this.BASE_URL_READ + '/' + id);
   }
 
-  getAllHackathons():Observable<any> {
-    console.log("sending req")
+  getAllHackathons():Observable<HackathonDto[]> {
 
-    return this.http.get(this.BASE_URL_READ);
+    return this.http.get<HackathonDto[]>(this.BASE_URL_READ);
   }
 
   private formatDate(hackathon: HackathonRequest): HackathonRequest {

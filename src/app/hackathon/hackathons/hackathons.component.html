@@ -7,14 +7,15 @@
       <tr>
         <th></th>
         <th>Name</th>
-        <th>Participants</th>
+        <th>Participants number</th>
         <th>Start Date</th>
+        <th>End Date</th>
         <th></th>
       </tr>
       </thead>
       <tbody>
       <!-- row 1 -->
-      <tr *ngFor="let hackathon of hackathons" routerLink="/hackathon/{{ hackathon.id }}">
+      <tr *ngFor="let hackathon of hackathons">
         <th>
           {{ hackathon.id }}
         </th>
@@ -27,31 +28,20 @@
             </div>
             <div>
               <div class="font-bold">{{ hackathon.name }}</div>
-              <div class="text-sm opacity-50">United States</div>
             </div>
           </div>
         </td>
         <td>
-          Zemlak, Daniel and Leannon
-          <br>
-          <span class="badge badge-ghost badge-sm">Desktop Support Technician</span>
+<!--          TODO Add icon -->
+          {{ hackathon.hackathonParticipantsNumber }}
         </td>
-        <td>Purple</td>
+        <td>{{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}</td>
         <th>
-          <button class="btn btn-ghost btn-xs">details</button>
+          <a routerLink="/hackathon/{{ hackathon.id }}"><button class="btn btn-ghost btn-xs">details</button></a>
         </th>
       </tr>
       </tbody>
-      <!-- foot -->
-      <tfoot>
-      <tr>
-        <th></th>
-        <th>Name</th>
-        <th>Participants</th>
-        <th>Start Date</th>
-        <th></th>
-      </tr>
-      </tfoot>
 
     </table>
   </div>
