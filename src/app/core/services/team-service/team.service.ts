@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {map, Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
 import {Tag, Team, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
+import {EntityCollectionServiceBase, EntityCollectionServiceElementsFactory} from "@ngrx/data";
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,9 @@ export class TeamService {
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/teams';
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/teams';
 
-  constructor(private http: HttpClient, private userService: UserService) { }
+  constructor(private http: HttpClient, private userService: UserService) {
+
+  }
 
   updateInviteStatus(teamInvite: TeamInvitation, accepted: boolean) {
 
@@ -36,7 +39,6 @@ export class TeamService {
     this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', x).subscribe();
   }
 
-
   sendTeamInvitation(userId: number, teamId: number): Observable<any> {
 
     const username = this.userService.getUsername();
@@ -49,18 +51,19 @@ export class TeamService {
   }
 
   createTeam(team: TeamRequest): Observable<TeamResponse> {
-     return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
+    return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
   }
 
   getAvailableTags(): Observable<Tag[]> {
     return this.http.get<Tag[]>('http://localhost:9090/api/v1/read/teams/tags');
   }
 
-  getTeamById(teamId: number): Observable<Team>{
-      return this.http.get<Team>(this.BASE_URL_READ + '/' + teamId);
+  getTeamById(teamId: number): Observable<Team> {
+
+    return this.http.get<Team>(this.BASE_URL_READ + '/' + teamId);
   }
 
   addUserToTeam(teamId: number, userId: number): Observable<any> {
-      return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
+    return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
 }

@@ -4,8 +4,9 @@ import {Client} from "@stomp/stompjs";
 import {KeycloakService} from "keycloak-angular";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ActivatedRoute} from "@angular/router";
-import {Subscription} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {Team, TeamResponse} from "../model/TeamRequest";
+import {log} from "util";
 
 @Component({
   selector: 'ho-team-profile',
@@ -17,8 +18,10 @@ export class TeamProfileComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   searchUser: string = "";
+  hackathonId: number = 0;
   teamId: number = 0;
   team!: Team;
+
 
   constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute) {
   }
@@ -26,7 +29,8 @@ export class TeamProfileComponent implements OnInit {
   ngOnInit(): void {
 
     this.routeSubscription = this.route.params.subscribe(params => {
-        this.teamId = params['teamId'];
+      this.hackathonId = params['id'];
+      this.teamId = params['teamId'];
     });
 
     this.teamService.getTeamById(this.teamId).subscribe(team => {

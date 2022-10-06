@@ -7,6 +7,8 @@ import {UserResponseDto} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
 import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
+import {Team} from "../../../team/model/TeamRequest";
+import {TeamService} from "../team-service/team.service";
 
 @Injectable({
   providedIn: 'root'
@@ -107,6 +109,8 @@ export class UserService {
       this.user = userData;
       console.log(userData);
 
+      localStorage.setItem("userId", String(userData.id));
+
       this.fetchUserInvites();
     });
   }
@@ -120,11 +124,14 @@ export class UserService {
   }
 
   getUserId(): number {
-     if (this.user.id) {
-       return this.user.id;
-     } else {
-       throw new Error("User not loaded yet!");
-     }
+    const userId = localStorage.getItem("userId");
+
+    if (userId) {
+      return +userId;
+    } else {
+      throw new Error("User not loaded yet!");
+    }
+
   }
 
   logout() {
