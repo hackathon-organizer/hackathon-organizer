@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 
 @Component({
@@ -8,11 +8,22 @@ import {UserService} from "../services/user-service/user.service";
 })
 export class MenuComponent implements OnInit {
 
+
+  userHackathonId: number = 0;
+  userTeamId: number = 0;
+
   constructor(private userService: UserService) {
   }
 
   ngOnInit(): void {
     this.userService.initWsConn();
+
+    this.userService.loading.subscribe(loaded => {
+      if (!loaded) {
+        this.userHackathonId = this.userService.userHackathonId;
+        this.userTeamId = this.userService.userTeamId;
+      }
+    });
   }
 
   logout() {

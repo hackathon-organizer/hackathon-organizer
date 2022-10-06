@@ -20,6 +20,9 @@ export class UserService {
 
   user!: User;
 
+  private loadingSource = new BehaviorSubject(true);
+  loading = this.loadingSource.asObservable();
+
   private keycloakUserId = "";
 
   constructor(private http: HttpClient, private keycloakService: KeycloakService) {
@@ -111,6 +114,8 @@ export class UserService {
 
       localStorage.setItem("userId", String(userData.id));
 
+      this.loadingSource.next(false);
+
       this.fetchUserInvites();
     });
   }
@@ -140,5 +145,21 @@ export class UserService {
     }).catch((error) => {
       console.log("--> log: logout error ", error );
     });
+  }
+
+  get userHackathonId(): number {
+    if (this.user.currentHackathonId) {
+      return this.user.currentHackathonId;
+    } else {
+      throw new Error('err');
+    }
+  }
+
+  get userTeamId(): number {
+    if (this.user.currentTeamId) {
+      return this.user.currentTeamId;
+    } else {
+      throw new Error('err');
+    }
   }
 }

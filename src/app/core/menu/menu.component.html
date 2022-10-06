@@ -25,6 +25,7 @@
 
   <div class="flex-none gap-2">
 
+    <a *ngIf="userTeamId !== 0" routerLink="/hackathon/{{ userHackathonId }}/team/{{ userTeamId }}"><button class="btn mr-3">Go to my team</button></a>
     <a routerLink="/hackathon/new"><button class="btn mr-3">Create hackathon</button></a>
 
   <div class="dropdown dropdown-end">
