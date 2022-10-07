@@ -110,6 +110,7 @@ export class UserService {
       console.log(userData);
 
       localStorage.setItem("userId", String(userData.id));
+      localStorage.setItem("username", userData.username);
 
       this.fetchUserInvites();
     });

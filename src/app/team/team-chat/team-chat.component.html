@@ -1,7 +1,8 @@
 
 <section id="team-chat">
   <div class="flex flex-col">
-<textarea rows="15" [(ngModel)]="message" (keydown.enter)="sendMessage()" id="chat-window"></textarea>
+<textarea rows="15" [(ngModel)]="str"  id="chat-window"></textarea>
+    <input class="my-5" type="text" [(ngModel)]="message" (keydown.enter)="sendMessage()">
 <input class="btn" (click)="sendMessage()" type="submit" value="Send msg"/>
   </div>
 </section>

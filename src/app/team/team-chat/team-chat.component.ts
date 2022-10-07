@@ -3,6 +3,9 @@ import {Client} from "@stomp/stompjs";
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
+import {ChatMessage} from "../model/ChatMessage";
+import * as dayjs from "dayjs";
+import {ChatService} from "../../core/services/chat-service/chat.service";
 
 @Component({
   selector: 'ho-team-chat',
@@ -14,32 +17,40 @@ export class TeamChatComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   message: string = '';
+  messages: ChatMessage[] = [];
   client!: Client;
-  chatRoomId: any;
+
+  str = '';
+
+  chatRoomId: number = 0;
 
   chatRoomTitle: string = "";
 
-  constructor(private route: ActivatedRoute, private teamService: TeamService) { }
+  constructor(private route: ActivatedRoute, private teamService: TeamService, private chatService: ChatService) { }
 
   ngOnInit(): void {
 
     this.routeSubscription = this.route.params.subscribe(params => {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
 
+             this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
+               this.messages = messages;
+
+               messages.forEach(msg => this.updateChat(msg));
+             });
+
              this.chatRoomTitle = team.name;
 
              this.chatRoomId = team.teamChatRoomId;
 
-        this.initConn(this.chatRoomId);
+        this.initConn();
       })
     });
   }
 
-  sendMessage() {
-     this.message += 'test';
-  }
+  initConn() {
+    console.log("init called");
 
-  initConn(chatRoomId: number) {
     this.client = new Client({
       brokerURL: 'ws://localhost:9090/messages-websocket',
       debug: function (str) {
@@ -49,26 +60,11 @@ export class TeamChatComponent implements OnInit {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
-    setInterval(() => {
-      console.log("sengin msg");
-      this.client.publish({ destination: '/ws/room/' + chatRoomId, body: 'Hello world' });
-    }, 5000)
 
-    this.client.onConnect = (frame) => {
-      // Do something, all subscribes must be done is this callback
-      // This is needed because this will be executed after a (re)connect
-      console.log("CONNECTING...");
-      this.client.subscribe('/topic/room/' + chatRoomId, (message: any) => {
-        // called when the client receives a STOMP message from the server
+    this.client.onConnect = () => {
 
-        const invite = message.body;
-        const invite2 = message;
-        console.log("recived")
-        console.log(invite);
-        console.log(invite2);
-        console.log('')
+    this.startChatRoomListening();
 
-      });
     };
 
     this.client.onStompError = function (frame) {
@@ -77,6 +73,34 @@ export class TeamChatComponent implements OnInit {
     };
 
     this.client.activate();
+  }
+
+  sendMessage() {
+
+    const message: ChatMessage = {username: localStorage.getItem("username")!,
+        userId: localStorage.getItem("userId")!, entryText: this.message }
+
+    this.client.publish({ destination: '/ws/room/' + this.chatRoomId, body: JSON.stringify(message) });
+  }
+
+  private startChatRoomListening() {
+
+      // Do something, all subscribes must be done is this callback
+      // This is needed because this will be executed after a (re)connect
+      console.log("CONNECTING...");
+      this.client.subscribe('/topic/room/' + this.chatRoomId, (message: any) => {
+        // called when the client receives a STOMP message from the server
+
+        const msg = JSON.parse(message.body);
+
+        this.updateChat(msg);
+      });
+
+  }
+
+  private updateChat(message: ChatMessage) {
+
+    this.str += message.username + " : " + message.entryText + '\n';
   }
 
 
