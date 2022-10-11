@@ -13,6 +13,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
 
+
 @NgModule({
   declarations: [
     MenuComponent,
@@ -35,7 +36,7 @@ import { HomepageComponent } from './core/homepage/homepage.component';
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService],
-    }
+    },
   ],
   bootstrap: [HoComponent]
 })

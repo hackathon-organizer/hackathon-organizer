@@ -5,7 +5,6 @@ import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
 import {Tag, Team, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
-import {EntityCollectionServiceBase, EntityCollectionServiceElementsFactory} from "@ngrx/data";
 
 @Injectable({
   providedIn: 'root'
