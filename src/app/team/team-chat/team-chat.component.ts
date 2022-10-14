@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Client, Versions} from "@stomp/stompjs";
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -7,159 +7,289 @@ import {ChatMessage} from "../model/ChatMessage";
 import * as dayjs from "dayjs";
 import {ChatService} from "../../core/services/chat-service/chat.service";
 import {HttpClient} from "@angular/common/http";
+import {MessageType} from "../model/MessageType";
 
 @Component({
   selector: 'ho-team-chat',
   templateUrl: './team-chat.component.html',
   styleUrls: ['./team-chat.component.scss']
 })
-export class TeamChatComponent implements OnInit {
+export class TeamChatComponent implements AfterViewInit {
+
+  mediaConstraints = {
+    audio: false,
+    video: {
+      frameRate: { ideal: 30, max: 60 },
+      width: { ideal: 1280, max: 1920 },
+      height: { ideal: 720, max: 1080 },
+      disableSimulcast: true,
+      enableLayerSuspension: false,
+      preferH264: true,
+      disableH264: false,
+      disableRtx: true,
+      enableTcc: true,
+      desktopSharingFrameRate: {
+        min: 25,
+        max: 25
+      },
+    }
+  };
 
   private routeSubscription: Subscription = new Subscription();
 
   message: string = '';
   messages: ChatMessage[] = [];
-  client!: Client;
 
   str = '';
 
   chatRoomId: number = 0;
-
   chatRoomTitle: string = "";
 
   users = '';
+  @ViewChild('local_video') localVideo!: ElementRef;
+  @ViewChild('remote_video') remoteVideo!: ElementRef;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private teamService: TeamService, private chatService: ChatService) { }
+  // constructor(private http: HttpClient, private route: ActivatedRoute, private teamService: TeamService, private chatService: ChatService) { }
+  //
+  // ngOnInit(): void {
+  //   this.initConn();
+  //
+  //   // this.routeSubscription = this.route.params.subscribe(params => {
+  //   //   this.teamService.getTeamById(params['teamId']).subscribe(team => {
+  //   //
+  //   //          this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
+  //   //            this.messages = messages;
+  //   //
+  //   //            messages.forEach(msg => this.updateChat(msg));
+  //   //          });
+  //   //
+  //   //          this.chatRoomTitle = team.name;
+  //   //
+  //   //          this.chatRoomId = team.teamChatRoomId;
+  //   //
+  //   //
+  //   //   })
+  //   // });
+  // }
 
-  ngOnInit(): void {
 
-    this.routeSubscription = this.route.params.subscribe(params => {
-      this.teamService.getTeamById(params['teamId']).subscribe(team => {
+  private peerConnection!: RTCPeerConnection;
 
-             this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
-               this.messages = messages;
+  private localStream!: MediaStream;
 
-               messages.forEach(msg => this.updateChat(msg));
-             });
+  inCall = false;
+  localVideoActive = false;
 
-             this.chatRoomTitle = team.name;
+  senders: RTCRtpSender[] = [];
 
-             this.chatRoomId = team.teamChatRoomId;
+  constructor(private chatService: ChatService) { }
 
-        this.initConn();
-      })
-    });
+  ngAfterViewInit(): void {
+    this.addIncomingMessageHandler();
+    this.requestMediaDevices();
   }
 
-  conn!: WebSocket;
+  async call(): Promise<void> {
+    this.createPeerConnection();
 
-  initConn() {
-    console.log("init called");
+    this.localStream.getTracks().forEach(
+      track => this.senders.push(this.peerConnection.addTrack(track, this.localStream))
+    );
 
+    try {
+      const offer: RTCSessionDescriptionInit = await this.peerConnection.createOffer();
 
-    //this.conn = new WebSocket('ws://localhost:9090/messages-websocket');
+      await this.peerConnection.setLocalDescription(offer);
 
+      this.inCall = true;
 
-    this.client = new Client({
-      brokerURL: 'ws://localhost:51678/messages-websocket',
-      connectHeaders: {
+      this.chatService.sendMessage({type: MessageType.OFFER, data: offer});
+    } catch (err: any) {
+      this.handleError(err);
+    }
+  }
+
+  hangUp(): void {
+    this.chatService.sendMessage({type: MessageType.HANGUP, data: ''});
+    this.closeVideoCall();
+  }
+
+  private addIncomingMessageHandler(): void {
+    this.chatService.connect();
+
+    this.chatService.messages$.subscribe(
+      msg => {
+        switch (msg.type) {
+          case MessageType.OFFER:
+            this.handleOfferMessage(msg.data);
+            break;
+          case MessageType.ANSWER:
+            this.handleAnswerMessage(msg.data);
+            break;
+          case MessageType.HANGUP:
+            this.handleHangupMessage();
+            break;
+          case MessageType.ICE_CANDIDATE:
+            this.handleICECandidateMessage(msg.data);
+            break;
+        }
       },
-      debug: (str) => console.log(str)
+      this.handleError
+    );
+  }
+
+  /* ########################  MESSAGE HANDLERS  ################################## */
+
+  private handleOfferMessage(msg: RTCSessionDescriptionInit): void {
+    console.log('handle incoming offer');
+    if (!this.peerConnection) {
+      this.createPeerConnection();
+    }
+
+    if (!this.localStream) {
+      this.startLocalVideo();
+    }
+
+    this.peerConnection.setRemoteDescription(new RTCSessionDescription(msg))
+      .then(() => {
+
+        this.localVideo.nativeElement.srcObject = this.localStream;
+        this.localStream.getTracks().forEach(
+          track => this.peerConnection.addTrack(track, this.localStream)
+        );
+
+      }).then(() => {
+
+      return this.peerConnection.createAnswer();
+    }).then((answer) => {
+
+      return this.peerConnection.setLocalDescription(answer);
+    }).then(() => {
+
+      this.chatService.sendMessage({type: MessageType.OFFER, data: this.peerConnection.localDescription});
+      this.inCall = true;
+    }).catch(this.handleError);
+  }
+
+  private handleAnswerMessage(msg: RTCSessionDescriptionInit): void {
+    this.peerConnection.setRemoteDescription(msg);
+  }
+
+  private handleHangupMessage(): void {
+    this.closeVideoCall();
+  }
+
+  private handleICECandidateMessage(msg: RTCIceCandidate): void {
+    const candidate = new RTCIceCandidate(msg);
+    this.peerConnection.addIceCandidate(candidate).catch(this.handleError);
+  }
+
+  private async requestMediaDevices(): Promise<void> {
+
+    try {
+      this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints);
+      this.pauseLocalVideo();
+    } catch (err: any) {
+      this.handleError(err);
+    }
+  }
+
+  startLocalVideo(): void {
+    this.localStream.getTracks().forEach(track => {
+      track.enabled = true;
     });
 
-    this.client.onStompError = function (frame) {
-      // Will be invoked in case of error encountered at Broker
-      // Bad login/passcode typically will cause an error
-      // Complaint brokers will set `message` header with a brief message. Body may contain details.
-      // Compliant brokers will terminate the connection after any error
-      console.log('Broker reported error: ' + frame.headers['message']);
-      console.log('Additional details: ' + frame.body);
-    };
+    this.localVideo.nativeElement.srcObject = this.localStream;
 
-    this.client.activate();
-
-
-    // this.conn.onopen = () => {
-    //   console.log("Connected to the signaling server");
-    //   // initialize();
-    //   this.conn.send(JSON.stringify({usename: 'pies'}))
-    // };
-    //
-    // this.conn.onmessage = function(msg) {
-    //   console.log("Got message", msg.data);
-    //   var content = JSON.parse(msg.data);
-    //   var data = content.data;
-    // }
-      // switch (content.event) {
-      //   // when somebody wants to call us
-      //   case "offer":
-      //     this.handleOffer(data);
-      //     break;
-      //   case "answer":
-      //     this.handleAnswer(data);
-      //     break;
-      //   // when a remote peer sends an ice candidate to us
-      //   case "candidate":
-      //     this.handleCandidate(data);
-      //     break;
-      //   default:
-      //     break;
-      // }
-   // };
+    this.localVideoActive = true;
   }
 
-  sendMessage() {
+  pauseLocalVideo(): void {
+    this.localStream.getTracks().forEach(track => {
+      track.enabled = false;
+    });
+    this.localVideo.nativeElement.srcObject = undefined;
 
-    const message: ChatMessage = {username: localStorage.getItem("username")!,
-        userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1 }
-
-    this.conn.send(JSON.stringify(message));
+    this.localVideoActive = false;
   }
 
-  private startChatRoomListening() {
+  private createPeerConnection(): void {
+    this.peerConnection = new RTCPeerConnection();
 
-      // Do something, all subscribes must be done is this callback
-      // This is needed because this will be executed after a (re)connect
-      console.log("CONNECTING...");
-      this.client.subscribe('/topic/room/' + this.chatRoomId, (message: any) => {
-        // called when the client receives a STOMP message from the server
+    this.peerConnection.onicecandidate = this.handleICECandidateEvent;
+    this.peerConnection.onsignalingstatechange = this.handleSignalingStateChangeEvent;
+    this.peerConnection.ontrack = this.handleTrackEvent;
+  }
 
-        console.log(message);
+  private closeVideoCall(): void {
 
-        const msg = JSON.parse(message.body);
+    if (this.peerConnection) {
+      this.peerConnection.ontrack = null;
+      this.peerConnection.onicecandidate = null;
+      this.peerConnection.onsignalingstatechange = null;
 
-        this.updateChat(msg);
+      this.peerConnection.getTransceivers().forEach(transceiver => {
+        transceiver.stop();
       });
 
-
-    this.client.subscribe('/topic/room/' + this.chatRoomId + '/users', (message: any) => {
-      // called when the client receives a STOMP message from the server
-      console.log('trggering');
-
-      const msg = message.body;
-
-      console.log('users');
-      console.log(msg);
-      this.users = msg;
-    });
-
-    this.client.subscribe('/topic/room/hujnia', (message: any) => {
-      // called when the client receives a STOMP message from the server
-      console.log('trggering');
-
-      const msg = message.body;
-
-      console.log('users');
-      console.log(msg);
-      this.users = msg;
-    });
-
+      this.peerConnection.close();
+      this.inCall = false;
+    }
   }
 
-  private updateChat(message: ChatMessage) {
+  /* ########################  ERROR HANDLER  ################################## */
+  private handleError(err: Error): void {
 
-    this.str += message.username + " : " + message.entryText + '\n';
+    console.log(err);
+
+    this.closeVideoCall();
   }
+
+  /* ########################  EVENT HANDLER  ################################## */
+  private handleICECandidateEvent = (event: RTCPeerConnectionIceEvent) => {
+
+    if (event.candidate) {
+      this.chatService.sendMessage({
+        type: MessageType.ICE_CANDIDATE,
+        data: event.candidate
+      });
+    }
+  }
+
+  private handleSignalingStateChangeEvent = (event: Event) => {
+
+    switch (this.peerConnection.signalingState) {
+      case 'closed':
+        this.closeVideoCall();
+        break;
+    }
+  }
+
+  async startScreenShare() {
+
+    const displayMediaStream = await navigator.mediaDevices.getDisplayMedia(this.mediaConstraints);
+
+    // @ts-ignore
+    await this.senders.find((sender: RTCRtpSender) => sender.track.kind === 'video').replaceTrack(displayMediaStream.getTracks()[0]);
+    this.localVideo.nativeElement.srcObject = displayMediaStream;
+
+    // TODO implement stop sharing
+  }
+
+  private handleTrackEvent = (event: RTCTrackEvent) => {
+    this.remoteVideo.nativeElement.srcObject = event.streams[0];
+  }
+  // sendMessage() {
+  //
+  //   const message: ChatMessage = {username: localStorage.getItem("username")!,
+  //       userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1 }
+  //
+  //   this.conn.send(JSON.stringify(message));
+  // }
+  // private updateChat(message: ChatMessage) {
+  //
+  //   this.str += message.username + " : " + message.entryText + '\n';
+  // }
 
 
 
