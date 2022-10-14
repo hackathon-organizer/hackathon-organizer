@@ -12,6 +12,7 @@ import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 import {HttpClientModule} from "@angular/common/http";
 import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
+import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 
 
 @NgModule({
@@ -28,7 +29,12 @@ import { HomepageComponent } from './core/homepage/homepage.component';
         HoRoutingModule,
         TeamModule,
         HackathonModule,
-        UserModule
+        UserModule,
+        LoggerModule.forRoot({
+        serverLoggingUrl: '/api/logs',
+        level: NgxLoggerLevel.DEBUG,
+        serverLogLevel: NgxLoggerLevel.ERROR
+      }),
     ],
   providers: [
     {

@@ -8,6 +8,8 @@ import * as dayjs from "dayjs";
 import {ChatService} from "../../core/services/chat-service/chat.service";
 import {HttpClient} from "@angular/common/http";
 import {MessageType} from "../model/MessageType";
+import {BasicMessage} from "../model/BasicMessage";
+import {NGXLogger} from "ngx-logger";
 
 @Component({
   selector: 'ho-team-chat',
@@ -15,6 +17,9 @@ import {MessageType} from "../model/MessageType";
   styleUrls: ['./team-chat.component.scss']
 })
 export class TeamChatComponent implements AfterViewInit {
+
+  @ViewChild('localVideo') localVideo!: ElementRef;
+  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
 
   mediaConstraints = {
     audio: false,
@@ -44,34 +49,7 @@ export class TeamChatComponent implements AfterViewInit {
 
   chatRoomId: number = 0;
   chatRoomTitle: string = "";
-
-  users = '';
-  @ViewChild('local_video') localVideo!: ElementRef;
-  @ViewChild('remote_video') remoteVideo!: ElementRef;
-
-  // constructor(private http: HttpClient, private route: ActivatedRoute, private teamService: TeamService, private chatService: ChatService) { }
-  //
-  // ngOnInit(): void {
-  //   this.initConn();
-  //
-  //   // this.routeSubscription = this.route.params.subscribe(params => {
-  //   //   this.teamService.getTeamById(params['teamId']).subscribe(team => {
-  //   //
-  //   //          this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
-  //   //            this.messages = messages;
-  //   //
-  //   //            messages.forEach(msg => this.updateChat(msg));
-  //   //          });
-  //   //
-  //   //          this.chatRoomTitle = team.name;
-  //   //
-  //   //          this.chatRoomId = team.teamChatRoomId;
-  //   //
-  //   //
-  //   //   })
-  //   // });
-  // }
-
+  users: any[] = [];
 
   private peerConnection!: RTCPeerConnection;
 
@@ -82,9 +60,28 @@ export class TeamChatComponent implements AfterViewInit {
 
   senders: RTCRtpSender[] = [];
 
-  constructor(private chatService: ChatService) { }
+
+  constructor(private chatService: ChatService, private logger: NGXLogger,
+              private http: HttpClient, private route: ActivatedRoute,
+              private teamService: TeamService) { }
 
   ngAfterViewInit(): void {
+
+    this.routeSubscription = this.route.params.subscribe(params => {
+      this.teamService.getTeamById(params['teamId']).subscribe(team => {
+
+             this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
+               this.messages = messages;
+
+               messages.forEach(msg => this.updateChat(msg));
+             });
+
+             this.chatRoomTitle = team.name;
+
+             this.chatRoomId = team.teamChatRoomId;
+      })
+    });
+
     this.addIncomingMessageHandler();
     this.requestMediaDevices();
   }
@@ -103,23 +100,23 @@ export class TeamChatComponent implements AfterViewInit {
 
       this.inCall = true;
 
-      this.chatService.sendMessage({type: MessageType.OFFER, data: offer});
+      this.chatService.sendMessage({messageType: MessageType.OFFER, data: offer});
     } catch (err: any) {
       this.handleError(err);
     }
   }
 
   hangUp(): void {
-    this.chatService.sendMessage({type: MessageType.HANGUP, data: ''});
+    this.chatService.sendMessage({messageType: MessageType.HANGUP, data: ''});
     this.closeVideoCall();
   }
 
   private addIncomingMessageHandler(): void {
-    this.chatService.connect();
+    this.chatService.connect(this.chatRoomId);
 
-    this.chatService.messages$.subscribe(
-      msg => {
-        switch (msg.type) {
+    this.chatService.messages$.subscribe(msg => {
+
+        switch (msg.messageType) {
           case MessageType.OFFER:
             this.handleOfferMessage(msg.data);
             break;
@@ -132,6 +129,12 @@ export class TeamChatComponent implements AfterViewInit {
           case MessageType.ICE_CANDIDATE:
             this.handleICECandidateMessage(msg.data);
             break;
+          case MessageType.MESSAGE:
+            this.updateChat(msg.data);
+            break;
+          case MessageType.JOIN:
+            this.updateChatParticipants(msg.data);
+            break;
         }
       },
       this.handleError
@@ -141,50 +144,79 @@ export class TeamChatComponent implements AfterViewInit {
   /* ########################  MESSAGE HANDLERS  ################################## */
 
   private handleOfferMessage(msg: RTCSessionDescriptionInit): void {
-    console.log('handle incoming offer');
+    this.logger.info("Handling incoming offer");
     if (!this.peerConnection) {
+
+      this.logger.info("Peer connection not exist. Creating one now...");
+
       this.createPeerConnection();
     }
 
     if (!this.localStream) {
+
+      this.logger.info("Local video not exist. Starting one now...");
+
       this.startLocalVideo();
     }
+
 
     this.peerConnection.setRemoteDescription(new RTCSessionDescription(msg))
       .then(() => {
 
+        this.logger.info("Adding media stream to local video");
+
         this.localVideo.nativeElement.srcObject = this.localStream;
+
+        this.logger.info("Adding media tracks to remote connection");
+
         this.localStream.getTracks().forEach(
           track => this.peerConnection.addTrack(track, this.localStream)
         );
 
       }).then(() => {
 
+      this.logger.info("Building SDP for answer message");
+
       return this.peerConnection.createAnswer();
     }).then((answer) => {
+
+      this.logger.info("Setting local SDP");
 
       return this.peerConnection.setLocalDescription(answer);
     }).then(() => {
 
-      this.chatService.sendMessage({type: MessageType.OFFER, data: this.peerConnection.localDescription});
+      this.logger.info("Sending local SDP to remote party");
+
+      this.chatService.sendMessage({messageType: MessageType.OFFER, data: this.peerConnection.localDescription});
       this.inCall = true;
     }).catch(this.handleError);
   }
 
   private handleAnswerMessage(msg: RTCSessionDescriptionInit): void {
+
+    this.logger.info("Handling answer message", msg);
+
     this.peerConnection.setRemoteDescription(msg);
   }
 
   private handleHangupMessage(): void {
+
+    this.logger.info("Handling hang up message");
+
     this.closeVideoCall();
   }
 
   private handleICECandidateMessage(msg: RTCIceCandidate): void {
+
+    this.logger.info("Handling ice candidate", msg);
+
     const candidate = new RTCIceCandidate(msg);
     this.peerConnection.addIceCandidate(candidate).catch(this.handleError);
   }
 
   private async requestMediaDevices(): Promise<void> {
+
+    this.logger.info("Requesting users media devices");
 
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints);
@@ -195,6 +227,9 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   startLocalVideo(): void {
+
+    this.logger.info("Starting local video");
+
     this.localStream.getTracks().forEach(track => {
       track.enabled = true;
     });
@@ -205,6 +240,9 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   pauseLocalVideo(): void {
+
+    this.logger.info("Pausing local video");
+
     this.localStream.getTracks().forEach(track => {
       track.enabled = false;
     });
@@ -214,6 +252,9 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   private createPeerConnection(): void {
+
+    this.logger.info("Creating new peer connection");
+
     this.peerConnection = new RTCPeerConnection();
 
     this.peerConnection.onicecandidate = this.handleICECandidateEvent;
@@ -242,21 +283,27 @@ export class TeamChatComponent implements AfterViewInit {
 
     console.log(err);
 
+    this.logger.error("Handling error ", err);
+
     this.closeVideoCall();
   }
 
   /* ########################  EVENT HANDLER  ################################## */
   private handleICECandidateEvent = (event: RTCPeerConnectionIceEvent) => {
 
+    this.logger.info("Handling new ice candidate", event.candidate);
+
     if (event.candidate) {
       this.chatService.sendMessage({
-        type: MessageType.ICE_CANDIDATE,
+        messageType: MessageType.ICE_CANDIDATE,
         data: event.candidate
       });
     }
   }
 
-  private handleSignalingStateChangeEvent = (event: Event) => {
+  private handleSignalingStateChangeEvent = () => {
+
+    this.logger.info("Signaling state changed");
 
     switch (this.peerConnection.signalingState) {
       case 'closed':
@@ -266,6 +313,8 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   async startScreenShare() {
+
+    this.logger.info("Starting sharing screen...");
 
     const displayMediaStream = await navigator.mediaDevices.getDisplayMedia(this.mediaConstraints);
 
@@ -277,141 +326,27 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   private handleTrackEvent = (event: RTCTrackEvent) => {
+
+    this.logger.info("Handling remote track event");
+
     this.remoteVideo.nativeElement.srcObject = event.streams[0];
   }
-  // sendMessage() {
-  //
-  //   const message: ChatMessage = {username: localStorage.getItem("username")!,
-  //       userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1 }
-  //
-  //   this.conn.send(JSON.stringify(message));
-  // }
-  // private updateChat(message: ChatMessage) {
-  //
-  //   this.str += message.username + " : " + message.entryText + '\n';
-  // }
 
+  private updateChatParticipants(users: any[]) {
+    this.users = users;
+  }
 
+  private updateChat(message: ChatMessage) {
 
+    this.str += message.username + " : " + message.entryText + '\n';
+  }
 
+  sendTextMessage() {
+    const chatMessage: ChatMessage = {username: localStorage.getItem("username")!,
+      userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1 }
 
+    const basicMessage = {messageType: MessageType.MESSAGE, data: chatMessage};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // send(message) {
-  //   conn.send(JSON.stringify(message));
-  // }
-  //
-  // var peerConnection;
-  // var dataChannel;
-  // var input = document.getElementById("messageInput");
-  //
-  // initialize() {
-  //   var configuration = null;
-  //
-  //   peerConnection = new RTCPeerConnection(configuration);
-  //
-  //   // Setup ice handling
-  //   peerConnection.onicecandidate = function(event) {
-  //     if (event.candidate) {
-  //       send({
-  //         event : "candidate",
-  //         data : event.candidate
-  //       });
-  //     }
-  //   };
-  //
-  //   // creating data channel
-  //   dataChannel = peerConnection.createDataChannel("dataChannel", {
-  //     reliable : true
-  //   });
-  //
-  //   dataChannel.onerror = function(error) {
-  //     console.log("Error occured on datachannel:", error);
-  //   };
-  //
-  //   // when we receive a message from the other peer, printing it on the console
-  //   dataChannel.onmessage = function(event) {
-  //     console.log("message:", event.data);
-  //   };
-  //
-  //   dataChannel.onclose = function() {
-  //     console.log("data channel is closed");
-  //   };
-  //
-  //   peerConnection.ondatachannel = function (event) {
-  //     dataChannel = event.channel;
-  //   };
-  //
-  // }
-  //
-  //  createOffer() {
-  //   peerConnection.createOffer(function(offer) {
-  //     send({
-  //       event : "offer",
-  //       data : offer
-  //     });
-  //     peerConnection.setLocalDescription(offer);
-  //   }, function(error) {
-  //     alert("Error creating an offer");
-  //   });
-  // }
-  //
-  //  handleOffer(offer) {
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-  //
-  //   // create and send an answer to an offer
-  //   peerConnection.createAnswer(function(answer) {
-  //     peerConnection.setLocalDescription(answer);
-  //     send({
-  //       event : "answer",
-  //       data : answer
-  //     });
-  //   }, function(error) {
-  //     alert("Error creating an answer");
-  //   });
-  //
-  // };
-  //
-  //  handleCandidate(candidate) {
-  //   peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-  // };
-  //
-  //  handleAnswer(answer) {
-  //   peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-  //   console.log("connection established successfully!!");
-  // };
-  //
-  //  sendMessage2() {
-  //   dataChannel.send(input.value);
-  //   input.value = "";
-  // }
-
+    this.chatService.sendMessage(basicMessage);
+  }
 }
