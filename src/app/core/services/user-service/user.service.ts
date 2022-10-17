@@ -9,6 +9,8 @@ import {User} from "../../../user/model/User";
 import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {Team} from "../../../team/model/TeamRequest";
 import {TeamService} from "../team-service/team.service";
+import {MentorScheduleEntry} from "../../../mentor/model/MentorScheduleEntry";
+import {NGXLogger} from "ngx-logger";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,7 @@ export class UserService {
 
   private keycloakUserId = "";
 
-  constructor(private http: HttpClient, private keycloakService: KeycloakService) {
+  constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger) {
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {
@@ -42,7 +44,7 @@ export class UserService {
 
       this.keycloakUserId = v!;
 
-      this.openWsConn(this.keycloakUserId);
+      // this.openWsConn(this.keycloakUserId);
 
       this.fetchUserData();
     });
@@ -133,6 +135,24 @@ export class UserService {
       throw new Error("User not loaded yet!");
     }
 
+  }
+
+  saveMentorSchedule(schedule: MentorScheduleEntry[]): Observable<any> {
+
+    this.logger.info("Saving user " + this.getUserId() + " schedule");
+    return this.http.patch("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
+  }
+
+  getUserSchedule(): Observable<MentorScheduleEntry[]> {
+
+     this.logger.info("Requesting user " + this.getUserId() + " schedule");
+     return this.http.get<MentorScheduleEntry[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule")
+  }
+
+  getUsersHackathonSchedule(): Observable<MentorScheduleEntry[]> {
+
+    this.logger.info("Requesting users " + this.getUserId() + " hackathon schedule");
+    return this.http.get<MentorScheduleEntry[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
   }
 
   logout() {

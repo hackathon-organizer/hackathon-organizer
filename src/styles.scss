@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @tailwind base;
+@import "../node_modules/angular-calendar/css/angular-calendar.css";
 
 .ho-section {
   @apply rounded-2xl mb-6;
