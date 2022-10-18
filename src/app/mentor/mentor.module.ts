@@ -7,6 +7,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {FlatpickrModule} from "angularx-flatpickr";
+import { HackathonRatingFormComponent } from '../hackathon/hackathon-rating-form/hackathon-rating-form.component';
 
 
 

@@ -5,6 +5,7 @@ import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonDto} from "../../../hackathon/model/Hackathon";
+import {Criteria} from "../../../hackathon/model/Criteria";
 
 @Injectable({
   providedIn: 'root'
@@ -48,5 +49,9 @@ export class HackathonService {
 
   getHackathonTeamsById(hackathonId: number): Observable<any> {
     return this.http.get(this.BASE_URL_READ + '/' + hackathonId + '/teams');
+  }
+
+  getHackathonRatingCriteria(hackathonId: number): Observable<Criteria[]> {
+    return this.http.get<Criteria[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria');
   }
 }
