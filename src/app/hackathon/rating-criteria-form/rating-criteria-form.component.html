@@ -9,8 +9,8 @@
 
       <div class="mx-12" formArrayName="criteria">
 
-      <div *ngFor="let c of criteria().controls; let i=index" [formGroupName]="i">
-        <div>
+      <div *ngFor="let c of criteria.controls; let i=index" >
+        <div [formGroupName]="i">
           <label>Name:</label>
           <input type="text" formControlName="name" placeholder="Type criteria here" class="input input-bordered input-info w-full max-w-xs" />
         </div>

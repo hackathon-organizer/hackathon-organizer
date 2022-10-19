@@ -6,26 +6,19 @@
 
     <span>team name here</span>
 
-    <form>
+    <form [formGroup]="criteriaForm" (ngSubmit)="rateTeam()">
 
-      <div class="mx-12">
-        <h5 class="mb-4">1. Idea...........</h5>
+      <div formArrayName="criteria" *ngFor="let c of criteria.controls; let i = index" class="mx-12">
 
-        <input type="range" min="0" max="100" value="0" class="range" step="10"/>
-        <div class="w-full flex justify-between text-xs px-2">
-          <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+        <div [formGroupName]="i">
+          <h5 class="mb-4">{{ c.value.name }}</h5>
+
+          <input formControlName="value" (change)="changeVal($event, i)" type="range" min="0" max="100" value="0" class="range" step="10"/>
+
+          <div class="w-full flex justify-between text-xs px-2">
+            <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+          </div>
         </div>
-
-      </div>
-
-      <div class="mx-12">
-        <h5 class="mb-4">1. Idea...........</h5>
-
-        <input type="range" min="0" max="100" value="0" class="range" step="10"/>
-        <div class="w-full flex justify-between text-xs px-2">
-          <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
-        </div>
-
       </div>
 
       <input type="submit" value="Save">

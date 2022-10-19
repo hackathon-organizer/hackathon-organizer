@@ -33,10 +33,6 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-  this.subscription.unsubscribe();
-  }
-
   createCriteria(): FormGroup {
     return this.formBuilder.group({
       name: ""
@@ -44,11 +40,7 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   }
 
   addCriteria() {
-    this.criteria().push(this.createCriteria());
-  }
-
-  criteria(): FormArray {
-    return this.criteriaForm.get("criteria") as FormArray
+    this.criteria.push(this.createCriteria());
   }
 
   saveCriteria() {
@@ -59,6 +51,14 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   }
 
   remove(index: number): void {
-    this.criteria().removeAt(index);
+    this.criteria.removeAt(index);
+  }
+
+  get criteria(): FormArray {
+    return this.criteriaForm.get("criteria") as FormArray
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
