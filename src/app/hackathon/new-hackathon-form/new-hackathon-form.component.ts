@@ -50,7 +50,7 @@ export class NewHackathonFormComponent implements OnInit {
     console.log(hackathon);
     console.log('');
 
-    this.hackathonService.createHackathon(hackathon).subscribe(res => {
+    this.hackathonService.saveHackathon(hackathon).subscribe(res => {
       console.log(res);
 
     this.router.navigateByUrl('/hackathon/' + res.id);

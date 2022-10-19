@@ -6,26 +6,32 @@ import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonDto} from "../../../hackathon/model/Hackathon";
 import {Criteria} from "../../../hackathon/model/Criteria";
+import {NGXLogger} from "ngx-logger";
 
 @Injectable({
   providedIn: 'root'
 })
 export class HackathonService {
 
-  constructor(private http: HttpClient, private userService: UserService) { }
+  constructor(private http: HttpClient, private userService: UserService, private logger: NGXLogger) { }
 
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/hackathons';
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
 
-  createHackathon(hackathon: HackathonRequest): Observable<any> {
+  saveHackathon(hackathon: HackathonRequest): Observable<any> {
 
     hackathon = this.formatDate(hackathon);
+
+    this.logger.info("Saving new hackathon", hackathon);
 
     return this.http.post(this.BASE_URL_WRITE, hackathon);
   }
 
-  getHackathonDetailsById(id: number): Observable<any> {
-    return this.http.get(this.BASE_URL_READ + '/' + id);
+  getHackathonDetailsById(hackathonId: number): Observable<any> {
+
+    this.logger.info("Returning hackathon id: " + hackathonId +" details");
+
+    return this.http.get(this.BASE_URL_READ + '/' + hackathonId);
   }
 
   getAllHackathons():Observable<HackathonDto[]> {
@@ -44,14 +50,29 @@ export class HackathonService {
   addUserToHackathon(hackathonId: number):Observable<any> {
     const userId = this.userService.getUserId();
 
+    this.logger.info("Adding user to hackathon id: " + hackathonId);
+
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null);
   }
 
   getHackathonTeamsById(hackathonId: number): Observable<any> {
+
+    this.logger.info("Returning hackathon id: " + hackathonId +" teams");
+
     return this.http.get(this.BASE_URL_READ + '/' + hackathonId + '/teams');
   }
 
   getHackathonRatingCriteria(hackathonId: number): Observable<Criteria[]> {
+
+    this.logger.info("Returning hackathon id: " + hackathonId +" criteria");
+
     return this.http.get<Criteria[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria');
+  }
+
+  saveHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<any> {
+
+    this.logger.info("Saving hackathon id: " + hackathonId +" criteria", criteria);
+
+    return this.http.post(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 }

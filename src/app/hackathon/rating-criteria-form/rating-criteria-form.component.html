@@ -1,0 +1,26 @@
+<section id="rating-criteria-form">
+  <h4>Add criteria</h4>
+  <p>Below add criteria which will be used by jury to rate teams.</p>
+
+  <div class="mt-12 my-8" id="q-1">
+
+    <button (click)="addCriteria()" class="btn btn-info">Add new</button>
+    <form [formGroup]="criteriaForm" (ngSubmit)="saveCriteria()">
+
+      <div class="mx-12" formArrayName="criteria">
+
+      <div *ngFor="let c of criteria().controls; let i=index" [formGroupName]="i">
+        <div>
+          <label>Name:</label>
+          <input type="text" formControlName="name" placeholder="Type criteria here" class="input input-bordered input-info w-full max-w-xs" />
+        </div>
+        <button (click)="remove(i)" class="btn btn-danger">Remove</button>
+      </div>
+
+      </div>
+
+      <input class="btn btn-success" type="submit" value="Save">
+    </form>
+  </div>
+</section>
+
