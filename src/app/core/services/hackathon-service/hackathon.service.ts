@@ -5,7 +5,7 @@ import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonDto} from "../../../hackathon/model/Hackathon";
-import {Criteria} from "../../../hackathon/model/Criteria";
+import {Criteria, CriteriaAnswer} from "../../../hackathon/model/Criteria";
 import {NGXLogger} from "ngx-logger";
 
 @Injectable({
@@ -74,5 +74,12 @@ export class HackathonService {
     this.logger.info("Saving hackathon id: " + hackathonId +" criteria", criteria);
 
     return this.http.post(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
+  }
+
+  saveTeamRating(hackathonId: number, criteria: Criteria[]): Observable<any> {
+
+    this.logger.info("Saving hackathon id: " + hackathonId +" team rating criteria", criteria);
+
+    return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 }

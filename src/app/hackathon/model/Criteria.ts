@@ -1,5 +1,11 @@
 export interface Criteria {
   id: number;
   name: string;
-  value?: number;
+  criteriaAnswers: CriteriaAnswer[];
+}
+
+export interface CriteriaAnswer {
+  teamId: number;
+  userId: number;
+  value: number;
 }
