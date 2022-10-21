@@ -1,7 +1,8 @@
 export interface Criteria {
   id: number;
   name: string;
-  criteriaAnswers: CriteriaAnswer[];
+  hackathonId?: number;
+  criteriaAnswers?: CriteriaAnswer[];
 }
 
 export interface CriteriaAnswer {

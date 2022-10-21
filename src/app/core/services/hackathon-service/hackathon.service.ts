@@ -76,10 +76,24 @@ export class HackathonService {
     return this.http.post(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 
+  updateHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<any> {
+
+    this.logger.info("Updating hackathon id: " + hackathonId +" criteria", criteria);
+
+    return this.http.put(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
+  }
+
   saveTeamRating(hackathonId: number, criteria: Criteria[]): Observable<any> {
 
     this.logger.info("Saving hackathon id: " + hackathonId +" team rating criteria", criteria);
 
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
+  }
+
+  deleteCriteria(idToDelete: number) {
+
+    this.logger.info("Deleting criteria with id", idToDelete);
+
+    return this.http.delete(this.BASE_URL_WRITE + '/criteria/' + idToDelete);
   }
 }

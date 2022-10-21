@@ -61,9 +61,9 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   }
 
 
-  changeVal($event: any, idx: number) {
+  changeVal($event: any, index: number) {
 
-    const criteria = this.criteria.at(idx);
+    const criteria = this.criteria.at(index);
 
     criteria.get("criteriaAnswer")?.patchValue({
       teamId: this.currentTeamId,
