@@ -65,4 +65,8 @@ export class TeamService {
   addUserToTeam(teamId: number, userId: number): Observable<any> {
     return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
+
+  isUserTeamOwner(teamId: number, userId: number): Observable<boolean> {
+    return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners');
+  }
 }

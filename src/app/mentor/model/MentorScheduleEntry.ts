@@ -4,6 +4,7 @@ export interface MentorScheduleEntry {
   hackathonId: number;
   sessionStart: Date;
   sessionEnd: Date;
+  isAvailable?: boolean;
   info?: string;
   entryColor?: string;
   teamId?: number;

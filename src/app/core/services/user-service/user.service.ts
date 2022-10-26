@@ -155,6 +155,10 @@ export class UserService {
     return this.http.get<MentorScheduleEntry[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
   }
 
+  assignTeamToMeetingWithMentor(teamId: any): Observable<any> {
+    return this.http.patch("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", teamId);
+  }
+
   logout() {
     this.keycloakService.logout('http://localhost:4200').then((success) => {
       console.log("--> log: logout success ", success );

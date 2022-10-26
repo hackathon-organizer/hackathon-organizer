@@ -29,49 +29,20 @@
   <div class="col-md-4">
     <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
   </div>
-  <div class="col-md-4">
-    <div class="btn-group">
-      <div
-        class="btn btn-primary"
-        (click)="setView(CalendarView.Week)"
-        [class.active]="view === CalendarView.Week"
-      >
-        Week
-      </div>
-      <div
-        class="btn btn-primary"
-        (click)="setView(CalendarView.Day)"
-        [class.active]="view === CalendarView.Day"
-      >
-        Day
-      </div>
-    </div>
-  </div>
 </div>
 <br/>
-<div [ngSwitch]="view">
-  <mwl-calendar-week-view
-    *ngSwitchCase="CalendarView.Week"
-    [viewDate]="viewDate"
-    [events]="events"
-    [refresh]="refresh"
-    (eventClicked)="handleEvent('Clicked', $event.event)"
-    (eventTimesChanged)="eventTimesChanged($event)"
-  >
-  </mwl-calendar-week-view>
+
+<label for="modal" class="btn btn-primary modal-button">Add</label>
+
+
   <mwl-calendar-day-view
-    *ngSwitchCase="CalendarView.Day"
     [viewDate]="viewDate"
     [events]="events"
     [refresh]="refresh"
-    (eventClicked)="handleEvent('Clicked', $event.event)"
+    [eventTemplate]="hoDayCell"
     (eventTimesChanged)="eventTimesChanged($event)"
   >
   </mwl-calendar-day-view>
-</div>
-
-
-<label for="modal" class="btn btn-primary modal-button">Add</label>
 
 <input type="checkbox" id="modal" class="modal-toggle"/>
 <div class="modal">
@@ -84,9 +55,7 @@
       <table class="table table-bordered">
         <thead>
         <tr>
-          <th>Title</th>
           <th>Primary color</th>
-          <th>Secondary + text color</th>
           <th>Starts at</th>
           <th>Ends at</th>
           <th>Remove</th>
@@ -97,29 +66,8 @@
         <tr *ngFor="let event of events">
           <td>
             <input
-              type="text"
-              class="form-control"
-              [(ngModel)]="event.title"
-              (keyup)="refresh.next()"
-            />
-          </td>
-          <td>
-            <input
-              type="color"
-              [(ngModel)]="event.color!.primary"
-              (change)="refresh.next()"
-            />
-          </td>
-          <td>
-            <input
               type="color"
               [(ngModel)]="event.color!.secondary"
-              (change)="refresh.next()"
-            />
-            <input
-              type="color"
-              [ngModel]="event.color!.secondaryText ?? '#1e90ff'"
-              (ngModelChange)="event.color!.secondaryText = $event"
               (change)="refresh.next()"
             />
           </td>
@@ -169,3 +117,50 @@
 
   </div>
 </div>
+
+
+<ng-template #hoDayCell let-weekEvent="weekEvent"
+             let-tooltipPlacement="tooltipPlacement"
+             let-eventClicked="eventClicked"
+             let-tooltipTemplate="tooltipTemplate"
+             let-tooltipAppendToBody="tooltipAppendToBody"
+             let-tooltipDisabled="tooltipDisabled"
+             let-tooltipDelay="tooltipDelay"
+             let-daysInWeek="daysInWeek">
+
+  <div class="cal-event" [ngStyle]="{
+          color: weekEvent.event.color?.secondaryText,
+          backgroundColor: weekEvent.event.color?.secondary,
+          borderColor: weekEvent.event.color?.primary
+        }"
+       [mwlCalendarTooltip]="
+          !tooltipDisabled
+            ? (weekEvent.event.title
+              | calendarEventTitle
+                : (daysInWeek === 1 ? 'dayTooltip' : 'weekTooltip')
+                : weekEvent.tempEvent || weekEvent.event)
+            : '' "
+       [tooltipPlacement]="tooltipPlacement"
+       [tooltipEvent]="weekEvent.tempEvent || weekEvent.event"
+       [tooltipTemplate]="tooltipTemplate"
+       [tooltipAppendToBody]="tooltipAppendToBody"
+       [tooltipDelay]="tooltipDelay"
+       (mwlClick)="eventClicked.emit({ sourceEvent: $event })"
+       (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
+       tabindex="0"
+       role="application"
+       [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'">
+
+    <div class="flex flex-col justify-center items-center w-full pt-48">
+
+    <h5 class="text-center text-5xl">{{ weekEvent.event.title }}</h5>
+
+    <div class="text-3xl my-12">
+      <span *ngIf="weekEvent.event.isAvailable; else notAvailable" class="text-success">AVALIBLE</span>
+      <ng-template #notAvailable class="text-danger">NOT AVALIBLE</ng-template>
+    </div>
+
+    <button class="btn btn-primary w-3/5" (click)="assignTeam()">Assign</button>
+    </div>
+  </div>
+</ng-template>

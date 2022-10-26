@@ -13,8 +13,8 @@ import {HttpClientModule} from "@angular/common/http";
 import {TeamModule} from "./team/team.module";
 import {HomepageComponent} from './core/homepage/homepage.component';
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
-import {MentorModule} from "./mentor/mentor.module";
-import {CalendarModule, DateAdapter} from 'angular-calendar';
+import {CustomDateFormatter, MentorModule} from "./mentor/mentor.module";
+import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calendar';
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
 
 
@@ -42,8 +42,12 @@ import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
     CalendarModule.forRoot({
       provide: DateAdapter,
       useFactory: adapterFactory,
-    }),
-    CalendarModule.forRoot({provide: DateAdapter, useFactory: adapterFactory}),
+    }, {
+      dateFormatter: {
+        provide: CalendarDateFormatter,
+        useClass: CustomDateFormatter
+      }
+    })
   ],
   providers: [
     {
