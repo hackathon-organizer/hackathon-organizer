@@ -67,6 +67,6 @@ export class TeamService {
   }
 
   isUserTeamOwner(teamId: number, userId: number): Observable<boolean> {
-    return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners');
+    return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners?userId=' + userId);
   }
 }

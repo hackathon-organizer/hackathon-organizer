@@ -178,7 +178,7 @@ export class MentorScheduleComponent {
     } as ScheduleEntryEvent;
   }
 
-  assignTeam() {
+  assignTeam(event: any) {
 
     const currentUser = JSON.parse(<string>localStorage.getItem("user")) as User
 
@@ -188,7 +188,13 @@ export class MentorScheduleComponent {
       this.teamService.isUserTeamOwner(teamId, this.userService.getUserId()).subscribe(isOwner => {
 
          if (isOwner) {
-           this.userService.assignTeamToMeetingWithMentor({eventId: 1, teamId: teamId}).subscribe();
+           this.userService.assignTeamToMeetingWithMentor({teamOwnerId: currentUser.id, entryId: 1, teamId: teamId}).subscribe((isAvailable) => {
+
+             event.isAvailable = isAvailable;
+
+           });
+         } else {
+           console.log("not team owner");
          }
       });
     }

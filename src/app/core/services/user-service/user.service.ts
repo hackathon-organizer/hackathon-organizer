@@ -113,6 +113,7 @@ export class UserService {
 
       localStorage.setItem("userId", String(userData.id));
       localStorage.setItem("username", userData.username);
+      localStorage.setItem("user", JSON.stringify(userData));
 
       this.fetchUserInvites();
     });
@@ -140,7 +141,7 @@ export class UserService {
   saveMentorSchedule(schedule: MentorScheduleEntry[]): Observable<any> {
 
     this.logger.info("Saving user " + this.getUserId() + " schedule");
-    return this.http.patch("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
+    return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
   }
 
   getUserSchedule(): Observable<MentorScheduleEntry[]> {
@@ -156,7 +157,9 @@ export class UserService {
   }
 
   assignTeamToMeetingWithMentor(teamId: any): Observable<any> {
-    return this.http.patch("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", teamId);
+
+    this.logger.info("Saving team meeting with mentor", teamId);
+    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule", teamId);
   }
 
   logout() {

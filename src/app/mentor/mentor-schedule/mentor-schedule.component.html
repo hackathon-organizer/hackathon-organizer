@@ -157,10 +157,10 @@
 
     <div class="text-3xl my-12">
       <span *ngIf="weekEvent.event.isAvailable; else notAvailable" class="text-success">AVALIBLE</span>
-      <ng-template #notAvailable class="text-danger">NOT AVALIBLE</ng-template>
+      <ng-template #notAvailable class="text-error">NOT AVALIBLE</ng-template>
     </div>
 
-    <button class="btn btn-primary w-3/5" (click)="assignTeam()">Assign</button>
+    <button class="btn btn-primary w-3/5" (click)="assignTeam(weekEvent.event)">Assign</button>
     </div>
   </div>
 </ng-template>
