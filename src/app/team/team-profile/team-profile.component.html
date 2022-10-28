@@ -31,6 +31,8 @@
       <a routerLink="/team/invite"><button class="btn btn-success w-36 self-center m-5" >Invite user</button></a>
       <a *ngIf="team.isOpen" routerLink="/"><button (click)="joinToTeam()" class="btn btn-success w-36 self-center m-5" >Join to team</button></a>
       <a routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat"><button class="btn btn-accent w-36 self-center m-5">Join team chat</button></a>
+
+      <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">{{ team.isOpen ? 'Close' : 'Open' }}</button>
       </div>
 
     </div>

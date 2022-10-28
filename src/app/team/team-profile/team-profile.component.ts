@@ -43,6 +43,15 @@ export class TeamProfileComponent implements OnInit {
     this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).subscribe(res => console.log(res));
   }
 
+  openOrCloseTeamForMembers() {
+
+    const isOpen = !this.team.isOpen;
+
+    this.teamService.openOrCloseTeamForMembers(this.teamId, isOpen).subscribe((isOpen) => {
+      this.team.isOpen = isOpen;
+    });
+  }
+
   get isOwner() {
     return true;
   }

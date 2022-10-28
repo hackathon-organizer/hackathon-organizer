@@ -5,7 +5,6 @@ import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
 import {Tag, Team, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
-import {EntityCollectionServiceBase, EntityCollectionServiceElementsFactory} from "@ngrx/data";
 
 @Injectable({
   providedIn: 'root'
@@ -65,5 +64,9 @@ export class TeamService {
 
   addUserToTeam(teamId: number, userId: number): Observable<any> {
     return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
+  }
+
+  openOrCloseTeamForMembers(teamId: number, isOpen: boolean): Observable<boolean> {
+    return this.http.patch<boolean>(this.BASE_URL_WRITE + '/' + teamId, isOpen);
   }
 }
