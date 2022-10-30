@@ -69,4 +69,8 @@ export class TeamService {
   openOrCloseTeamForMembers(teamId: number, isOpen: boolean): Observable<boolean> {
     return this.http.patch<boolean>(this.BASE_URL_WRITE + '/' + teamId, isOpen);
   }
+
+  isUserTeamOwner(teamId: number, userId: number): Observable<boolean> {
+    return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners?userId=' + userId);
+  }
 }

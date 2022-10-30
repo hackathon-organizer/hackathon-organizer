@@ -1,16 +1,19 @@
 import {RouterModule, Routes} from "@angular/router";
 import {NgModule} from "@angular/core";
 import {UserProfileComponent} from "./user-profile/user-profile.component";
+import {MentorModule} from "../mentor/mentor.module";
+import {MentorScheduleComponent} from "../mentor/mentor-schedule/mentor-schedule.component";
 
 
 const routes: Routes = [
   {path: '', component: UserProfileComponent},
   {path: ':id', component: UserProfileComponent},
+  {path: ':id/schedule', component: MentorScheduleComponent}
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+  exports: [RouterModule, MentorModule],
 })
 export class UserRoutingModule {
   static components = [

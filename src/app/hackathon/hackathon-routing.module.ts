@@ -8,6 +8,7 @@ import {TeamsComponent} from "../team/teams/teams.component";
 import {TeamProfileComponent} from "../team/team-profile/team-profile.component";
 import {UserSerachComponent} from "../shared/user-serach/user-serach.component";
 import {TeamChatComponent} from "../team/team-chat/team-chat.component";
+import {MentorScheduleComponent} from "../mentor/mentor-schedule/mentor-schedule.component";
 
 
 const routes: Routes = [
@@ -19,6 +20,7 @@ const routes: Routes = [
   {path: ':id/team/:teamId', component: TeamProfileComponent},
   {path: ':id/team/:teamId/chat', component: TeamChatComponent},
   {path: ':id/team/:teamId/invite', component: UserSerachComponent},
+  {path: ':id/schedule', component: MentorScheduleComponent}
 ];
 
 @NgModule({

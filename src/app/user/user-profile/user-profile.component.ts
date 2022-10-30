@@ -17,7 +17,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   private routeSubscription: Subscription = new Subscription();
 
-  notificationsArray: TeamInvitation[] = [];
+  notificationsArray: any[] = [];
 
   user!: UserResponseDto;
 
