@@ -63,7 +63,8 @@ export class CustomDateFormatter extends CalendarNativeDateFormatter {
     FormsModule,
     ReactiveFormsModule,
     FlatpickrModule.forRoot()
-  ]        , providers: [
+  ],
+  providers: [
     {provide: CalendarDateFormatter, useClass: CustomDateFormatter}
   ]
 })

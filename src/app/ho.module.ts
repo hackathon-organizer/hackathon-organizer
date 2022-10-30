@@ -16,6 +16,7 @@ import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 import {CustomDateFormatter, MentorModule} from "./mentor/mentor.module";
 import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calendar';
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
+import {FlatpickrModule} from "angularx-flatpickr";
 
 
 @NgModule({
@@ -47,7 +48,8 @@ import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
         provide: CalendarDateFormatter,
         useClass: CustomDateFormatter
       }
-    })
+    }),
+    FlatpickrModule.forRoot()
   ],
   providers: [
     {

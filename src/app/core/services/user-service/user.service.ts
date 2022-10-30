@@ -6,18 +6,20 @@ import {Client} from "@stomp/stompjs";
 import {UserResponseDto} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
-import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
-import {Team} from "../../../team/model/TeamRequest";
-import {TeamService} from "../team-service/team.service";
 import {MentorScheduleEntry} from "../../../mentor/model/MentorScheduleEntry";
 import {NGXLogger} from "ngx-logger";
+import * as dayjs from 'dayjs';
+import {ScheduleEntryEvent} from "../../../user/model/ScheduleEntryEvent";
+import * as isBetween from 'dayjs/plugin/isBetween'
+import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private userNotifications: BehaviorSubject<TeamInvitation[]> = new BehaviorSubject<TeamInvitation[]>([]);
+  private userNotifications: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
 
   user!: User;
@@ -25,6 +27,7 @@ export class UserService {
   private keycloakUserId = "";
 
   constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger) {
+    dayjs.extend(isBetween);
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {
@@ -91,7 +94,7 @@ export class UserService {
   public getKcId(): string {
 
     if (!this.keycloakUserId) {
-      console.log('Erorr')   ;
+      console.log('Erorr');
     }
 
     return this.keycloakUserId;
@@ -100,9 +103,9 @@ export class UserService {
   private fetchUserInvites() {
     this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
       console.log('invites');
-      console.log(userInvites) ;
+      console.log(userInvites);
       this.userNotifications.next(userInvites);
-  });
+    });
   }
 
   private fetchUserData() {
@@ -116,6 +119,8 @@ export class UserService {
       localStorage.setItem("user", JSON.stringify(userData));
 
       this.fetchUserInvites();
+
+      this.startUserScheduleMonitoring();
     });
   }
 
@@ -144,16 +149,16 @@ export class UserService {
     return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
   }
 
-  getUserSchedule(): Observable<MentorScheduleEntry[]> {
+  getUserSchedule(): Observable<ScheduleEntryEvent[]> {
 
-     this.logger.info("Requesting user " + this.getUserId() + " schedule");
-     return this.http.get<MentorScheduleEntry[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule")
+    this.logger.info("Requesting user " + this.getUserId() + " schedule");
+    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule")
   }
 
-  getUsersHackathonSchedule(): Observable<MentorScheduleEntry[]> {
+  getUsersHackathonSchedule(): Observable<ScheduleEntryEvent[]> {
 
     this.logger.info("Requesting users " + this.getUserId() + " hackathon schedule");
-    return this.http.get<MentorScheduleEntry[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
+    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
   }
 
   assignTeamToMeetingWithMentor(teamId: any): Observable<any> {
@@ -164,9 +169,52 @@ export class UserService {
 
   logout() {
     this.keycloakService.logout('http://localhost:4200').then((success) => {
-      console.log("--> log: logout success ", success );
+      console.log("--> log: logout success ", success);
     }).catch((error) => {
-      console.log("--> log: logout error ", error );
+      console.log("--> log: logout error ", error);
     });
+  }
+
+  private startUserScheduleMonitoring() {
+    let index = 0;
+
+    // TODO if this.user is mentor...
+
+    if (this.user) {
+      this.getUserSchedulePlan().subscribe(schedule => {
+
+        let meetingStart = dayjs(schedule[index].sessionStart).subtract(5, "minutes");
+        let meetingEnd = dayjs(schedule[index].sessionEnd);
+
+        const scheduleMonitorInterval = setInterval(() => {
+
+          if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
+
+            this.userNotifications.next(this.userNotifications.value.concat(schedule[index].id));
+            index++;
+
+            if (schedule[index]) {
+              meetingStart = dayjs(schedule[index].sessionStart).subtract(5, "minutes");
+            } else {
+              clearInterval(scheduleMonitorInterval);
+            }
+          }
+        }, 5000);
+
+        scheduleMonitorInterval;
+      });
+    }
+  }
+
+  getUserSchedulePlan(): Observable<any[]> {
+    return this.http.get<any[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule");
+  }
+
+  removeScheduleEntry(id: number) {
+    return this.http.delete("http://localhost:9090/api/v1/write/users/schedule/" + id);
+  }
+
+  updateUserScheduleEntry(id: number, obj: ScheduleEntrySession): Observable<any> {
+    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + id, obj)
   }
 }

@@ -47,7 +47,7 @@
 
       <div *ngFor="let not of notificationsArray; let i = index;">
 
-        User {{ not.fromUserName }} invited you to team {{ not.teamName }}.
+        User {{ not.url }} invited you to team {{ not.url }}.
 
         <button class="m-5" (click)="acceptInvitation(i, true)">Accept</button>
         <button class="m-5" (click)="acceptInvitation(i,false)">Reject</button>

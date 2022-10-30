@@ -34,6 +34,19 @@
 
 <label for="modal" class="btn btn-primary modal-button">Add</label>
 
+<input
+  class="form-control"
+  type="text"
+  mwlFlatpickr
+
+  (ngModelChange)="refresh.next()"
+  [altInput]="true"
+  [convertModelValue]="true"
+  [enableTime]="true"
+  dateFormat="Y-m-dTH:i"
+  altFormat="F j, Y H:i"
+  placeholder="Not set"
+/>
 
   <mwl-calendar-day-view
     [viewDate]="viewDate"
@@ -55,7 +68,7 @@
       <table class="table table-bordered">
         <thead>
         <tr>
-          <th>Primary color</th>
+          <th>Color</th>
           <th>Starts at</th>
           <th>Ends at</th>
           <th>Remove</th>

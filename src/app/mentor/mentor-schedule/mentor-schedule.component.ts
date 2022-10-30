@@ -20,6 +20,7 @@ import {NGXLogger} from "ngx-logger";
 import {User} from "../../user/model/User";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ScheduleEntryEvent} from "../../user/model/ScheduleEntryEvent";
+import {ScheduleEntrySession} from "../model/ScheduleEntrySession";
 
 const colors: Record<string, EventColor> = {
   main: {
@@ -108,12 +109,18 @@ export class MentorScheduleComponent {
                     }: CalendarEventTimesChangedEvent): void {
     this.events = this.events.map((iEvent) => {
       if (iEvent === event) {
+
+        this.userService.updateUserScheduleEntry(event.id as number, {sessionStart: newStart, sessionEnd: newEnd} as ScheduleEntrySession).subscribe();
+
         return {
           ...event,
           start: newStart,
           end: newEnd,
         };
       }
+
+      console.log(event)
+
       return iEvent;
     });
   }
@@ -138,6 +145,8 @@ export class MentorScheduleComponent {
 
   deleteEvent(eventToDelete: CalendarEvent) {
     this.events = this.events.filter((event) => event !== eventToDelete);
+
+    this.userService.removeScheduleEntry(eventToDelete.id as number).subscribe();
   }
 
   setView(view: CalendarView) {
@@ -153,18 +162,20 @@ export class MentorScheduleComponent {
       this.userService.saveMentorSchedule(scheduleEntries).subscribe();
   }
 
-  private mapToMentorSchedule(x: CalendarEvent): MentorScheduleEntry {
+  private mapToMentorSchedule(x: CalendarEvent): ScheduleEntryEvent {
     return {
+      id: x.id,
       sessionStart: x.start,
       sessionEnd: x.end,
       userId: this.userService.getUserId(),
       hackathonId: 1,
       info: "test"
-    } as MentorScheduleEntry;
+    } as ScheduleEntryEvent;
   }
 
-  private mapToCalendarEvent(x: MentorScheduleEntry): ScheduleEntryEvent {
+  private mapToCalendarEvent(x: ScheduleEntryEvent): ScheduleEntryEvent {
     return {
+      id: x.id,
       title: "John Doe",
       start: new Date(x.sessionStart),
       end: new Date(x.sessionEnd),
