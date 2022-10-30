@@ -180,7 +180,7 @@ export class UserService {
     });
   }
 
-<<<<<<< HEAD
+
   get userHackathonId(): number {
     if (this.user.currentHackathonId) {
       return this.user.currentHackathonId;
@@ -195,7 +195,8 @@ export class UserService {
     } else {
       throw new Error('err');
     }
-=======
+  }
+
   private startUserScheduleMonitoring() {
     let index = 0;
 
@@ -237,6 +238,5 @@ export class UserService {
 
   updateUserScheduleEntry(id: number, obj: ScheduleEntrySession): Observable<any> {
     return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + id, obj)
->>>>>>> schedule-feature
   }
 }
