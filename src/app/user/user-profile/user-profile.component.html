@@ -47,10 +47,17 @@
 
       <div *ngFor="let not of notificationsArray; let i = index;">
 
-        User {{ not.url }} invited you to team {{ not.url }}.
+        <span *ngIf="not.notificationType === 'INVITATION'">User {{ asInvitation(not).fromUserName }} invited you to team {{ asInvitation(not).teamName }}</span>
+        <span *ngIf="not.notificationType === 'MEETING'">You can join meeting with team {{ asMeeting(not).teamId }}</span>
 
+        <div *ngIf="not.notificationType === 'INVITATION'">
         <button class="m-5" (click)="acceptInvitation(i, true)">Accept</button>
         <button class="m-5" (click)="acceptInvitation(i,false)">Reject</button>
+        </div>
+
+        <div *ngIf="not.notificationType === 'MEETING'">
+          <button>JOIN</button>
+        </div>
 
       </div>
 

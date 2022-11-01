@@ -1,4 +1,5 @@
-export enum NotificationType {
-  INVITATION = "INVITATION",
-  MEETING = "MEETING"
+import {NotificationType} from "./NotificationType";
+
+export interface Notification {
+  notificationType: NotificationType
 }

@@ -1,12 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import { Client, Message } from '@stomp/stompjs';
-import {KeycloakService} from "keycloak-angular";
 import {ActivatedRoute} from "@angular/router";
-import {Observable, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {UserResponseDto} from "../model/UserResponseDto";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {TeamInvitation} from "../../team/model/TeamInvitation";
+import {Notification} from "../model/Notification";
+import {NotificationType} from "../model/NotificationType";
+import {MeetingNotification} from "../../team/model/MeetingNotification";
 
 @Component({
   selector: 'ho-user-profile',
@@ -17,7 +18,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   private routeSubscription: Subscription = new Subscription();
 
-  notificationsArray: any[] = [];
+  notificationsArray: Notification[] = [];
 
   user!: UserResponseDto;
 
@@ -26,8 +27,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.userService.userNotificationsObservable.subscribe((teamInv) => {
-      this.notificationsArray = teamInv;
+    this.userService.userNotificationsObservable.subscribe((notifications) => {
+      this.notificationsArray = notifications;
     });
 
     this.routeSubscription = this.route.params.subscribe(params => {
@@ -48,13 +49,24 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     console.log(this.userService.user.currentTeamId);
 
     const teamId = this.userService.user.currentTeamId!;
-    this.teamService.sendTeamInvitation(this.user.id, teamId).subscribe();
+
+    const username = localStorage.getItem("username") as string;
+
+    this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe();
   }
 
   acceptInvitation(inviteNumber: number, accepted: boolean) {
 
     const invite = this.notificationsArray[inviteNumber];
 
-    this.teamService.updateInviteStatus(invite, accepted);
+    this.teamService.updateInviteStatus(invite as TeamInvitation, accepted);
+  }
+
+  asInvitation(notification: Notification): TeamInvitation {
+    return notification as TeamInvitation;
+  }
+
+  asMeeting(notification: Notification): MeetingNotification {
+    return notification as MeetingNotification;
   }
 }

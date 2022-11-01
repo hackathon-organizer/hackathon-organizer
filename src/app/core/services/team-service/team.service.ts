@@ -14,7 +14,7 @@ export class TeamService {
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/teams';
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/teams';
 
-  constructor(private http: HttpClient, private userService: UserService) {
+  constructor(private http: HttpClient) {
 
   }
 
@@ -38,9 +38,7 @@ export class TeamService {
     this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', x).subscribe();
   }
 
-  sendTeamInvitation(userId: number, teamId: number): Observable<any> {
-
-    const username = this.userService.getUsername();
+  sendTeamInvitation(userId: number, teamId: number, username: string): Observable<any> {
 
     return this.http.post("http://localhost:9090/api/v1/write/teams/" + teamId + "/invite/" + userId + "?username=" + username, null, {
       headers: {
