@@ -1,9 +1,9 @@
 <section id="add-new-team">
 
   <div class="w-full p-4 mx-auto md:w-4/5 lg:w-3/5 xl:w-2/5 lg:p-16">
-    <div class="p-4 border-2 border-black rounded-lg lg:p-8">
+    <div class="p-4 rounded-lg lg:p-8">
 
-      <h2 class="m-4 mb-6 text-3xl">Create new team for hackathon ...</h2>
+      <h2 class="m-4 mb-6 text-3xl">Create new team</h2>
 
       <form id="create-team-form" novalidate (ngSubmit)="createTeam()" [formGroup]="newTeamForm"
             class="flex flex-col items-center justify-center">
@@ -27,11 +27,16 @@
         <span class="error-message"
               *ngIf="newTeamForm.get('description')?.errors?.minlength">The description must be longer than 15 characters.</span>
 
-        <div class="w-24" *ngFor="let tag of tags; let i = index">
-          <label>
-          <input type="checkbox" [formControlName]="tag.id" />     {{ tags[i].name }}
+        <span class="text-center mt-4">Select tags that will help find new members:</span>
+
+        <div class="flex flex-wrap my-5">
+        <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
+          <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-primary' : 'btn-outline'">+
+          <input type="checkbox" class="appearance-none" (change)="markTag(i)" [formControlName]="tag.id" />{{ tags[i].name }}
           </label>
         </div>
+        </div>
+        {{ newTeamForm.value | json }}
 
         <input type="submit" class="btn btn-primary" value="Create">
       </form>

@@ -1,6 +1,7 @@
 export interface Tag {
   id: number;
   name: string;
+  isSelected?: boolean;
 }
 
 export interface TeamRequest {

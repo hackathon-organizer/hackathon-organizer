@@ -37,23 +37,24 @@ export class NewTeamFormComponent implements OnInit {
      this.hackathonId = params['id'];
     });
 
-    this.teamService.getAvailableTags().subscribe(result => this.tags = result);
-
     this.newTeamForm = this.formBuilder.group({
       teamName: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      tags: this.buildTagsFormGroup(this.tags)
     });
 
-    //this.newTeamForm.addControl('tagsFormGroup',) )
+    this.teamService.getAvailableTags().subscribe(result => {
+      this.tags = result;
+
+      this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
+    });
   }
 
   buildTagsFormGroup(tags: Tag[], selectedTagsIds: number[] = []): FormGroup {
     let group = this.formBuilder.group({});
 
     tags.forEach(tag => {
-      let isSelected = selectedTagsIds.some(id => id === tag.id);
-      group.addControl(String(tag.id), this.formBuilder.control(isSelected));
+      tag.isSelected = false;
+      group.addControl(String(tag.id), this.formBuilder.control(false));
     });
     return group;
   }
@@ -68,15 +69,13 @@ export class NewTeamFormComponent implements OnInit {
       tags: this.tags,
     };
 
-    console.log('sending');
-    console.log(team);
-    console.log('');
-
     this.teamService.createTeam(team).subscribe(res => {
-      console.log(res);
 
       this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + res.id);
     });
   }
 
+  markTag(index: number) {
+    this.tags[index].isSelected = !this.tags[index].isSelected;
+  }
 }

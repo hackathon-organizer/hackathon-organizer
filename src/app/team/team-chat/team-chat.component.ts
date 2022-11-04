@@ -70,15 +70,14 @@ export class TeamChatComponent implements AfterViewInit {
     this.routeSubscription = this.route.params.subscribe(params => {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
 
-             this.chatService.getChatRoomMessages(team.teamChatRoomId).subscribe(messages => {
+        this.chatRoomId = team.teamChatRoomId;
+        this.chatRoomTitle = team.name;
+
+             this.chatService.getChatRoomMessages(1).subscribe(messages => {
                this.messages = messages;
 
                messages.forEach(msg => this.updateChat(msg));
              });
-
-             this.chatRoomTitle = team.name;
-
-             this.chatRoomId = team.teamChatRoomId;
       })
     });
 
@@ -112,7 +111,7 @@ export class TeamChatComponent implements AfterViewInit {
   }
 
   private addIncomingMessageHandler(): void {
-    this.chatService.connect(this.chatRoomId);
+    this.chatService.connect(1);
 
     this.chatService.messages$.subscribe(msg => {
 
@@ -344,6 +343,8 @@ export class TeamChatComponent implements AfterViewInit {
   sendTextMessage() {
     const chatMessage: ChatMessage = {username: localStorage.getItem("username")!,
       userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1 }
+
+    this.updateChat(chatMessage);
 
     const basicMessage = {messageType: MessageType.MESSAGE, data: chatMessage};
 
