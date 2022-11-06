@@ -26,4 +26,14 @@
       <p>{{ hackathon.description }}</p>
     </article>
   </div>
+
+  <div class="my-5" id="teams-suggestions">
+
+    <span>Team recommendations:</span>
+
+      <ul>
+        <li *ngFor="let team of teamsSuggestions">{{ team.name }}</li>
+      </ul>
+
+  </div>
 </section>

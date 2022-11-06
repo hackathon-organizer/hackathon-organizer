@@ -63,4 +63,8 @@ export class TeamService {
   addUserToTeam(teamId: number, userId: number): Observable<any> {
       return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
+
+  getTeamSuggestions(userTags: number[]): Observable<Team[]> {
+     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions", userTags);
+  }
 }
