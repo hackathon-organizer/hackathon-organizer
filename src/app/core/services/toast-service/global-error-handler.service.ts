@@ -16,13 +16,19 @@ export class GlobalErrorHandler extends ErrorHandler {
     return this.injector.get(ToastrService);
   }
 
-  public override handleError(error: HttpErrorResponse) {
+  public override handleError(error: HttpErrorResponse | Error) {
     let errorMessage = '';
 
-    if (error.status === 0) {
-      errorMessage = 'No connection with server. Please try again later.';
+    if (error instanceof HttpErrorResponse) {
+
+      if (error.status === 0) {
+        errorMessage = 'No connection with server. Please try again later.';
+      } else {
+        errorMessage = `Server returned code: ${error.status}, error message is: ${error.error.message}`;
+      }
+
     } else {
-      errorMessage = `Server returned code: ${error.status}, error message is: ${error.error.message}`;
+      errorMessage = error.message;
     }
 
     this.toastrService.error(errorMessage, "Error");
