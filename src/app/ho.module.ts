@@ -17,6 +17,7 @@ import {TeamRoutingModule} from "./team/team-routing.module";
 import {UserRoutingModule} from "./user/user-routing.module";
 import {GlobalErrorHandler} from "./core/services/toast-service/global-error-handler.service";
 import {ToastrModule} from "ngx-toastr";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import {ToastrModule} from "ngx-toastr";
   ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         HttpClientModule,
         KeycloakAngularModule,
         HoRoutingModule,

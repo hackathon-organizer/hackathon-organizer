@@ -5,8 +5,12 @@
   @apply rounded-2xl mb-6;
 }
 
-.is-invalid {
+.error-message {
+   @apply text-error;
+}
 
+.ho-input-primary {
+  @apply input input-bordered input-primary w-full max-w-xs bg-gray-700;
 }
 
 @tailwind components;

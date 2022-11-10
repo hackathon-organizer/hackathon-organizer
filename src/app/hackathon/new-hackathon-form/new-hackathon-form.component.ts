@@ -8,12 +8,11 @@ import {UserService} from "../../core/services/user-service/user.service";
 @Component({
   selector: 'ho-new-hackathon-form',
   templateUrl: './new-hackathon-form.component.html',
-  styleUrls: ['./new-hackathon-form.component.scss']
+  styleUrls: []
 })
 export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
-  errorMsg = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -24,9 +23,9 @@ export class NewHackathonFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.newHackathonForm = this.formBuilder.group({
-      hackathonName: ['', [Validators.required, Validators.minLength(3)]],
+      hackathonName: ['', [Validators.required, Validators.minLength(10)]],
       description: ['', [Validators.minLength(15)]],
-      organizerInfo: ['', [Validators.minLength(3)]],
+      organizerInfo: ['', [Validators.minLength(15)]],
       // TODO add date validators
       startDate: ['', [Validators.required]],
       endDate: ['', [Validators.required]],
@@ -44,14 +43,9 @@ export class NewHackathonFormComponent implements OnInit {
       eventEndDate: this.newHackathonForm.get('endDate')?.value
     };
 
-    console.log('sending');
-    console.log(hackathon);
-    console.log('');
+    this.hackathonService.createHackathon(hackathon).subscribe(hackathonResponse => {
 
-    this.hackathonService.createHackathon(hackathon).subscribe(res => {
-      console.log(res);
-
-    this.router.navigateByUrl('/hackathon/' + res.id);
+    this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
   });
   }
 }
