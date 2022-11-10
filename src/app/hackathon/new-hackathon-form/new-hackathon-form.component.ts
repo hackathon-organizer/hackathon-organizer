@@ -35,13 +35,11 @@ export class NewHackathonFormComponent implements OnInit {
 
   createHackathon() {
 
-    // console.log(this.userService.user.id);
-
     const hackathon: HackathonRequest = {
       name: this.newHackathonForm.get('hackathonName')?.value,
       description: this.newHackathonForm.get('description')?.value,
       organizerInfo: this.newHackathonForm.get('organizerInfo')?.value,
-      ownerId: this.userService.getUserId(),
+      ownerId: Number(localStorage.getItem("userId")),
       eventStartDate: this.newHackathonForm.get('startDate')?.value,
       eventEndDate: this.newHackathonForm.get('endDate')?.value
     };

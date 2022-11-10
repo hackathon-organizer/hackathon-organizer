@@ -64,7 +64,7 @@ export class TeamService {
       return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
 
-  getTeamSuggestions(userTags: number[]): Observable<Team[]> {
-     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions", userTags);
+  getTeamSuggestions(userTags: number[], hackathonId: number): Observable<Team[]> {
+     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTags);
   }
 }

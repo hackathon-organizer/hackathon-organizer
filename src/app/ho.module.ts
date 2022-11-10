@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, ErrorHandler, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { HoRoutingModule } from './ho-routing.module';
@@ -15,6 +15,8 @@ import {TeamModule} from "./team/team.module";
 import { HomepageComponent } from './core/homepage/homepage.component';
 import {TeamRoutingModule} from "./team/team-routing.module";
 import {UserRoutingModule} from "./user/user-routing.module";
+import {GlobalErrorHandler} from "./core/services/toast-service/global-error-handler.service";
+import {ToastrModule} from "ngx-toastr";
 
 @NgModule({
   declarations: [
@@ -30,7 +32,8 @@ import {UserRoutingModule} from "./user/user-routing.module";
         HoRoutingModule,
         TeamModule,
         HackathonModule,
-        UserModule
+        UserModule,
+        ToastrModule.forRoot()
     ],
   providers: [
     {
@@ -38,7 +41,12 @@ import {UserRoutingModule} from "./user/user-routing.module";
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService],
-    }
+    },
+    {
+      // processes all errors
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
+    },
   ],
   bootstrap: [HoComponent]
 })

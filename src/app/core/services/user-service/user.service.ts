@@ -48,7 +48,7 @@ export class UserService {
 
   openWsConn(kcUserId: string) {
     const client = new Client({
-      brokerURL: 'ws://localhost:9090/hackathon-websocket?userId=' + kcUserId,
+      brokerURL: 'ws://localhost:9090/hackathon-websocket',
       debug: function (str) {
         console.log(str);
       },

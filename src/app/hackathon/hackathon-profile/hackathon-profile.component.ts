@@ -50,6 +50,6 @@ export class HackathonProfileComponent implements OnInit {
 
         const userTagsIds = user.tags.map(tag => tag.id);
 
-        this.teamService.getTeamSuggestions(userTagsIds).subscribe(suggestions => this.teamsSuggestions = suggestions);
+        this.teamService.getTeamSuggestions(userTagsIds, this.hcId).subscribe(suggestions => this.teamsSuggestions = suggestions);
   }
 }

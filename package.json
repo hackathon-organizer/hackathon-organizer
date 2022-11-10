@@ -23,6 +23,7 @@
     "dayjs": "^1.11.5",
     "keycloak-angular": "^12.1.0",
     "keycloak-js": "^19.0.1",
+    "ngx-toastr": "^15.2.1",
     "rxjs": "~7.4.0",
     "stompjs": "^2.3.3",
     "tslib": "^2.3.0",
