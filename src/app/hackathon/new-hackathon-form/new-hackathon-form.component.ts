@@ -16,21 +16,19 @@ export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
 
-  @ViewChild('startPicker') pickerStart: ElementRef | undefined;
-
   constructor(
     private formBuilder: FormBuilder,
     private hackathonService: HackathonService,
     private userService: UserService,
     private router: Router
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.newHackathonForm = this.formBuilder.group({
       hackathonName: ['', [Validators.required, Validators.minLength(10)]],
       description: ['', [Validators.required, Validators.minLength(15)]],
       organizerInfo: ['', [Validators.required, Validators.minLength(15)]],
-      // TODO add date validators
       startDate: ['', [Validators.required, this.dateValidator()]],
       endDate: ['', [Validators.required, this.dateValidator()]],
     }, {validators: this.groupDateValidator});
@@ -49,32 +47,31 @@ export class NewHackathonFormComponent implements OnInit {
 
     this.hackathonService.createHackathon(hackathon).subscribe(hackathonResponse => {
 
-    this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
-  });
+      this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
+    });
   }
-
 
 
   groupDateValidator(group: AbstractControl): ValidationErrors | null {
     const fromCtrl = group.get('startDate')!;
     const toCtrl = group.get('endDate')!;
 
-    return dayjs(fromCtrl.value).isAfter(dayjs(toCtrl.value)) ? { dateErrorMessage: 'Please provide correct event dates' } : null;
+    return dayjs(fromCtrl.value).isAfter(dayjs(toCtrl.value)) ? {dateErrorMessage: 'Please provide correct event dates'} : null;
   }
 
   dateValidator(): ValidatorFn {
 
-      return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): { [key: string]: any } | null => {
 
-        const today = new Date();
+      const today = new Date();
 
-        if (!(control && control.value)) {
-          return null;
-        }
-
-        return new Date(control.value) < today
-          ? {dateErrorMessage: 'You cannot use past dates'}
-          : null;
+      if (!(control && control.value)) {
+        return null;
       }
+
+      return new Date(control.value) < today
+        ? {dateErrorMessage: 'You cannot use past dates'}
+        : null;
+    }
   }
 }
