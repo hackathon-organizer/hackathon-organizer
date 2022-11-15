@@ -4,6 +4,7 @@ import { HackathonsComponent } from './hackathons/hackathons.component';
 import {HackathonRoutingModule} from "./hackathon-routing.module";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
+import {FlatpickrModule} from "angularx-flatpickr";
 
 @NgModule({
   declarations: [
@@ -13,11 +14,12 @@ import {RouterModule} from "@angular/router";
     HackathonsComponent,
     HackathonRoutingModule
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterModule
-  ]
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlatpickrModule
+    ]
 })
 export class HackathonModule { }

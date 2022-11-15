@@ -6,21 +6,33 @@ import {Client} from "@stomp/stompjs";
 import {UserResponseDto} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
-import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
+import {MentorScheduleEntry} from "../../../mentor/model/MentorScheduleEntry";
+import {NGXLogger} from "ngx-logger";
+import * as dayjs from 'dayjs';
+import {ScheduleEntryEvent} from "../../../user/model/ScheduleEntryEvent";
+import * as isBetween from 'dayjs/plugin/isBetween'
+import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
+import {MeetingNotification} from "../../../team/model/MeetingNotification";
+import {NotificationType} from "../../../user/model/NotificationType";
+import {Notification} from '../../../user/model/Notification';
+import {TeamService} from "../team-service/team.service";
+import {createLogErrorHandler} from "@angular/compiler-cli/ngcc/src/execution/tasks/completion";
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private userNotifications: BehaviorSubject<TeamInvitation[]> = new BehaviorSubject<TeamInvitation[]>([]);
+  private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
 
   user!: User;
 
   private keycloakUserId = "";
 
-  constructor(private http: HttpClient, private keycloakService: KeycloakService) {
+  constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger, private teamService: TeamService) {
+    dayjs.extend(isBetween);
   }
 
   findUsersByUsername(username: string): Observable<UserResponseDto[]> {
@@ -40,7 +52,7 @@ export class UserService {
 
       this.keycloakUserId = v!;
 
-      this.openWsConn(this.keycloakUserId);
+      // this.openWsConn(this.keycloakUserId);
 
       this.fetchUserData();
     });
@@ -87,7 +99,7 @@ export class UserService {
   public getKcId(): string {
 
     if (!this.keycloakUserId) {
-      console.log('Erorr')   ;
+      console.log('Erorr');
     }
 
     return this.keycloakUserId;
@@ -96,9 +108,10 @@ export class UserService {
   private fetchUserInvites() {
     this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
       console.log('invites');
-      console.log(userInvites) ;
+      console.log(userInvites);
+      userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
       this.userNotifications.next(userInvites);
-  });
+    });
   }
 
   private fetchUserData() {
@@ -107,7 +120,13 @@ export class UserService {
       this.user = userData;
       console.log(userData);
 
+      localStorage.setItem("userId", String(userData.id));
+      localStorage.setItem("username", userData.username);
+      localStorage.setItem("user", JSON.stringify(userData));
+
       this.fetchUserInvites();
+
+      this.sendUserScheduleNotification();
     });
   }
 
@@ -120,18 +139,104 @@ export class UserService {
   }
 
   getUserId(): number {
-     if (this.user.id) {
-       return this.user.id;
-     } else {
-       throw new Error("User not loaded yet!");
-     }
+    const userId = localStorage.getItem("userId");
+
+    if (userId) {
+      return +userId;
+    } else {
+      throw new Error("User not loaded yet!");
+    }
+
+  }
+
+  saveMentorSchedule(schedule: MentorScheduleEntry[]): Observable<any> {
+
+    this.logger.info("Saving user " + this.getUserId() + " schedule");
+    return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
+  }
+
+  getUserSchedule(): Observable<ScheduleEntryEvent[]> {
+
+    this.logger.info("Requesting user " + this.getUserId() + " schedule");
+    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule")
+  }
+
+  getUsersHackathonSchedule(): Observable<ScheduleEntryEvent[]> {
+
+    this.logger.info("Requesting users " + this.getUserId() + " hackathon schedule");
+    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
+  }
+
+  assignTeamToMeetingWithMentor(teamId: any): Observable<any> {
+
+    this.logger.info("Saving team meeting with mentor", teamId);
+    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule", teamId);
   }
 
   logout() {
     this.keycloakService.logout('http://localhost:4200').then((success) => {
-      console.log("--> log: logout success ", success );
+      console.log("--> log: logout success ", success);
     }).catch((error) => {
-      console.log("--> log: logout error ", error );
+      console.log("--> log: logout error ", error);
     });
+  }
+
+  private sendUserScheduleNotification(index = 0) {
+
+    // TODO if this.user is mentor...
+
+    if (this.user) {
+      this.getUserSchedulePlan().subscribe(schedule => {
+
+        console.log(schedule);
+        let meeting = schedule[index];
+
+        const meetingNotification: MeetingNotification = {
+          chatId: 0,
+          teamId: meeting.teamId,
+          notificationType: NotificationType.MEETING
+        } as MeetingNotification;
+
+        console.log(meetingNotification)
+
+        this.teamService.getTeamById(meeting.teamId).subscribe(team => {
+
+          meetingNotification.chatId = team.teamChatRoomId
+
+          let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
+          let meetingEnd = dayjs(meeting.sessionEnd);
+
+          const scheduleMonitorInterval = setInterval(() => {
+
+            if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
+
+              this.userNotifications.next(this.userNotifications.value.concat(meetingNotification));
+
+              meeting = schedule[++index];
+
+              if (meeting) {
+                this.sendUserScheduleNotification(index);
+              } else {
+                clearInterval(scheduleMonitorInterval);
+              }
+            }
+          }, 10000);
+
+          scheduleMonitorInterval;
+        });
+      });
+    }
+  }
+
+  getUserSchedulePlan(): Observable<any[]> {
+    return this.http.get<any[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule");
+  }
+
+  removeScheduleEntry(id: number) {
+    return this.http.delete("http://localhost:9090/api/v1/write/users/schedule/" + id);
+  }
+
+  updateUserScheduleEntry(id: number, obj: ScheduleEntrySession): Observable<any> {
+    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + id, obj)
   }
 }

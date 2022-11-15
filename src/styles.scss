@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @tailwind base;
+@import "../node_modules/angular-calendar/css/angular-calendar.css";
 
 .ho-section {
   @apply rounded-2xl mb-6;
@@ -10,7 +11,19 @@
 }
 
 .ho-input-primary {
-  @apply input input-bordered input-primary w-full max-w-xs bg-gray-700;
+  @apply input input-bordered input-primary w-full max-w-lg bg-gray-700;
+}
+
+.ho-textarea-primary {
+  @apply textarea textarea-primary bg-gray-700 w-full max-w-lg;
+}
+
+.is-invalid {
+  @apply input-error;
+}
+
+.is-invalid-textarea {
+  @apply textarea-error;
 }
 
 @tailwind components;

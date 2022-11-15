@@ -1,0 +1,179 @@
+<div class="row text-center">
+  <div class="col-md-4">
+    <div class="btn-group">
+      <div
+        class="btn btn-primary"
+        mwlCalendarPreviousView
+        [view]="view"
+        [(viewDate)]="viewDate"
+      >
+        Previous
+      </div>
+      <div
+        class="btn btn-outline-secondary"
+        mwlCalendarToday
+        [(viewDate)]="viewDate"
+      >
+        Today
+      </div>
+      <div
+        class="btn btn-primary"
+        mwlCalendarNextView
+        [view]="view"
+        [(viewDate)]="viewDate"
+      >
+        Next
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+  </div>
+</div>
+<br/>
+
+<label for="modal" class="btn btn-primary modal-button">Add</label>
+
+<input
+  class="form-control"
+  type="text"
+  mwlFlatpickr
+
+  (ngModelChange)="refresh.next()"
+  [altInput]="true"
+  [convertModelValue]="true"
+  [enableTime]="true"
+  dateFormat="Y-m-dTH:i"
+  altFormat="F j, Y H:i"
+  placeholder="Not set"
+/>
+
+  <mwl-calendar-day-view
+    [viewDate]="viewDate"
+    [events]="events"
+    [refresh]="refresh"
+    [eventTemplate]="hoDayCell"
+    (eventTimesChanged)="eventTimesChanged($event)"
+  >
+  </mwl-calendar-day-view>
+
+<input type="checkbox" id="modal" class="modal-toggle"/>
+<div class="modal">
+  <div class="modal-box w-11/12 max-w-6xl">
+
+    <button class="btn btn-primary" (click)="addEvent()">Add new</button>
+
+
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>Color</th>
+          <th>Starts at</th>
+          <th>Ends at</th>
+          <th>Remove</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let event of events">
+          <td>
+            <input
+              type="color"
+              [(ngModel)]="event.color!.secondary"
+              (change)="refresh.next()"
+            />
+          </td>
+          <td>
+            <input
+              class="form-control"
+              type="text"
+              mwlFlatpickr
+              [(ngModel)]="event.start"
+              (ngModelChange)="refresh.next()"
+              [altInput]="true"
+              [convertModelValue]="true"
+              [enableTime]="true"
+              dateFormat="Y-m-dTH:i"
+              altFormat="F j, Y H:i"
+              placeholder="Not set"
+            />
+          </td>
+          <td>
+            <input
+              class="form-control"
+              type="text"
+              mwlFlatpickr
+              [(ngModel)]="event.end"
+              (ngModelChange)="refresh.next()"
+              [altInput]="true"
+              [convertModelValue]="true"
+              [enableTime]="true"
+              dateFormat="Y-m-dTH:i"
+              altFormat="F j, Y H:i"
+              placeholder="Not set"
+            />
+          </td>
+          <td>
+            <button class="btn btn-danger" (click)="deleteEvent(event)">
+              Delete
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-action">
+      <label (click)="saveEvents()" for="modal" class="btn">Save</label>
+    </div>
+
+  </div>
+</div>
+
+
+<ng-template #hoDayCell let-weekEvent="weekEvent"
+             let-tooltipPlacement="tooltipPlacement"
+             let-eventClicked="eventClicked"
+             let-tooltipTemplate="tooltipTemplate"
+             let-tooltipAppendToBody="tooltipAppendToBody"
+             let-tooltipDisabled="tooltipDisabled"
+             let-tooltipDelay="tooltipDelay"
+             let-daysInWeek="daysInWeek">
+
+  <div class="cal-event" [ngStyle]="{
+          color: weekEvent.event.color?.secondaryText,
+          backgroundColor: weekEvent.event.color?.secondary,
+          borderColor: weekEvent.event.color?.primary
+        }"
+       [mwlCalendarTooltip]="
+          !tooltipDisabled
+            ? (weekEvent.event.title
+              | calendarEventTitle
+                : (daysInWeek === 1 ? 'dayTooltip' : 'weekTooltip')
+                : weekEvent.tempEvent || weekEvent.event)
+            : '' "
+       [tooltipPlacement]="tooltipPlacement"
+       [tooltipEvent]="weekEvent.tempEvent || weekEvent.event"
+       [tooltipTemplate]="tooltipTemplate"
+       [tooltipAppendToBody]="tooltipAppendToBody"
+       [tooltipDelay]="tooltipDelay"
+       (mwlClick)="eventClicked.emit({ sourceEvent: $event })"
+       (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
+       tabindex="0"
+       role="application"
+       [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'">
+
+    <div class="flex flex-col justify-center items-center w-full pt-48">
+
+    <h5 class="text-center text-5xl">{{ weekEvent.event.title }}</h5>
+
+    <div class="text-3xl my-12">
+      <span *ngIf="weekEvent.event.isAvailable; else notAvailable" class="text-success">AVALIBLE</span>
+      <ng-template #notAvailable class="text-error">NOT AVALIBLE</ng-template>
+    </div>
+
+    <button class="btn btn-primary w-3/5" (click)="assignTeam(weekEvent.event)">Assign</button>
+    </div>
+  </div>
+</ng-template>

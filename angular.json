@@ -31,8 +31,11 @@
               "src/assets"
             ],
             "styles": [
+
               "src/styles.scss",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/angular-calendar/css/angular-calendar.css",
+              "node_modules/flatpickr/dist/flatpickr.css",
             ],
             "scripts": []
           },
@@ -101,7 +104,9 @@
             ],
             "styles": [
               "src/styles.scss",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/angular-calendar/css/angular-calendar.css",
+              "node_modules/flatpickr/dist/flatpickr.css",
             ],
             "scripts": []
           }

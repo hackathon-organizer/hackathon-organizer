@@ -23,20 +23,21 @@
 
       <div class="mt-8" id="about">
         <h4>About:</h4>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.
-        <br/>
-          {{ team.description }}
-        </p>
+        <p>{{ team.description }}</p>
       </div>
 
+      <div class="mx-auto mt-4">
+      <button class="btn btn-accent w-36 self-center m-5" *ngIf="isOwner">Edit team</button>
       <a routerLink="/team/invite"><button class="btn btn-success w-36 self-center m-5" >Invite user</button></a>
       <a *ngIf="team.isOpen" routerLink="/"><button (click)="joinToTeam()" class="btn btn-success w-36 self-center m-5" >Join to team</button></a>
+      <a routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat"><button class="btn btn-accent w-36 self-center m-5">Join team chat</button></a>
+      </div>
 
     </div>
 
     <div class="col-span-2">
       <div class="flex flex-col">
-        <h4 class="text-3xl font-bold mb-5">User tags</h4>
+        <h4 class="text-3xl font-bold mb-5">Team tags</h4>
 
         <div class="flex flex-wrap">
           <!--        TODO use checkbox later -->
