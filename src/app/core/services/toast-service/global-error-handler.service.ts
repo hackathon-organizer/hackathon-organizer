@@ -21,7 +21,7 @@ export class GlobalErrorHandler extends ErrorHandler {
 
     if (error instanceof HttpErrorResponse) {
 
-      if (error.status === 0) {
+      if (error.status === 0 || error.status === 500) {
         errorMessage = 'No connection with server. Please try again later.';
       } else {
         errorMessage = `Server returned code: ${error.status}, error message is: ${error.error.message}`;

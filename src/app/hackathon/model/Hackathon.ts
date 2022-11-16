@@ -6,3 +6,10 @@ export interface HackathonDto {
   eventStartDate: Date | string;
   eventEndDate: Date | string;
 }
+
+export interface HackathonResponse {
+  content: HackathonDto[];
+  number: number;
+  totalElements: number;
+  totalPages: number;
+}

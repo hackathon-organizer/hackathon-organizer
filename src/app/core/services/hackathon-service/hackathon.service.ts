@@ -4,7 +4,7 @@ import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {catchError, Observable, of} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
-import {HackathonDto} from "../../../hackathon/model/Hackathon";
+import {HackathonDto, HackathonResponse} from "../../../hackathon/model/Hackathon";
 import {ToastrService} from "ngx-toastr";
 import {GlobalErrorHandler} from "../toast-service/global-error-handler.service";
 
@@ -34,9 +34,9 @@ export class HackathonService {
       ));
   }
 
-  getAllHackathons():Observable<HackathonDto[]> {
+  getAllHackathons(pageNumber: number):Observable<HackathonResponse> {
 
-    return this.http.get<HackathonDto[]>(this.BASE_URL_READ).pipe(
+    return this.http.get<HackathonResponse>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10").pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }

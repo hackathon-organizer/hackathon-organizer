@@ -1,10 +1,12 @@
-import { NgModule } from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HackathonsComponent } from './hackathons/hackathons.component';
 import {HackathonRoutingModule} from "./hackathon-routing.module";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
 import {FlatpickrModule} from "angularx-flatpickr";
+import {NgxPaginationModule} from "ngx-pagination";
+import {SharedModule} from "../shared/shared.module";
 
 @NgModule({
   declarations: [
@@ -19,7 +21,10 @@ import {FlatpickrModule} from "angularx-flatpickr";
         ReactiveFormsModule,
         FormsModule,
         RouterModule,
-        FlatpickrModule
-    ]
+        FlatpickrModule,
+        NgxPaginationModule,
+        SharedModule
+    ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class HackathonModule { }
