@@ -1,32 +1,45 @@
 <section id="hackathon-profile">
 
   <div class="flex justify-center items-center flex-col">
-    <h1 class="text-7xl font-bold mb-8">{{ hcTitle }}</h1>
+    <h1 class="text-7xl font-bold mb-8">{{ hackathonTitle }}</h1>
 
     <img src="https://via.placeholder.com/800x400">
   </div>
 
-  <div class="mt-12 flex justify-center">
+  <div class="mt-12 flex justify-center space-x-5">
 
-    <a routerLink="/hackathon/{{ hcId }}/team/new">
-      <button class="btn">Create team</button>
+    <a routerLink="/hackathon/{{ hackathonId }}/team/new">
+      <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
+    <button *ngIf="hackathon.isActive" (click)="joinHackathon()" class="btn btn-outline btn-accent">Join hackathon</button>
 
-    <a class="m-12">
-      <button (click)="joinHackathon()" class="btn">Join hackathon</button>
+    <a routerLink="/hackathon/{{ hackathonId }}/teams">
+      <button class="btn btn-outline btn-info">Show teams</button>
     </a>
 
-    <a routerLink="/hackathon/{{ hcId }}/teams"><button class="btn">Show teams</button></a>
-
-
-    <a routerLink="/hackathon/{{ hcId }}/schedule" [queryParams]="{hackathonView: 1}"><button class="btn">Show schedule</button></a>
+    <a routerLink="/hackathon/{{ hackathonId }}/schedule" [queryParams]="{hackathonView: 1}">
+      <button class="btn btn-outline btn-secondary">Show schedule</button>
+    </a>
 
   </div>
 
-  <div id="hackathon-description">
+  <div id="hackathon-description" class="mt-4">
+
+    <h4 class="text-3xl">Description:</h4>
+
     <article class="mx-4">
       <p>{{ hackathon.description }}</p>
     </article>
   </div>
+
+<!--  <div class="my-5" id="teams-suggestions">-->
+
+<!--    <span>Team recommendations:</span>-->
+
+<!--      <ul>-->
+<!--        <li *ngFor="let team of teamsSuggestions">{{ team.name }}</li>-->
+<!--      </ul>-->
+
+<!--  </div>-->
 </section>

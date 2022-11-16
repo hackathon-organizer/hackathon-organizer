@@ -12,6 +12,10 @@ import * as dayjs from 'dayjs';
 import {ScheduleEntryEvent} from "../../../user/model/ScheduleEntryEvent";
 import * as isBetween from 'dayjs/plugin/isBetween'
 import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
+import {MeetingNotification} from "../../../team/model/MeetingNotification";
+import {NotificationType} from "../../../user/model/NotificationType";
+import {Notification} from '../../../user/model/Notification';
+import {TeamService} from "../team-service/team.service";
 
 
 @Injectable({
@@ -19,7 +23,7 @@ import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
 })
 export class UserService {
 
-  private userNotifications: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);
+  private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
 
   user!: User;
@@ -29,7 +33,7 @@ export class UserService {
 
   private keycloakUserId = "";
 
-  constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger) {
+  constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger, private teamService: TeamService) {
     dayjs.extend(isBetween);
   }
 
@@ -58,7 +62,7 @@ export class UserService {
 
   openWsConn(kcUserId: string) {
     const client = new Client({
-      brokerURL: 'ws://localhost:9090/hackathon-websocket?userId=' + kcUserId,
+      brokerURL: 'ws://localhost:9090/hackathon-websocket',
       debug: function (str) {
         console.log(str);
       },
@@ -107,6 +111,7 @@ export class UserService {
     this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
       console.log('invites');
       console.log(userInvites);
+      userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
       this.userNotifications.next(userInvites);
     });
   }
@@ -125,7 +130,7 @@ export class UserService {
 
       this.fetchUserInvites();
 
-      this.startUserScheduleMonitoring();
+      this.sendUserScheduleNotification();
     });
   }
 
@@ -180,7 +185,6 @@ export class UserService {
     });
   }
 
-
   get userHackathonId(): number {
     if (this.user.currentHackathonId) {
       return this.user.currentHackathonId;
@@ -197,33 +201,50 @@ export class UserService {
     }
   }
 
-  private startUserScheduleMonitoring() {
-    let index = 0;
+
+  private sendUserScheduleNotification(index = 0) {
 
     // TODO if this.user is mentor...
 
     if (this.user) {
       this.getUserSchedulePlan().subscribe(schedule => {
 
-        let meetingStart = dayjs(schedule[index].sessionStart).subtract(5, "minutes");
-        let meetingEnd = dayjs(schedule[index].sessionEnd);
+        console.log(schedule);
+        let meeting = schedule[index];
 
-        const scheduleMonitorInterval = setInterval(() => {
+        const meetingNotification: MeetingNotification = {
+          chatId: 0,
+          teamId: meeting.teamId,
+          notificationType: NotificationType.MEETING
+        } as MeetingNotification;
 
-          if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
+        console.log(meetingNotification)
 
-            this.userNotifications.next(this.userNotifications.value.concat(schedule[index].id));
-            index++;
+        this.teamService.getTeamById(meeting.teamId).subscribe(team => {
 
-            if (schedule[index]) {
-              meetingStart = dayjs(schedule[index].sessionStart).subtract(5, "minutes");
-            } else {
-              clearInterval(scheduleMonitorInterval);
+          meetingNotification.chatId = team.teamChatRoomId
+
+          let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
+          let meetingEnd = dayjs(meeting.sessionEnd);
+
+          const scheduleMonitorInterval = setInterval(() => {
+
+            if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
+
+              this.userNotifications.next(this.userNotifications.value.concat(meetingNotification));
+
+              meeting = schedule[++index];
+
+              if (meeting) {
+                this.sendUserScheduleNotification(index);
+              } else {
+                clearInterval(scheduleMonitorInterval);
+              }
             }
-          }
-        }, 5000);
+          }, 10000);
 
-        scheduleMonitorInterval;
+          scheduleMonitorInterval;
+        });
       });
     }
   }

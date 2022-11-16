@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -6,20 +6,21 @@ import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest} from "../model/TeamRequest";
 import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
 import {Subscription} from "rxjs";
+import {UserResponseDto} from "../../user/model/UserResponseDto";
+import {Utils} from "../../shared/Utils";
 
 @Component({
   selector: 'ho-new-team-form',
   templateUrl: './new-team-form.component.html',
-  styleUrls: ['./new-team-form.component.scss']
+  styleUrls: []
 })
-export class NewTeamFormComponent implements OnInit {
+export class NewTeamFormComponent implements OnInit, OnDestroy {
 
   private routeSubscription: Subscription = new Subscription();
 
   newTeamForm!: FormGroup;
   hackathon!: HackathonRequest;
   tags: Tag[] = [];
-  errorMsg = '';
   hackathonId: number = 0;
 
   constructor(
@@ -38,18 +39,20 @@ export class NewTeamFormComponent implements OnInit {
     });
 
     this.newTeamForm = this.formBuilder.group({
-      teamName: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(3)]],
+      teamName: ['', {
+        validators: [Validators.required, Validators.minLength(5)], updateOn: 'blur' }],
+      description: ['', {
+        validators: [Validators.required, Validators.minLength(15)], updateOn: 'blur'}],
     });
 
     this.teamService.getAvailableTags().subscribe(result => {
-      this.tags = result;
 
+      this.tags = result;
       this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
     });
   }
 
-  buildTagsFormGroup(tags: Tag[], selectedTagsIds: number[] = []): FormGroup {
+  buildTagsFormGroup(tags: Tag[]): FormGroup {
     let group = this.formBuilder.group({});
 
     tags.forEach(tag => {
@@ -61,21 +64,30 @@ export class NewTeamFormComponent implements OnInit {
 
   createTeam() {
 
-    const team: TeamRequest = {
-      ownerId: this.userService.getUserId(),
-      hackathonId: this.hackathonId,
-      name: this.newTeamForm.get('teamName')?.value,
-      description: this.newTeamForm.get('description')?.value,
-      tags: this.tags,
-    };
+    const user = Utils.currentUserFromLocalStorage;
 
-    this.teamService.createTeam(team).subscribe(res => {
+    if (this.hackathonId && user) {
 
-      this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + res.id);
-    });
+      const team: TeamRequest = {
+        ownerId: user.id,
+        hackathonId: this.hackathonId,
+        name: this.newTeamForm.get('teamName')?.value,
+        description: this.newTeamForm.get('description')?.value,
+        tags: this.tags,
+      };
+
+      this.teamService.createTeam(team).subscribe(createdTeam => {
+
+        this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
+      });
+    }
   }
 
   markTag(index: number) {
     this.tags[index].isSelected = !this.tags[index].isSelected;
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription.unsubscribe();
   }
 }

@@ -1,5 +1,6 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, ErrorHandler, NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
+
 
 import {HoRoutingModule} from './ho-routing.module';
 import {MenuComponent} from './core/menu/menu.component';
@@ -17,7 +18,9 @@ import {CustomDateFormatter, MentorModule} from "./mentor/mentor.module";
 import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calendar';
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
 import {FlatpickrModule} from "angularx-flatpickr";
-
+import {ToastrModule} from "ngx-toastr";
+import {GlobalErrorHandler} from "./core/services/toast-service/global-error-handler.service";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
   declarations: [
@@ -28,6 +31,7 @@ import {FlatpickrModule} from "angularx-flatpickr";
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     KeycloakAngularModule,
     HoRoutingModule,
@@ -49,14 +53,20 @@ import {FlatpickrModule} from "angularx-flatpickr";
         useClass: CustomDateFormatter
       }
     }),
-    FlatpickrModule.forRoot()
+    FlatpickrModule.forRoot(),
+    ToastrModule.forRoot()
   ],
+
   providers: [
     {
       provide: APP_INITIALIZER,
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService],
+    },
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
     },
   ],
   bootstrap: [HoComponent]

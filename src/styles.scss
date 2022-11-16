@@ -6,8 +6,24 @@
   @apply rounded-2xl mb-6;
 }
 
-.is-invalid {
+.error-message {
+   @apply text-error;
+}
 
+.ho-input-primary {
+  @apply input input-bordered input-primary w-full max-w-lg bg-gray-700;
+}
+
+.ho-textarea-primary {
+  @apply textarea textarea-primary bg-gray-700 w-full max-w-lg;
+}
+
+.is-invalid {
+  @apply input-error;
+}
+
+.is-invalid-textarea {
+  @apply textarea-error;
 }
 
 @tailwind components;

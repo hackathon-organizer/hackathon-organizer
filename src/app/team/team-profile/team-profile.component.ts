@@ -1,12 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
-import {Client} from "@stomp/stompjs";
-import {KeycloakService} from "keycloak-angular";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ActivatedRoute} from "@angular/router";
 import {Observable, Subscription} from "rxjs";
 import {Team, TeamResponse} from "../model/TeamRequest";
-import {log} from "util";
 
 @Component({
   selector: 'ho-team-profile',

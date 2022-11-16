@@ -119,8 +119,6 @@ export class MentorScheduleComponent {
         };
       }
 
-      console.log(event)
-
       return iEvent;
     });
   }
@@ -162,24 +160,24 @@ export class MentorScheduleComponent {
       this.userService.saveMentorSchedule(scheduleEntries).subscribe();
   }
 
-  private mapToMentorSchedule(x: CalendarEvent): ScheduleEntryEvent {
+  private mapToMentorSchedule(entry: CalendarEvent): ScheduleEntryEvent {
     return {
-      id: x.id,
-      sessionStart: x.start,
-      sessionEnd: x.end,
+      id: entry.id,
+      sessionStart: entry.start,
+      sessionEnd: entry.end,
       userId: this.userService.getUserId(),
       hackathonId: 1,
       info: "test"
     } as ScheduleEntryEvent;
   }
 
-  private mapToCalendarEvent(x: ScheduleEntryEvent): ScheduleEntryEvent {
+  private mapToCalendarEvent(entry: ScheduleEntryEvent): ScheduleEntryEvent {
     return {
-      id: x.id,
+      id: entry.id,
       title: "John Doe",
-      start: new Date(x.sessionStart),
-      end: new Date(x.sessionEnd),
-      color: x.entryColor ? x.entryColor : colors.main,
+      start: new Date(entry.sessionStart),
+      end: new Date(entry.sessionEnd),
+      color: entry.entryColor ? entry.entryColor : colors.main,
       draggable: true,
       resizable: {
         beforeStart: true,
@@ -199,7 +197,7 @@ export class MentorScheduleComponent {
       this.teamService.isUserTeamOwner(teamId, this.userService.getUserId()).subscribe(isOwner => {
 
          if (isOwner) {
-           this.userService.assignTeamToMeetingWithMentor({teamOwnerId: currentUser.id, entryId: 1, teamId: teamId}).subscribe((isAvailable) => {
+           this.userService.assignTeamToMeetingWithMentor({teamOwnerId: currentUser.id, entryId: event.id, teamId: teamId}).subscribe((isAvailable) => {
 
              event.isAvailable = isAvailable;
 
