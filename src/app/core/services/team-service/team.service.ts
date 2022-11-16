@@ -68,7 +68,7 @@ export class TeamService {
     return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners?userId=' + userId);
   }
 
-  getTeamSuggestions(userTags: number[], hackathonId: number): Observable<Team[]> {
+  getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<Team[]> {
      return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTags);
   }
 }
