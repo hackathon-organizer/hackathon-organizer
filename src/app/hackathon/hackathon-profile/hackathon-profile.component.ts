@@ -7,6 +7,8 @@ import {TeamService} from "../../core/services/team-service/team.service";
 import {Team} from "../../team/model/TeamRequest";
 import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {NGXLogger} from "ngx-logger";
+import {Utils} from "../../shared/Utils";
+import {HackathonRequest} from "../model/HackathonRequest";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -16,9 +18,6 @@ import {NGXLogger} from "ngx-logger";
 export class HackathonProfileComponent implements OnInit {
 
   private routeSubscription: Subscription = new Subscription();
-
-  hackathonTitle: string = '';
-  hackathonId: number = 0;
 
   hackathon!: HackathonDto;
 
@@ -30,16 +29,26 @@ export class HackathonProfileComponent implements OnInit {
     this.routeSubscription = this.route.params.subscribe(params => {
 
       this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hackathon => {
-        this.hackathonTitle = hackathon.name;
-        this.hackathonId = hackathon.id;
+
+        console.log(this.hackathon)
+
         this.hackathon = hackathon;
       });
     });
   }
 
   joinHackathon() {
-     this.hackathonService.addUserToHackathon(this.hackathonId).subscribe(
-       () => this.logger.info("User added to hackathon" + this.hackathonId));
+     this.hackathonService.addUserToHackathon(this.hackathon.id).subscribe(
+       () => {
+         this.logger.info("User added to hackathon " + this.hackathon.name);
+
+         const currentUser: UserResponseDto = Utils.currentUserFromLocalStorage;
+         currentUser.currentHackathonId = this.hackathon.id;
+
+         Utils.updateUserInLocalStorage(currentUser);
+
+
+       });
   }
 
   // getUserTeamSuggestions() {
@@ -54,4 +63,16 @@ export class HackathonProfileComponent implements OnInit {
   //           this.logger.info("Team suggestions downloaded successfully");
   //         });
   // }
+  isUserHackathonParticipant(): boolean {
+
+    const currentUser = Utils.currentUserFromLocalStorage;
+
+    if (currentUser.currentHackathonId === this.hackathon.id) {
+
+      return (currentUser.currentHackathonId === this.hackathon.id);
+    } else {
+
+      return false;
+    }
+  }
 }

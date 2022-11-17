@@ -1,21 +1,28 @@
 <section id="hackathon-teams">
 
-  <h3 class="text-3xl text-center font-bold mb-5">Teams:</h3>
+  <h3 class="text-center text-5xl mb-8">Browse teams</h3>
 
-  <div class="overflow-x-auto w-full">
-    <table class="table w-full">
-      <!-- head -->
+  <div class="overflow-x-auto w-full min-h-screen">
+
+    <ng-container *ngIf="loading">
+      <img class="mx-auto mt-36" src="assets/spinner.svg" alt="Loading spinner"/>
+    </ng-container>
+
+    <table *ngIf="!loading" class="table w-full">
       <thead>
       <tr>
-        <th></th>
+        <th>Num</th>
         <th>Name</th>
         <th>Description</th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      <!-- row 1 -->
-      <tr *ngFor="let team of teams">
+      <tr *ngFor="let team of teams | paginate: paginationConfig; index as i;">
+        <th>
+          <span *ngIf="currentPageNumber==0">{{(i+1)}}</span>
+          <span *ngIf="currentPageNumber>0">{{((currentPageNumber-1)*10)+(i+1)}}</span>
+        </th>
         <th>
           {{ team.id }}
         </th>
@@ -36,7 +43,8 @@
         </th>
       </tr>
       </tbody>
-
     </table>
   </div>
+
+  <ho-pagination [config]="paginationConfig" (pageChangeEvent)="onPageChange($event)"></ho-pagination>
 </section>

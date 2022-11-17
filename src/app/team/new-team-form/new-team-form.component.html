@@ -39,7 +39,7 @@
         </div>
         </div>
 
-        <input [disabled]="!newTeamForm.valid" type="submit" class="btn btn-primary" value="Create">
+        <input [disabled]="!newTeamForm.valid" type="submit" class="btn btn-primary" [value]="editMode ? 'Save' : 'Create'">
       </form>
 
     </div>

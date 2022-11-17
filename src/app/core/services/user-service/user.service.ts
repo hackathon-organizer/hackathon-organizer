@@ -107,8 +107,9 @@ export class UserService {
     return this.keycloakUserId;
   }
 
+  // TODO move to team service
   private fetchUserInvites() {
-    this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invites/' + this.user.id).subscribe(userInvites => {
+    this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invitations/' + this.user.id).subscribe(userInvites => {
       console.log('invites');
       console.log(userInvites);
       userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
@@ -118,7 +119,7 @@ export class UserService {
 
   private fetchUserData() {
 
-    this.http.get<User>('http://localhost:9090/api/v1/read/users/kc/' + this.getKcId()).subscribe(userData => {
+    this.http.get<User>('http://localhost:9090/api/v1/read/users/keycloak/' + this.getKcId()).subscribe(userData => {
       this.user = userData;
       console.log(userData);
 
@@ -259,5 +260,9 @@ export class UserService {
 
   updateUserScheduleEntry(id: number, obj: ScheduleEntrySession): Observable<any> {
     return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + id, obj)
+  }
+
+  getMembersByTeamId(teamId: number): Observable<UserResponseDto[]> {
+    return this.http.get<UserResponseDto[]>("http://localhost:9090/api/v1/read/users/membership?teamId=" + teamId);
   }
 }

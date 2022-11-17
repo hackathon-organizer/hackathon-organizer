@@ -12,4 +12,8 @@ export class Utils {
         throw new Error("Can't obtain user data from local storage. Try refreshing the page.");
       }
   }
+
+  public static updateUserInLocalStorage(user: UserResponseDto): void {
+      localStorage.setItem("user", JSON.stringify(user));
+  }
 }

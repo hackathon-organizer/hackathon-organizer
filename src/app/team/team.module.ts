@@ -6,6 +6,7 @@ import {SharedModule} from "../shared/shared.module";
 import {TeamRoutingModule} from "./team-routing.module";
 import {Router, RouterModule} from "@angular/router";
 import {TeamChatComponent} from './team-chat/team-chat.component';
+import {NgxPaginationModule} from "ngx-pagination";
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import {TeamChatComponent} from './team-chat/team-chat.component';
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
-    RouterModule
+    RouterModule,
+    NgxPaginationModule
   ]
 })
 export class TeamModule {

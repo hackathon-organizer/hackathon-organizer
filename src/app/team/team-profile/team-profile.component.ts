@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {Observable, Subscription} from "rxjs";
 import {Team, TeamResponse} from "../model/TeamRequest";
+import {UserResponseDto} from "../../user/model/UserResponseDto";
 
 @Component({
   selector: 'ho-team-profile',
@@ -18,9 +19,13 @@ export class TeamProfileComponent implements OnInit {
   hackathonId: number = 0;
   teamId: number = 0;
   team!: Team;
+  teamMembers: UserResponseDto[] = [];
+
+  editMode = false;
 
 
-  constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute) {
+  constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute,
+              private router: Router) {
   }
 
   ngOnInit(): void {
@@ -32,6 +37,8 @@ export class TeamProfileComponent implements OnInit {
 
     this.teamService.getTeamById(this.teamId).subscribe(team => {
       this.team = team;
+
+      this.getTeamMembers();
     });
   }
 
@@ -49,7 +56,15 @@ export class TeamProfileComponent implements OnInit {
     });
   }
 
+  getTeamMembers() {
+    return this.userService.getMembersByTeamId(this.teamId).subscribe(members => this.teamMembers = members);
+  }
+
   get isOwner() {
     return true;
+  }
+
+  redirectToTeamEdit() {
+     this.router.navigate(["/hackathon/1/team"], {queryParams: {edit: true, teamId: this.teamId}});
   }
 }

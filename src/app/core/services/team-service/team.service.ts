@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {catchError, map, Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
@@ -47,8 +47,8 @@ export class TeamService {
     });
   }
 
-  createTeam(team: TeamRequest): Observable<TeamResponse> {
-    return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
+  createTeam(team: TeamRequest): Observable<Team> {
+    return this.http.post<Team>('http://localhost:9090/api/v1/write/teams', team);
   }
 
   getAvailableTags(): Observable<Tag[]> {
@@ -74,5 +74,13 @@ export class TeamService {
 
   getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<Team[]> {
      return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTags);
+  }
+
+  getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponse> {
+
+    return this.http.get<TeamResponse>(this.BASE_URL_READ + "?hackathonId=" + hackathonId + "&page=" + pageNumber + "&size=10") ;
+      //.pipe(
+      // catchError((error) => this.errorHandler.handleError(error)
+      // ));
   }
 }

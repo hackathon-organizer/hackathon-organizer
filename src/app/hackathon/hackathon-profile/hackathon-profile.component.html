@@ -1,24 +1,25 @@
 <section id="hackathon-profile">
 
   <div class="flex justify-center items-center flex-col">
-    <h1 class="text-7xl font-bold mb-8">{{ hackathonTitle }}</h1>
+    <h1 class="text-7xl font-bold mb-8">{{ hackathon.name }}</h1>
 
     <img src="https://via.placeholder.com/800x400">
   </div>
 
   <div class="mt-12 flex justify-center space-x-5">
 
-    <a routerLink="/hackathon/{{ hackathonId }}/team/new">
+    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
-    <button *ngIf="hackathon.isActive" (click)="joinHackathon()" class="btn btn-outline btn-accent">Join hackathon</button>
+    <button *ngIf="hackathon.isActive && !isUserHackathonParticipant()" (click)="joinHackathon()"
+            class="btn btn-outline btn-accent">Join hackathon</button>
 
-    <a routerLink="/hackathon/{{ hackathonId }}/teams">
+    <a routerLink="/hackathon/{{ hackathon.id }}/teams">
       <button class="btn btn-outline btn-info">Show teams</button>
     </a>
 
-    <a routerLink="/hackathon/{{ hackathonId }}/schedule" [queryParams]="{hackathonView: 1}">
+    <a routerLink="/hackathon/{{ hackathon.id }}/schedule" [queryParams]="{hackathonView: 1}">
       <button class="btn btn-outline btn-secondary">Show schedule</button>
     </a>
 

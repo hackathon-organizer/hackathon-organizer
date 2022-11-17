@@ -19,6 +19,9 @@ export class GlobalErrorHandler extends ErrorHandler {
   public override handleError(error: HttpErrorResponse | Error) {
     let errorMessage = '';
 
+    //TODO remove it
+    console.error(error);
+
     if (error instanceof HttpErrorResponse) {
 
       if (error.status === 0 || error.status === 500) {

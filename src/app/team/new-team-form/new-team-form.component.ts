@@ -22,6 +22,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
   hackathon!: HackathonRequest;
   tags: Tag[] = [];
   hackathonId: number = 0;
+  editMode = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -36,6 +37,10 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.params.subscribe(params => {
 
      this.hackathonId = params['id'];
+
+     if (params['edit']) {
+         this.loadFromData(params['teamId']);
+     }
     });
 
     this.newTeamForm = this.formBuilder.group({
@@ -81,6 +86,16 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
       });
     }
+  }
+
+  loadFromData(teamId: number) {
+     this.teamService.getTeamById(teamId).subscribe(team => {
+
+       this.newTeamForm.get('teamName')?.patchValue(team.name);
+       this.newTeamForm.get('description')?.patchValue(team.name);
+
+
+     })
   }
 
   markTag(index: number) {

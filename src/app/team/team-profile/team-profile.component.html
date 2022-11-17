@@ -1,7 +1,3 @@
-
-
-<router-outlet></router-outlet>
-
 <section id="team-profile">
 
   <div class="grid grid-cols-2 gap-4">
@@ -10,7 +6,7 @@
 
       <div class="avatar">
         <div class="w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img src="https://placeimg.com/300/300/people"  alt="profile image"/>
+          <img src="https://placeimg.com/300/300/people" alt="profile image"/>
         </div>
       </div>
 
@@ -19,60 +15,69 @@
 
     <div id="user-data" class="flex flex-col text-2xl">
 
-      <h4 class="mt-8">Team name: {{ team.name }}</h4>
+      <span class="mt-8 text-3xl">Team: {{ team.name }}</span>
 
-      <div class="mt-8" id="about">
+      <div class="mt-8 text-xl" id="about">
         <h4>About:</h4>
         <p>{{ team.description }}</p>
       </div>
 
-      <div class="mx-auto mt-4">
-      <button class="btn btn-accent w-36 self-center m-5" *ngIf="isOwner">Edit team</button>
-      <a routerLink="/team/invite"><button class="btn btn-success w-36 self-center m-5" >Invite user</button></a>
-      <a *ngIf="team.isOpen" routerLink="/"><button (click)="joinToTeam()" class="btn btn-success w-36 self-center m-5" >Join to team</button></a>
-      <a routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat"><button class="btn btn-accent w-36 self-center m-5">Join team chat</button></a>
+      <div class="mt-10 space-x-4 space-y-3">
 
-      <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">{{ team.isOpen ? 'Close' : 'Open' }}</button>
+        <a routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat">
+          <button class="btn btn-accent">Join team chat</button>
+        </a>
+
+        <button class="btn btn-accent" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
+
+        <a routerLink="/team/invite">
+          <button class="btn btn-success">Invite user</button>
+        </a>
+
+        <a *ngIf="team.isOpen" routerLink="/">
+          <button (click)="joinToTeam()" class="btn btn-success">Join to team</button>
+        </a>
+
+        <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">
+          {{ team.isOpen ? 'Close for members' : 'Open for members' }}</button>
+
+
       </div>
 
     </div>
 
-    <div class="col-span-2">
+    <div class="col-span-2 mt-12">
       <div class="flex flex-col">
-        <h4 class="text-3xl font-bold mb-5">Team tags</h4>
+        <span class="text-3xl font-bold mb-5">Team tags:</span>
 
         <div class="flex flex-wrap">
           <!--        TODO use checkbox later -->
-          <div id="java-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-red-600 flex justify-center items-center cursor-pointer hover:bg-red-500 hover:text-white">Java</div>
-          <div id="html-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center cursor-pointer hover:bg-white hover:text-black">HTML</div>
-          <div id="js-pill " class="py-2 px-6 rounded-full border-2 w-auto m-2 border-yellow-600 flex justify-center items-center cursor-pointer hover:bg-yellow-500 hover:text-white">JavaScript</div>
+          <div id="java-pill"
+               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-red-600 flex justify-center items-center cursor-pointer hover:bg-red-500 hover:text-white">
+            Java
+          </div>
+          <div id="html-pill"
+               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center cursor-pointer hover:bg-white hover:text-black">
+            HTML
+          </div>
+          <div id="js-pill "
+               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-yellow-600 flex justify-center items-center cursor-pointer hover:bg-yellow-500 hover:text-white">
+            JavaScript
+          </div>
         </div>
 
         <!--      <button class="btn btn-outline btn-success rounded-full px-8 m-5 w-24 h-full">Save</button>-->
       </div>
     </div>
 
+    <div class="col-span-2 mt-12">
 
+      <span class="text-3xl font-bold mb-5">Members:</span>
 
-    <div>
-
-
-
-
+       <ul class="mt-4 list-disc">
+         <li class="ml-8" *ngFor="let member of teamMembers">{{ member.username }}</li>
+       </ul>
 
     </div>
-
-
-
-
-
-
-
-
   </div>
-
-
-
-
-
 </section>

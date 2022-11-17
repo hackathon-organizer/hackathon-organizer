@@ -28,10 +28,9 @@ export class HackathonsComponent implements OnInit {
   }
 
   getHackathons(pageNumber: number) {
-    this.hackathonService.getAllHackathons(pageNumber - 1).subscribe(hackathonsResponse =>
-    {
-      console.log(hackathonsResponse)
-      console.log("X " + hackathonsResponse.number);
+    this.hackathonService.getAllHackathons(pageNumber - 1).subscribe(
+      hackathonsResponse => {
+
       this.hackathons = hackathonsResponse.content;
       this.paginationConfig.currentPage = hackathonsResponse.number + 1;
       this.paginationConfig.totalItems = hackathonsResponse.totalElements;

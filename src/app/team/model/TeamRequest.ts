@@ -1,3 +1,5 @@
+import {HackathonDto} from "../../hackathon/model/Hackathon";
+
 export interface Tag {
   id: number;
   name: string;
@@ -13,9 +15,10 @@ export interface TeamRequest {
 }
 
 export interface TeamResponse {
-  id: number;
-  ownerId: number;
-  hackathonId: number;
+  content: Team[];
+  number: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface Team {

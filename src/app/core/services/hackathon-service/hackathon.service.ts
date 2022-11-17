@@ -7,6 +7,7 @@ import {UserService} from "../user-service/user.service";
 import {HackathonDto, HackathonResponse} from "../../../hackathon/model/Hackathon";
 import {ToastrService} from "ngx-toastr";
 import {GlobalErrorHandler} from "../toast-service/global-error-handler.service";
+import {TeamResponse} from "../../../team/model/TeamRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -27,9 +28,9 @@ export class HackathonService {
       ));
   }
 
-  getHackathonDetailsById(id: number): Observable<any> {
+  getHackathonDetailsById(id: number): Observable<HackathonDto> {
 
-    return this.http.get(this.BASE_URL_READ + '/' + id).pipe(
+    return this.http.get<HackathonDto>(this.BASE_URL_READ + '/' + id).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
@@ -45,13 +46,6 @@ export class HackathonService {
     const userId = localStorage.getItem("userId");
 
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null).pipe(
-      catchError((error) => this.errorHandler.handleError(error)
-      ));
-  }
-
-  getHackathonTeamsById(hackathonId: number): Observable<any> {
-
-    return this.http.get(this.BASE_URL_READ + '/' + hackathonId + '/teams').pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
