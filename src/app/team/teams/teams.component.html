@@ -2,6 +2,10 @@
 
   <h3 class="text-center text-5xl mb-8">Browse teams</h3>
 
+  <div id="team-search" class="flex justify-center">
+    <input [formControl]="teamNameControl" type="text" class="input input-primary w-3/5 mb-6" (change)="searchTeam($event)" placeholder="Search team">
+  </div>
+
   <div class="overflow-x-auto w-full min-h-screen">
 
     <ng-container *ngIf="loading">
@@ -11,34 +15,29 @@
     <table *ngIf="!loading" class="table w-full">
       <thead>
       <tr>
-        <th>Num</th>
+        <th>Number</th>
         <th>Name</th>
         <th>Description</th>
+        <th></th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let team of teams | paginate: paginationConfig; index as i;">
+      <tr class="h-20" *ngFor="let team of teams | paginate: paginationConfig; index as i;">
         <th>
-          <span *ngIf="currentPageNumber==0">{{(i+1)}}</span>
-          <span *ngIf="currentPageNumber>0">{{((currentPageNumber-1)*10)+(i+1)}}</span>
+          <span *ngIf="currentPageNumber==0">{{(i + 1)}}</span>
+          <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
         </th>
         <th>
-          {{ team.id }}
+          {{ team.name }}
         </th>
         <td>
-          <div class="flex items-center space-x-3">
-            <div>
-              <div class="font-bold">{{ team.name }}</div>
-            </div>
-          </div>
+          {{ team.description }}
         </td>
-
-        <th>{{ team.description }}</th>
-
+        <th></th>
         <th>
           <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}">
-            <button class="btn btn-ghost btn-xs">details</button>
+            <button class="btn btn-ghost btn-xs">Details</button>
           </a>
         </th>
       </tr>

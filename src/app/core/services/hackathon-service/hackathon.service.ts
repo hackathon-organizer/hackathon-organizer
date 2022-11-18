@@ -6,7 +6,7 @@ import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonDto, HackathonResponse} from "../../../hackathon/model/Hackathon";
 import {ToastrService} from "ngx-toastr";
-import {GlobalErrorHandler} from "../toast-service/global-error-handler.service";
+import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
 import {TeamResponse} from "../../../team/model/TeamRequest";
 
 @Injectable({

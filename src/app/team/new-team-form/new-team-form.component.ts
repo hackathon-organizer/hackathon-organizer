@@ -8,6 +8,7 @@ import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
 import {Subscription} from "rxjs";
 import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {Utils} from "../../shared/Utils";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'ho-new-team-form',
@@ -29,7 +30,8 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     private teamService: TeamService,
     private userService: UserService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +86,8 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
       this.teamService.createTeam(team).subscribe(createdTeam => {
 
         this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
+
+        this.toastr.success("Team " + team.name + " created successfully");
       });
     }
   }

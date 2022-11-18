@@ -83,4 +83,11 @@ export class TeamService {
       // catchError((error) => this.errorHandler.handleError(error)
       // ));
   }
+
+  searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponse> {
+
+    console.log("log")
+
+    return this.http.get<TeamResponse>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
+  }
 }

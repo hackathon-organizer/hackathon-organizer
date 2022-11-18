@@ -1,4 +1,4 @@
-<pagination-template class="" #p="paginationApi" (pageChange)="pageChangeEvent.emit($event)">
+<pagination-template #p="paginationApi" (pageChange)="pageChangeEvent.emit($event)">
 
   <div class="flex justify-center">
   <button (click)="p.previous()" [disabled]="p.isFirstPage()" class="btn btn-md mx-4">

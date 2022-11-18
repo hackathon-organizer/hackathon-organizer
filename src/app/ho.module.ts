@@ -19,7 +19,7 @@ import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calend
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
-import {GlobalErrorHandler} from "./core/services/toast-service/global-error-handler.service";
+import {GlobalErrorHandler} from "./core/services/error-service/global-error-handler.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({

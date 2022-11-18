@@ -9,6 +9,7 @@ import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {NGXLogger} from "ngx-logger";
 import {Utils} from "../../shared/Utils";
 import {HackathonRequest} from "../model/HackathonRequest";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -22,15 +23,13 @@ export class HackathonProfileComponent implements OnInit {
   hackathon!: HackathonDto;
 
   constructor(private hackathonService: HackathonService, private teamService: TeamService, private route: ActivatedRoute,
-              private logger: NGXLogger) { }
+              private logger: NGXLogger, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
     this.routeSubscription = this.route.params.subscribe(params => {
 
       this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hackathon => {
-
-        console.log(this.hackathon)
 
         this.hackathon = hackathon;
       });
@@ -47,7 +46,7 @@ export class HackathonProfileComponent implements OnInit {
 
          Utils.updateUserInLocalStorage(currentUser);
 
-
+         this.toastr.success("You are now member of hackathon " + this.hackathon.name);
        });
   }
 
@@ -67,12 +66,6 @@ export class HackathonProfileComponent implements OnInit {
 
     const currentUser = Utils.currentUserFromLocalStorage;
 
-    if (currentUser.currentHackathonId === this.hackathon.id) {
-
-      return (currentUser.currentHackathonId === this.hackathon.id);
-    } else {
-
-      return false;
-    }
+    return (currentUser.currentHackathonId === this.hackathon.id);
   }
 }
