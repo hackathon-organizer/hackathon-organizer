@@ -21,4 +21,12 @@ export class Utils {
   public static updateTeamInLocalStorage(team: Team): void {
     localStorage.setItem("team", JSON.stringify(team));
   }
+
+  public static isUserTeamOwner(currentUserId: number, teamOwnerId: number) {
+    return currentUserId === teamOwnerId;
+  }
+
+  public static isUserTeamMember(currentUserTeamId: number, teamId: number) {
+    return currentUserTeamId === teamId;
+  }
 }

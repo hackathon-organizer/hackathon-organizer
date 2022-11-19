@@ -5,6 +5,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {Observable, Subscription} from "rxjs";
 import {Team, TeamResponse} from "../model/TeamRequest";
 import {UserResponseDto} from "../../user/model/UserResponseDto";
+import {ToastrService} from "ngx-toastr";
+import {Utils} from "../../shared/Utils";
 
 @Component({
   selector: 'ho-team-profile',
@@ -20,12 +22,13 @@ export class TeamProfileComponent implements OnInit {
   teamId: number = 0;
   team!: Team;
   teamMembers: UserResponseDto[] = [];
+  user = Utils.currentUserFromLocalStorage;
 
   editMode = false;
 
 
   constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute,
-              private router: Router) {
+              private router: Router, private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
@@ -44,16 +47,28 @@ export class TeamProfileComponent implements OnInit {
 
 
   joinToTeam() {
-    this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).subscribe(res => console.log(res));
+    this.teamService.addUserToTeam(this.teamId, this.userService.getUserId())
+      .subscribe(() => {
+        this.toastr.success("Successfully joined to team");
+
+        this.router.navigate(["/"]);
+      });
   }
 
   openOrCloseTeamForMembers() {
 
-    const isOpen = !this.team.isOpen;
+    const teamStatus = {userId: this.user.id, isOpen: !this.team.isOpen};
 
-    this.teamService.openOrCloseTeamForMembers(this.teamId, isOpen).subscribe((isOpen) => {
+    if (this.isOwner){
+
+    this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
       this.team.isOpen = isOpen;
+
+      this.toastr.success("Team is now " + this.team.isOpen ? 'open' : 'closed' + " for new members");
     });
+    } else {
+      throw new Error("User is not team owner");
+    }
   }
 
   getTeamMembers() {
@@ -61,10 +76,16 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner() {
-    return true;
+    return Utils.isUserTeamOwner(this.user.id, this.team.ownerId);
+  }
+
+  get isTeamMember() {
+    return Utils.isUserTeamMember(this.user.currentTeamId, this.teamId);
   }
 
   redirectToTeamEdit() {
      this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
   }
+
+
 }

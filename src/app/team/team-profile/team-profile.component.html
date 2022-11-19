@@ -30,17 +30,14 @@
 
         <button class="btn btn-accent" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
 
-        <a routerLink="/team/invite">
+        <a routerLink="/users">
           <button class="btn btn-success">Invite user</button>
         </a>
 
-        <a *ngIf="team.isOpen" routerLink="/">
-          <button (click)="joinToTeam()" class="btn btn-success">Join to team</button>
-        </a>
+        <button *ngIf="isTeamMember" (click)="joinToTeam()" class="btn btn-success">Join to team</button>
 
         <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">
           {{ team.isOpen ? 'Close for members' : 'Open for members' }}</button>
-
 
       </div>
 
@@ -51,31 +48,21 @@
         <span class="text-3xl font-bold mb-5">Team tags:</span>
 
         <div class="flex flex-wrap">
-          <!--        TODO use checkbox later -->
-          <div id="java-pill"
-               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-red-600 flex justify-center items-center cursor-pointer hover:bg-red-500 hover:text-white">
-            Java
+          <div id="pill" *ngFor="let tag of team.tags"
+               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center font-bold">
+            {{ tag.name }}
           </div>
-          <div id="html-pill"
-               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center cursor-pointer hover:bg-white hover:text-black">
-            HTML
-          </div>
-          <div id="js-pill "
-               class="py-2 px-6 rounded-full border-2 w-auto m-2 border-yellow-600 flex justify-center items-center cursor-pointer hover:bg-yellow-500 hover:text-white">
-            JavaScript
-          </div>
-        </div>
 
-        <!--      <button class="btn btn-outline btn-success rounded-full px-8 m-5 w-24 h-full">Save</button>-->
+        </div>
       </div>
     </div>
 
-    <div class="col-span-2 mt-12">
+    <div class="col-span-2 mt-12" id="team-members">
 
       <span class="text-3xl font-bold mb-5">Members:</span>
 
        <ul class="mt-4 list-disc">
-         <li class="ml-8" *ngFor="let member of teamMembers">{{ member.username }}</li>
+         <li class="ml-8 text-xl" *ngFor="let member of teamMembers">{{ member.username }}</li>
        </ul>
 
     </div>

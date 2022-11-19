@@ -25,6 +25,7 @@ export interface Team {
   id: number;
   name: string;
   description: string;
+  ownerId: number;
   isOpen: boolean;
   teamChatRoomId: number;
   tags: Tag[];

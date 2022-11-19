@@ -64,8 +64,8 @@ export class TeamService {
     return this.http.patch(this.BASE_URL_WRITE + '/' + teamId + '/participants/' + userId, null);
   }
 
-  openOrCloseTeamForMembers(teamId: number, isOpen: boolean): Observable<boolean> {
-    return this.http.patch<boolean>(this.BASE_URL_WRITE + '/' + teamId, isOpen);
+  openOrCloseTeamForMembers(teamId: number, teamStatus: any): Observable<boolean> {
+    return this.http.patch<boolean>(this.BASE_URL_WRITE + '/' + teamId, teamStatus);
   }
 
   isUserTeamOwner(teamId: number, userId: number): Observable<boolean> {
@@ -85,8 +85,6 @@ export class TeamService {
   }
 
   searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponse> {
-
-    console.log("log")
 
     return this.http.get<TeamResponse>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
   }
