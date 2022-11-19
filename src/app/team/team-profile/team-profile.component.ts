@@ -65,6 +65,6 @@ export class TeamProfileComponent implements OnInit {
   }
 
   redirectToTeamEdit() {
-     this.router.navigate(["/hackathon/1/team"], {queryParams: {edit: true, teamId: this.teamId}});
+     this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
   }
 }

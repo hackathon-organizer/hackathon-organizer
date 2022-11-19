@@ -16,6 +16,7 @@ const routes: Routes = [
   {path: 'new', component: NewHackathonFormComponent},
   {path: ':id', component: HackathonProfileComponent},
   {path: ':id/team', component: NewTeamFormComponent},
+  {path: ':id/team/:teamId/edit', component: NewTeamFormComponent},
   {path: ':id/teams', component: TeamsComponent},
   {path: ':id/team/:teamId', component: TeamProfileComponent},
   {path: ':id/team/:teamId/chat', component: TeamChatComponent},

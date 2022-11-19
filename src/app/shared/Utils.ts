@@ -1,4 +1,5 @@
 import {UserResponseDto} from "../user/model/UserResponseDto";
+import {Team, TeamResponse} from "../team/model/TeamRequest";
 
 export class Utils {
 
@@ -15,5 +16,9 @@ export class Utils {
 
   public static updateUserInLocalStorage(user: UserResponseDto): void {
       localStorage.setItem("user", JSON.stringify(user));
+  }
+
+  public static updateTeamInLocalStorage(team: Team): void {
+    localStorage.setItem("team", JSON.stringify(team));
   }
 }

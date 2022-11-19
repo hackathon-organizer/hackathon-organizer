@@ -90,4 +90,8 @@ export class TeamService {
 
     return this.http.get<TeamResponse>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
   }
+
+  updateTeam(team: TeamRequest, teamId: number): Observable<Team> {
+    return this.http.put<Team>('http://localhost:9090/api/v1/write/teams/' + teamId, team);
+  }
 }

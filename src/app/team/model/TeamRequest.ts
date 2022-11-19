@@ -1,8 +1,8 @@
 import {HackathonDto} from "../../hackathon/model/Hackathon";
 
 export interface Tag {
-  id: number;
-  name: string;
+  readonly id: number;
+  readonly name: string;
   isSelected?: boolean;
 }
 
