@@ -1,1 +1,57 @@
-<p>user-list works!</p>
+<section id="hackathons-list">
+
+  <h2 class="text-center text-5xl mb-8">Browse users</h2>
+
+  <div id="team-search" class="flex justify-center">
+    <input [formControl]="usernameControl" type="text" class="input input-primary w-3/5 mb-6" placeholder="Search user">
+  </div>
+
+
+  <div class="overflow-x-auto w-full min-h-screen">
+
+    <ng-container *ngIf="loading">
+      <img class="mx-auto mt-36" src="assets/spinner.svg" alt="Loading spinner"/>
+    </ng-container>
+
+    <table *ngIf="!loading" class="table w-full">
+      <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Tags</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let user of hackathonParticipants | paginate: paginationConfig; index as i;">
+        <th>
+          <span *ngIf="currentPageNumber==0">{{(i+1)}}</span>
+          <span *ngIf="currentPageNumber>0">{{((currentPageNumber-1)*10)+(i+1)}}</span>
+        </th>
+        <td>
+          <div class="flex items-center space-x-3">
+            <div class="avatar">
+              <div class="mask mask-squircle w-12 h-12">
+                <img src="https://placeimg.com/80/80/people" alt="Avatar Tailwind CSS Component" />
+              </div>
+            </div>
+            <div>
+              <div class="font-bold">{{ user.username }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+           <span *ngFor="let tag of user.tags">
+             {{ tag.name }}
+           </span>
+        </td>
+        <th>
+          <a routerLink="/user/{{ user.id }}"><button class="btn btn-ghost btn-xs">Details</button></a>
+        </th>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ho-pagination [config]="paginationConfig" (pageChangeEvent)="onPageChange($event)"></ho-pagination>
+</section>

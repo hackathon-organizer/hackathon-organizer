@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
 import {Client} from "@stomp/stompjs";
-import {UserResponseDto} from "../../../user/model/UserResponseDto";
+import {UserResponseDto, UserResponsePage} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
 import {MentorScheduleEntry} from "../../../mentor/model/MentorScheduleEntry";
@@ -37,8 +37,10 @@ export class UserService {
     dayjs.extend(isBetween);
   }
 
-  findUsersByUsername(username: string): Observable<UserResponseDto[]> {
-    return this.http.get<UserResponseDto[]>('http://localhost:9090/api/v1/read/users?username=' + username);
+  findHackathonUsersByUsername(username: string, hackathonId: number, pageNumber: number): Observable<UserResponsePage> {
+    return this.http.get<UserResponsePage>
+    ('http://localhost:9090/api/v1/read/users?username=' + username + '&hackathonId=' + hackathonId +
+      "&page=" + pageNumber + "&size=10");
   }
 
   // Open ws connection
@@ -264,5 +266,10 @@ export class UserService {
 
   getMembersByTeamId(teamId: number): Observable<UserResponseDto[]> {
     return this.http.get<UserResponseDto[]>("http://localhost:9090/api/v1/read/users/membership?teamId=" + teamId);
+  }
+
+  getParticipants(participantsIds: number[], pageNumber: number): Observable<UserResponsePage> {
+    return this.http.post<UserResponsePage>
+      ("http://localhost:9090/api/v1/read/users/hackathon-participants?page=" + pageNumber + "&size=10", participantsIds);
   }
 }

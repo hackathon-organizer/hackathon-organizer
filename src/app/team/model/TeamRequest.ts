@@ -14,7 +14,7 @@ export interface TeamRequest {
    tags: Tag[];
 }
 
-export interface TeamResponse {
+export interface TeamResponsePage {
   content: Team[];
   number: number;
   totalElements: number;

@@ -8,7 +8,7 @@ export interface HackathonDto {
   eventEndDate: Date | string;
 }
 
-export interface HackathonResponse {
+export interface HackathonResponsePage {
   content: HackathonDto[];
   number: number;
   totalElements: number;

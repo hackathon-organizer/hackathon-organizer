@@ -19,6 +19,10 @@
       <button class="btn btn-outline btn-info">Show teams</button>
     </a>
 
+    <a routerLink="/hackathon/{{ hackathon.id }}/participants">
+      <button class="btn btn-outline btn-info">Show participants</button>
+    </a>
+
     <a routerLink="/hackathon/{{ hackathon.id }}/schedule" [queryParams]="{hackathonView: 1}">
       <button class="btn btn-outline btn-secondary">Show schedule</button>
     </a>

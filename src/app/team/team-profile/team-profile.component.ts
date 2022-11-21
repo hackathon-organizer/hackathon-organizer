@@ -3,7 +3,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Observable, Subscription} from "rxjs";
-import {Team, TeamResponse} from "../model/TeamRequest";
+import {Team, TeamResponsePage} from "../model/TeamRequest";
 import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
@@ -11,7 +11,7 @@ import {Utils} from "../../shared/Utils";
 @Component({
   selector: 'ho-team-profile',
   templateUrl: './team-profile.component.html',
-  styleUrls: ['./team-profile.component.scss']
+  styleUrls: []
 })
 export class TeamProfileComponent implements OnInit {
 
@@ -64,7 +64,8 @@ export class TeamProfileComponent implements OnInit {
     this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
       this.team.isOpen = isOpen;
 
-      this.toastr.success("Team is now " + this.team.isOpen ? 'open' : 'closed' + " for new members");
+      //this.toastr.success("Team is now " + this.team.isOpen ? 'open' : 'closed' + " for new members");
+      this.toastr.success(`Team is now ${this.team.isOpen ? 'open' : 'closed'} for new members`);
     });
     } else {
       throw new Error("User is not team owner");

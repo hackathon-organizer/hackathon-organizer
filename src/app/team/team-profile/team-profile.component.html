@@ -30,7 +30,7 @@
 
         <button class="btn btn-accent" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
 
-        <a routerLink="/users">
+        <a routerLink="/hackathon/{{ hackathonId }}/participants">
           <button class="btn btn-success">Invite user</button>
         </a>
 

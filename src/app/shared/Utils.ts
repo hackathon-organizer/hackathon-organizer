@@ -1,5 +1,5 @@
 import {UserResponseDto} from "../user/model/UserResponseDto";
-import {Team, TeamResponse} from "../team/model/TeamRequest";
+import {Team, TeamResponsePage} from "../team/model/TeamRequest";
 
 export class Utils {
 

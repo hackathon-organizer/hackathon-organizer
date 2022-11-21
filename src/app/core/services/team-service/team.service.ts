@@ -4,7 +4,7 @@ import {catchError, map, Observable} from "rxjs";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
-import {Tag, Team, TeamRequest, TeamResponse} from "../../../team/model/TeamRequest";
+import {Tag, Team, TeamRequest, TeamResponsePage} from "../../../team/model/TeamRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -76,17 +76,17 @@ export class TeamService {
      return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTags);
   }
 
-  getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponse> {
+  getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
 
-    return this.http.get<TeamResponse>(this.BASE_URL_READ + "?hackathonId=" + hackathonId + "&page=" + pageNumber + "&size=10") ;
+    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "?hackathonId=" + hackathonId + "&page=" + pageNumber + "&size=10") ;
       //.pipe(
       // catchError((error) => this.errorHandler.handleError(error)
       // ));
   }
 
-  searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponse> {
+  searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
 
-    return this.http.get<TeamResponse>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
+    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
   }
 
   updateTeam(team: TeamRequest, teamId: number): Observable<Team> {

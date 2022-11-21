@@ -4,10 +4,11 @@ import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {catchError, Observable, of} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
-import {HackathonDto, HackathonResponse} from "../../../hackathon/model/Hackathon";
+import {HackathonDto, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
 import {ToastrService} from "ngx-toastr";
 import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
-import {TeamResponse} from "../../../team/model/TeamRequest";
+import {TeamResponsePage} from "../../../team/model/TeamRequest";
+import {UserResponseDto} from "../../../user/model/UserResponseDto";
 
 @Injectable({
   providedIn: 'root'
@@ -35,9 +36,9 @@ export class HackathonService {
       ));
   }
 
-  getAllHackathons(pageNumber: number):Observable<HackathonResponse> {
+  getAllHackathons(pageNumber: number):Observable<HackathonResponsePage> {
 
-    return this.http.get<HackathonResponse>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10").pipe(
+    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10").pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
@@ -48,6 +49,10 @@ export class HackathonService {
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
+  }
+
+  getHackathonParticipantsIds(hackathonId: number): Observable<number[]> {
+    return this.http.get<number[]>("http://localhost:9090/api/v1/read/hackathons/" + hackathonId + "/participants");
   }
 
   private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {

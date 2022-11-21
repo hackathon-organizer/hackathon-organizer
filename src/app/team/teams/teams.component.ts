@@ -81,8 +81,4 @@ export class TeamsComponent implements OnInit {
   get teamsCount() {
     return this.paginationConfig.totalItems;
   }
-
-  searchTeam($event: any) {
-    console.log($event.value);
-  }
 }

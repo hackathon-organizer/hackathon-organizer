@@ -1,4 +1,5 @@
 import {TagResponseDto} from "./TagResponseDto";
+import {HackathonDto} from "../../hackathon/model/Hackathon";
 
 export interface UserResponseDto {
   id: number;
@@ -10,4 +11,11 @@ export interface UserResponseDto {
   currentTeamId: number;
   profilePictureUrl: string;
   tags: TagResponseDto[];
+}
+
+export interface UserResponsePage {
+  content: UserResponseDto[];
+  number: number;
+  totalElements: number;
+  totalPages: number;
 }

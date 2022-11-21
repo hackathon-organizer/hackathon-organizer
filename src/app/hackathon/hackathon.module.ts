@@ -7,12 +7,10 @@ import {RouterModule} from "@angular/router";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {NgxPaginationModule} from "ngx-pagination";
 import {SharedModule} from "../shared/shared.module";
-import { UserListComponent } from './user-list/user-list.component';
 
 @NgModule({
   declarations: [
     HackathonRoutingModule.components,
-    UserListComponent
   ],
   exports: [
     HackathonsComponent,
