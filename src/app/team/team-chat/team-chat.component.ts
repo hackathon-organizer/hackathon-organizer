@@ -8,13 +8,12 @@ import * as dayjs from "dayjs";
 import {ChatService} from "../../core/services/chat-service/chat.service";
 import {HttpClient} from "@angular/common/http";
 import {MessageType} from "../model/MessageType";
-import {BasicMessage} from "../model/BasicMessage";
 import {NGXLogger} from "ngx-logger";
 
 @Component({
   selector: 'ho-team-chat',
   templateUrl: './team-chat.component.html',
-  styleUrls: ['./team-chat.component.scss']
+  styleUrls: []
 })
 export class TeamChatComponent implements AfterViewInit {
 

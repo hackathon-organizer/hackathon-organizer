@@ -5,7 +5,7 @@ import {Utils} from "../../shared/Utils";
 @Component({
   selector: 'ho-menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.scss']
+  styleUrls: []
 })
 export class MenuComponent implements OnInit {
 

@@ -12,7 +12,7 @@ import {MeetingNotification} from "../../team/model/MeetingNotification";
 @Component({
   selector: 'ho-user-profile',
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.scss']
+  styleUrls: []
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
 
