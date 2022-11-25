@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
+import {Utils} from "../../shared/Utils";
 
 @Component({
   selector: 'ho-menu',
@@ -11,6 +12,7 @@ export class MenuComponent implements OnInit {
 
   userHackathonId: number = 0;
   userTeamId: number = 0;
+  currentUserId = 0;
 
   constructor(private userService: UserService) {
   }
@@ -18,12 +20,11 @@ export class MenuComponent implements OnInit {
   ngOnInit(): void {
     this.userService.initWsConn();
 
-    this.userService.loading.subscribe(loaded => {
-      if (!loaded) {
-        this.userHackathonId = this.userService.userHackathonId;
-        this.userTeamId = this.userService.userTeamId;
-      }
-    });
+    if (Utils.currentUserFromLocalStorage) {
+      this.currentUserId = Utils.currentUserFromLocalStorage.id;
+      this.userHackathonId = Utils.currentUserFromLocalStorage.currentHackathonId;
+      this.userTeamId = Utils.currentUserFromLocalStorage.currentTeamId;
+    }
   }
 
   logout() {

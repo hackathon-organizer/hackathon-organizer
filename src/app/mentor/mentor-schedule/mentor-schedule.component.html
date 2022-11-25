@@ -1,5 +1,5 @@
-<div class="row text-center">
-  <div class="col-md-4">
+<div class="text-center">
+  <div class="flex justify-center">
     <div class="btn-group">
       <div
         class="btn btn-primary"
@@ -10,7 +10,7 @@
         Previous
       </div>
       <div
-        class="btn btn-outline-secondary"
+        class="btn btn-info"
         mwlCalendarToday
         [(viewDate)]="viewDate"
       >
@@ -26,46 +26,38 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="my-4">
     <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
   </div>
 </div>
 <br/>
 
-<label for="modal" class="btn btn-primary modal-button">Add</label>
+<div class="flex justify-center">
+  <label for="update-event-modal" class="btn btn-secondary m-5">Update schedule</label>
+</div>
 
-<input
-  class="form-control"
-  type="text"
-  mwlFlatpickr
+<mwl-calendar-day-view
+  [viewDate]="viewDate"
+  [events]="events"
+  [refresh]="refresh"
+  [eventTemplate]="hoDayCell"
+  (eventTimesChanged)="eventTimesChanged($event)"
+  (eventClicked)="handleEvent($event.event)"
+>
+</mwl-calendar-day-view>
 
-  (ngModelChange)="refresh.next()"
-  [altInput]="true"
-  [convertModelValue]="true"
-  [enableTime]="true"
-  dateFormat="Y-m-dTH:i"
-  altFormat="F j, Y H:i"
-  placeholder="Not set"
-/>
-
-  <mwl-calendar-day-view
-    [viewDate]="viewDate"
-    [events]="events"
-    [refresh]="refresh"
-    [eventTemplate]="hoDayCell"
-    (eventTimesChanged)="eventTimesChanged($event)"
-  >
-  </mwl-calendar-day-view>
-
-<input type="checkbox" id="modal" class="modal-toggle"/>
+<input type="checkbox" id="update-event-modal" class="modal-toggle"/>
 <div class="modal">
   <div class="modal-box w-11/12 max-w-6xl">
 
-    <button class="btn btn-primary" (click)="addEvent()">Add new</button>
+    <label for="update-event-modal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
 
+    <div class="m-5 flex justify-center">
+      <button class="btn btn-info" (click)="addEvent()">Add new event</button>
+    </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered">
+      <table class="table table-bordered w-full">
         <thead>
         <tr>
           <th>Color</th>
@@ -85,37 +77,35 @@
             />
           </td>
           <td>
-            <input
-              class="form-control"
-              type="text"
-              mwlFlatpickr
-              [(ngModel)]="event.start"
-              (ngModelChange)="refresh.next()"
-              [altInput]="true"
-              [convertModelValue]="true"
-              [enableTime]="true"
-              dateFormat="Y-m-dTH:i"
-              altFormat="F j, Y H:i"
-              placeholder="Not set"
+            <input class="ho-input-primary"
+                   type="text"
+                   mwlFlatpickr
+                   [(ngModel)]="event.start"
+                   (ngModelChange)="refresh.next()"
+                   [altInput]="true"
+                   [convertModelValue]="true"
+                   [enableTime]="true"
+                   dateFormat="Y-m-dTH:i"
+                   altFormat="F j, Y H:i"
+                   placeholder="Not set"
             />
           </td>
           <td>
-            <input
-              class="form-control"
-              type="text"
-              mwlFlatpickr
-              [(ngModel)]="event.end"
-              (ngModelChange)="refresh.next()"
-              [altInput]="true"
-              [convertModelValue]="true"
-              [enableTime]="true"
-              dateFormat="Y-m-dTH:i"
-              altFormat="F j, Y H:i"
-              placeholder="Not set"
+            <input class="ho-input-primary"
+                   type="text"
+                   mwlFlatpickr
+                   [(ngModel)]="event.end"
+                   (ngModelChange)="refresh.next()"
+                   [altInput]="true"
+                   [convertModelValue]="true"
+                   [enableTime]="true"
+                   dateFormat="Y-m-dTH:i"
+                   altFormat="F j, Y H:i"
+                   placeholder="Not set"
             />
           </td>
           <td>
-            <button class="btn btn-danger" (click)="deleteEvent(event)">
+            <button class="btn btn-error" (click)="deleteEvent(event)">
               Delete
             </button>
           </td>
@@ -125,8 +115,31 @@
     </div>
 
     <div class="modal-action">
-      <label (click)="saveEvents()" for="modal" class="btn">Save</label>
+      <label (click)="updateEvents()" for="update-event-modal" class="btn btn-success">Save</label>
     </div>
+
+  </div>
+</div>
+
+<input type="checkbox" id="event-modal" class="modal-toggle"/>
+<div class="modal">
+  <div class="modal-box w-11/12 max-w-6xl flex flex-col justify-center items-center">
+
+    <label for="event-modal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+
+    <h5 class="text-3xl text-primary">{{ modalData.title }}</h5>
+
+    <div class="text-2xl my-12 font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
+      <span *ngIf="modalData.isAvailable; else notAvailable">AVAILABLE</span>
+      <ng-template #notAvailable>NOT AVAILABLE</ng-template>
+    </div>
+
+    <div class="my-4 text-center">
+      <p class="text-md">{{ modalData.info }}</p>
+    </div>
+
+    <button [disabled]="!isUserTeamOwner()" class="btn btn-primary w-2/5" (click)="assignTeam(modalData)">
+      {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team</button>
 
   </div>
 </div>
@@ -164,16 +177,14 @@
        role="application"
        [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'">
 
-    <div class="flex flex-col justify-center items-center w-full pt-48">
-
-    <h5 class="text-center text-5xl">{{ weekEvent.event.title }}</h5>
-
-    <div class="text-3xl my-12">
-      <span *ngIf="weekEvent.event.isAvailable; else notAvailable" class="text-success">AVALIBLE</span>
-      <ng-template #notAvailable class="text-error">NOT AVALIBLE</ng-template>
-    </div>
-
-    <button class="btn btn-primary w-3/5" (click)="assignTeam(weekEvent.event)">Assign</button>
+    <div class="flex items-center justify-center md:justify-around">
+      <h5 class="text-3xl mr-5 text-primary hidden sm:block">{{ weekEvent.event.title }}</h5>
+      <div class="text-2xl mr-5 hidden sm:block font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
+        <span *ngIf="modalData.isAvailable; else notAvailable">AVAILABLE</span>
+        <ng-template #notAvailable>NOT AVAILABLE</ng-template>
+      </div>
+      <label (click)="handleEvent(weekEvent)" for="event-modal" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1">Show
+        details</label>
     </div>
   </div>
 </ng-template>

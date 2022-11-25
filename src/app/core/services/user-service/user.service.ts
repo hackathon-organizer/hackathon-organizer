@@ -6,10 +6,13 @@ import {Client} from "@stomp/stompjs";
 import {UserResponseDto, UserResponsePage} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {User} from "../../../user/model/User";
-import {MentorScheduleEntry} from "../../../mentor/model/MentorScheduleEntry";
 import {NGXLogger} from "ngx-logger";
 import * as dayjs from 'dayjs';
-import {ScheduleEntryEvent} from "../../../user/model/ScheduleEntryEvent";
+import {
+  ScheduleEntryEvent,
+  ScheduleEntryRequest,
+  ScheduleEntryResponse, TeamMeetingRequest
+} from "../../../mentor/model/ScheduleEntryEvent";
 import * as isBetween from 'dayjs/plugin/isBetween'
 import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
 import {MeetingNotification} from "../../../team/model/MeetingNotification";
@@ -129,6 +132,10 @@ export class UserService {
       localStorage.setItem("username", userData.username);
       localStorage.setItem("user", JSON.stringify(userData));
 
+      this.teamService.getTeamById(userData.currentTeamId as number).subscribe(team => {
+          localStorage.setItem("team", JSON.stringify(team));
+      });
+
       this.loadingSource.next(false);
 
       this.fetchUserInvites();
@@ -156,28 +163,34 @@ export class UserService {
 
   }
 
-  saveMentorSchedule(schedule: MentorScheduleEntry[]): Observable<any> {
+  createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<any> {
 
     this.logger.info("Saving user " + this.getUserId() + " schedule");
-    return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", schedule);
+    return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", entryEvent);
   }
 
-  getUserSchedule(): Observable<ScheduleEntryEvent[]> {
+  updateEntryEvents(userId: number, schedule: ScheduleEntryRequest[]): Observable<any> {
+
+    this.logger.info("Saving user " + this.getUserId() + " schedule");
+    return this.http.put("http://localhost:9090/api/v1/write/users/" + userId + "/schedule", schedule);
+  }
+
+  getUserSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
     this.logger.info("Requesting user " + this.getUserId() + " schedule");
-    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule")
+    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule?hackathonId=" + hackathonId);
   }
 
-  getUsersHackathonSchedule(): Observable<ScheduleEntryEvent[]> {
+  getHackathonSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
-    this.logger.info("Requesting users " + this.getUserId() + " hackathon schedule");
-    return this.http.get<ScheduleEntryEvent[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=1")
+    this.logger.info("Requesting hackathon " + hackathonId + " schedule");
+    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=" + hackathonId)
   }
 
-  assignTeamToMeetingWithMentor(teamId: any): Observable<any> {
+  assignTeamToMeetingWithMentor(entryId: number, scheduleEntry: TeamMeetingRequest): Observable<any> {
 
-    this.logger.info("Saving team meeting with mentor", teamId);
-    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule", teamId);
+    this.logger.info("Saving team meeting with mentor ", scheduleEntry);
+    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + entryId + "/meeting", scheduleEntry);
   }
 
   logout() {
@@ -256,12 +269,12 @@ export class UserService {
     return this.http.get<any[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule");
   }
 
-  removeScheduleEntry(id: number) {
-    return this.http.delete("http://localhost:9090/api/v1/write/users/schedule/" + id);
+  removeScheduleEntry(userId: number, entryId: number) {
+    return this.http.delete("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId);
   }
 
-  updateUserScheduleEntry(id: number, obj: ScheduleEntrySession): Observable<any> {
-    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + id, obj)
+  updateUserScheduleEntry(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<any> {
+    return this.http.patch("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId, entrySession)
   }
 
   getMembersByTeamId(teamId: number): Observable<UserResponseDto[]> {

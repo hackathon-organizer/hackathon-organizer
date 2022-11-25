@@ -9,10 +9,11 @@ import {TeamProfileComponent} from "../team/team-profile/team-profile.component"
 import {TeamChatComponent} from "../team/team-chat/team-chat.component";
 import {MentorScheduleComponent} from "../mentor/mentor-schedule/mentor-schedule.component";
 import {UserListComponent} from "./user-list/user-list.component";
+import {AuthGuard} from "../guard/auth.guard";
 
 
 const routes: Routes = [
-  {path: '', component: HackathonsComponent},
+  {path: '', component: HackathonsComponent, canActivate: [AuthGuard]},
   {path: 'new', component: NewHackathonFormComponent},
   {path: ':id', component: HackathonProfileComponent},
   {path: ':id/participants', component: UserListComponent},

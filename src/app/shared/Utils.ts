@@ -1,32 +1,36 @@
 import {UserResponseDto} from "../user/model/UserResponseDto";
 import {Team, TeamResponsePage} from "../team/model/TeamRequest";
+import {NGXLogger} from "ngx-logger";
 
 export class Utils {
 
   public static get currentUserFromLocalStorage(): UserResponseDto {
 
-      const user = localStorage.getItem("user") as string;
+    const user = localStorage.getItem("user") as string;
 
-      if (user) {
-        return JSON.parse(user) as UserResponseDto;
-      } else {
-        throw new Error("Can't obtain user data from local storage. Try refreshing the page.");
-      }
+    return JSON.parse(user) as UserResponseDto;
+  }
+
+  public static get currentUserTeamFromLocalStorage(): Team {
+
+    const team = localStorage.getItem("team") as string;
+
+    return JSON.parse(team) as Team;
   }
 
   public static updateUserInLocalStorage(user: UserResponseDto): void {
-      localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", JSON.stringify(user));
   }
 
   public static updateTeamInLocalStorage(team: Team): void {
     localStorage.setItem("team", JSON.stringify(team));
   }
 
-  public static isUserTeamOwner(currentUserId: number, teamOwnerId: number) {
-    return currentUserId === teamOwnerId;
+  public static isUserTeamOwner() {
+     return this.currentUserFromLocalStorage.id === this.currentUserTeamFromLocalStorage.ownerId;
   }
 
-  public static isUserTeamMember(currentUserTeamId: number, teamId: number) {
-    return currentUserTeamId === teamId;
+  public static isUserTeamMember() {
+      return this.currentUserFromLocalStorage.currentTeamId === this.currentUserTeamFromLocalStorage.id;
   }
 }

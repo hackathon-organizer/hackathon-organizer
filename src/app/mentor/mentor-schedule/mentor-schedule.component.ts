@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef, OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import {CalendarEvent, CalendarEventAction, CalendarEventTimesChangedEvent, CalendarView} from "angular-calendar";
 import {
   startOfDay,
@@ -10,202 +18,243 @@ import {
   isSameMonth,
   addHours,
 } from 'date-fns';
-import {Subject, Subscription} from "rxjs";
-import { EventColor } from 'calendar-utils';
+import {map, Subject, Subscription} from "rxjs";
+import {EventColor} from 'calendar-utils';
 import {UserService} from "../../core/services/user-service/user.service";
 import {MentorModule} from "../mentor.module";
 import {ActivatedRoute} from "@angular/router";
-import {MentorScheduleEntry} from "../model/MentorScheduleEntry";
 import {NGXLogger} from "ngx-logger";
 import {User} from "../../user/model/User";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {ScheduleEntryEvent} from "../../user/model/ScheduleEntryEvent";
+import {
+  ScheduleEntryEvent,
+  ScheduleEntryRequest,
+  ScheduleEntryResponse,
+  TeamMeetingRequest
+} from "../model/ScheduleEntryEvent";
 import {ScheduleEntrySession} from "../model/ScheduleEntrySession";
+import {ToastrService} from "ngx-toastr";
+import {Utils} from "../../shared/Utils";
+import dayjs from "dayjs";
 
-const colors: Record<string, EventColor> = {
+let colors: Record<string, EventColor> = {
   main: {
     primary: '#58C7F3',
     secondary: '#FAE3E3',
-  },
-};
+  }
+}
 
 @Component({
   selector: 'ho-mentor-schedule',
   templateUrl: './mentor-schedule.component.html',
-  styleUrls: ['./mentor-schedule.component.scss'],
+  styleUrls: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MentorScheduleComponent {
+export class MentorScheduleComponent implements OnInit, OnDestroy {
 
+  private routeSubscription: Subscription = new Subscription();
+  view: CalendarView = CalendarView.Day;
+  CalendarView = CalendarView;
+  viewDate: Date = new Date();
+  refresh = new Subject<void>();
+  events: ScheduleEntryEvent[] = [];
+  activeDayIsOpen: boolean = true;
+  currentUser = Utils.currentUserFromLocalStorage;
+  modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
 
-  constructor(private userService: UserService, private teamService: TeamService,
-              private route: ActivatedRoute, private logger: NGXLogger) {
+  constructor(private userService: UserService,
+              private teamService: TeamService,
+              private route: ActivatedRoute,
+              private logger: NGXLogger,
+              private toastr: ToastrService) {
+  }
 
-
+  ngOnInit(): void {
     this.routeSubscription = this.route.queryParams.subscribe(params => {
 
       if (params['hackathonView'] === "1") {
 
-        this.getHackathonSchedule()
-
+        this.route.params.subscribe(params => this.getHackathonSchedule(params["id"] as number));
       } else {
-
         this.getUserSchedule();
       }
     });
   }
 
+  private getHackathonSchedule(hackathonId: number) {
+    this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
+
+      this.logger.info("Hackathon hackathons schedule received ", schedule)
+
+      this.mapToCalendarEvents(schedule);
+    });
+  }
+
   private getUserSchedule() {
-    this.userService.getUserSchedule().subscribe(schedule => {
+    this.userService.getUserSchedule(this.currentUser.currentHackathonId).subscribe(schedule => {
 
-      this.logger.info("User schedule received", schedule)
+      this.logger.info("User schedule received ", schedule)
 
-      this.events = schedule.map(s => this.mapToCalendarEvent(s));
-
-      this.refresh.next();
+      this.mapToCalendarEvents(schedule);
     });
   }
 
-  private getHackathonSchedule() {
-    this.userService.getUsersHackathonSchedule().subscribe(schedule => {
+  eventTimesChanged(timesChangedEvent: CalendarEventTimesChangedEvent): void {
 
-      this.logger.info("Users hackathons schedule received", schedule)
-
-      this.events = schedule.map(s => this.mapToCalendarEvent(s));
-
-      this.refresh.next();
-    });
-  }
-
-  private routeSubscription: Subscription = new Subscription();
-
-  view: CalendarView = CalendarView.Day;
-
-  CalendarView = CalendarView;
-
-  viewDate: Date = new Date();
-
-  refresh = new Subject<void>();
-
-  events: CalendarEvent[] = [];
-
-  activeDayIsOpen: boolean = true;
-
-  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
-    if (isSameMonth(date, this.viewDate)) {
-      if ((isSameDay(this.viewDate, date) && this.activeDayIsOpen) || events.length === 0) {
-        this.activeDayIsOpen = false;
-      } else {
-        this.activeDayIsOpen = true;
-      }
-      this.viewDate = date;
-    }
-  }
-
-  eventTimesChanged({
-                      event,
-                      newStart,
-                      newEnd,
-                    }: CalendarEventTimesChangedEvent): void {
     this.events = this.events.map((iEvent) => {
-      if (iEvent === event) {
+      if (iEvent === timesChangedEvent.event) {
 
-        this.userService.updateUserScheduleEntry(event.id as number, {sessionStart: newStart, sessionEnd: newEnd} as ScheduleEntrySession).subscribe();
+        const updatedScheduleEntrySession: ScheduleEntrySession = {
+            sessionStart: timesChangedEvent.newStart,
+            sessionEnd: timesChangedEvent.newEnd!
+        }
+        const eventId = timesChangedEvent.event.id as number;
+
+        this.userService.updateUserScheduleEntry(this.currentUser.id, eventId, updatedScheduleEntrySession)
+          .subscribe(() => this.scheduleUpdateSuccessToast());
 
         return {
-          ...event,
-          start: newStart,
-          end: newEnd,
+          ...timesChangedEvent.event,
+          start: timesChangedEvent.newStart,
+          end: timesChangedEvent.newEnd,
         };
       }
-
       return iEvent;
     });
   }
 
   addEvent(): void {
-    this.events = [
-      ...this.events,
-      {
-        title: localStorage.getItem("username"),
-        start: startOfDay(new Date()),
-        end: endOfDay(new Date()),
-        color: colors.main,
-        draggable: true,
-        resizable: {
-          beforeStart: true,
-          afterEnd: true,
-        },
-        isAvailable: true
-      } as ScheduleEntryEvent,
-    ];
+
+    const entryEvent: ScheduleEntryEvent = {
+      title: this.currentUser.username,
+      start: dayjs().toDate(),
+      end: dayjs().add(1, 'hour').toDate(),
+      color: colors.main,
+      draggable: true,
+      resizable: {
+        beforeStart: true,
+        afterEnd: true,
+      },
+      isAvailable: true,
+    };
+
+    const newEvent = this.mapToScheduleEntryRequest(entryEvent);
+
+    this.userService.createEntryEvent(newEvent).subscribe(() => {
+
+        this.events = [
+          ...this.events,
+          entryEvent
+        ];
+
+        this.refresh.next();
+        this.scheduleUpdateSuccessToast();
+      });
   }
 
   deleteEvent(eventToDelete: CalendarEvent) {
-    this.events = this.events.filter((event) => event !== eventToDelete);
 
-    this.userService.removeScheduleEntry(eventToDelete.id as number).subscribe();
+    this.logger.info("Trying to delete event with id ", eventToDelete.id);
+
+    this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number)
+      .subscribe(() => {
+
+        this.events = this.events.filter((event) => event !== eventToDelete);
+        this.scheduleUpdateSuccessToast()
+      });
+  }
+
+  updateEvents(): void {
+
+    const scheduleEntries: ScheduleEntryRequest[] = this.events.map(entry => this.mapToScheduleEntryRequest(entry));
+
+    this.logger.info("Sending schedule to save ", scheduleEntries);
+
+    this.userService.updateEntryEvents(this.currentUser.id, scheduleEntries).subscribe(() => this.scheduleUpdateSuccessToast());
+  }
+
+  private mapToCalendarEvents(entries: ScheduleEntryResponse[]): void {
+
+    entries.map(entry => {
+
+    this.userService.getUserById(entry.userId).subscribe(
+     userResponse => {
+
+       colors.main = {
+         primary: colors.main.primary,
+         secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
+       }
+
+       this.events.push({
+         id: entry.id,
+         title: userResponse.username,
+         start: new Date(entry.sessionStart),
+         end: new Date(entry.sessionEnd),
+         color: colors.main,
+         draggable: true,
+         resizable: {
+           beforeStart: true,
+           afterEnd: true,
+         },
+         isAvailable: entry.isAvailable,
+         info: entry.info,
+       } as ScheduleEntryEvent)
+
+       this.refresh.next();
+     })
+    });
+  }
+
+  assignTeam(event: ScheduleEntryEvent) {
+
+    const teamId = this.currentUser.currentTeamId;
+
+    if (teamId && this.isUserTeamOwner()) {
+
+      const teamMeetingRequest: TeamMeetingRequest = {
+        teamOwnerId: this.currentUser.id,
+        teamId: teamId
+      };
+
+      this.userService.assignTeamToMeetingWithMentor(event.id as number, teamMeetingRequest).subscribe((isAvailable) => {
+
+            event.isAvailable = isAvailable;
+            this.refresh.next();
+            this.scheduleUpdateSuccessToast();
+          });
+      }
+  }
+
+  private scheduleUpdateSuccessToast() {
+    this.toastr.success("Schedule updated successfully");
   }
 
   setView(view: CalendarView) {
     this.view = view;
   }
 
-  saveEvents(): void {
-
-      const scheduleEntries: MentorScheduleEntry[] = this.events.map(event => this.mapToMentorSchedule(event));
-
-      this.logger.info("Sending schedule to save", scheduleEntries);
-
-      this.userService.saveMentorSchedule(scheduleEntries).subscribe();
+  ngOnDestroy(): void {
+    this.routeSubscription.unsubscribe();
+    this.refresh.unsubscribe();
   }
 
-  private mapToMentorSchedule(entry: CalendarEvent): ScheduleEntryEvent {
+  private mapToScheduleEntryRequest(entry: ScheduleEntryEvent): ScheduleEntryRequest {
     return {
       id: entry.id,
       sessionStart: entry.start,
       sessionEnd: entry.end,
-      userId: this.userService.getUserId(),
-      hackathonId: 1,
-      info: "test"
-    } as ScheduleEntryEvent;
+      entryColor: colors.main.secondary,
+      info: entry.info,
+      teamId: entry.teamId,
+      hackathonId: entry.hackathonId,
+    } as ScheduleEntryRequest;
   }
 
-  private mapToCalendarEvent(entry: ScheduleEntryEvent): ScheduleEntryEvent {
-    return {
-      id: entry.id,
-      title: "John Doe",
-      start: new Date(entry.sessionStart),
-      end: new Date(entry.sessionEnd),
-      color: entry.entryColor ? entry.entryColor : colors.main,
-      draggable: true,
-      resizable: {
-        beforeStart: true,
-        afterEnd: false,
-      },
-      isAvailable: true
-    } as ScheduleEntryEvent;
+  handleEvent(event: CalendarEvent): void {
+    this.modalData = event;
   }
 
-  assignTeam(event: any) {
-
-    const currentUser = JSON.parse(<string>localStorage.getItem("user")) as User
-
-    const teamId = currentUser.currentTeamId;
-
-    if (teamId) {
-      this.teamService.isUserTeamOwner(teamId, this.userService.getUserId()).subscribe(isOwner => {
-
-         if (isOwner) {
-           this.userService.assignTeamToMeetingWithMentor({teamOwnerId: currentUser.id, entryId: event.id, teamId: teamId}).subscribe((isAvailable) => {
-
-             event.isAvailable = isAvailable;
-
-           });
-         } else {
-           console.log("not team owner");
-         }
-      });
-    }
+  isUserTeamOwner(): boolean {
+    return Utils.isUserTeamOwner();
   }
 }

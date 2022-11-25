@@ -38,7 +38,10 @@ export class HackathonService {
 
   getAllHackathons(pageNumber: number):Observable<HackathonResponsePage> {
 
-    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10").pipe(
+    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10", {
+      headers : {'Access-Control-Allow-Origin': "*", 'Access-Control-Allow-Methods': ['GET', 'OPTIONS', 'PUT', 'POST'],
+        'Access-Control-Allow-Headers': ['Origin', 'Content-Type', 'X-Auth-Token']}
+    }).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }

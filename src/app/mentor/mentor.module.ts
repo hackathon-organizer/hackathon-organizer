@@ -13,6 +13,7 @@ import {adapterFactory} from 'angular-calendar/date-adapters/date-fns';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {FlatpickrModule} from "angularx-flatpickr";
+import {ToastrModule} from "ngx-toastr";
 
 @Injectable({
   providedIn: 'root'
@@ -62,7 +63,8 @@ export class CustomDateFormatter extends CalendarNativeDateFormatter {
     }),
     FormsModule,
     ReactiveFormsModule,
-    FlatpickrModule.forRoot()
+    FlatpickrModule.forRoot(),
+    ToastrModule
   ],
   providers: [
     {provide: CalendarDateFormatter, useClass: CustomDateFormatter}

@@ -77,11 +77,11 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner() {
-    return Utils.isUserTeamOwner(this.user.id, this.team.ownerId);
+    return Utils.isUserTeamOwner();
   }
 
   get isTeamMember() {
-    return Utils.isUserTeamMember(this.user.currentTeamId, this.teamId);
+    return Utils.isUserTeamMember();
   }
 
   redirectToTeamEdit() {
