@@ -20,16 +20,16 @@ export class ChatService {
 
   public connect(chatId: number): void {
 
-    this.logger.info("Starting web socket connection...");
+    //this.logger.info("Starting web socket connection...");
 
     if (!this.socket$ || this.socket$.closed) {
       this.socket$ = this.getNewWebSocket(chatId);
 
-      this.logger.info("Subscribing to websocket messages...");
+      //this.logger.info("Subscribing to websocket messages...");
 
       this.socket$.subscribe(
         (msg: BasicMessage) => {
-          this.logger.info("Message of type received", msg.messageType);
+         // this.logger.info("Message of type received", msg.messageType);
           this.messagesSubject.next(msg);
         }
       );
@@ -37,24 +37,24 @@ export class ChatService {
   }
 
   sendMessage(msg: BasicMessage): void {
-    this.logger.info("Sending message of type ", msg.messageType);
+    //this.logger.info("Sending message of type ", msg.messageType);
     this.socket$.next(msg);
   }
 
   private getNewWebSocket(chatId: number): WebSocketSubject<any> {
 
-    this.logger.info("Creating new websocket connection");
+    //this.logger.info("Creating new websocket connection");
 
     return webSocket({
       url: 'ws://localhost:9090/messages-websocket?username=' + localStorage.getItem('username') + '&chatId=' + chatId,
       openObserver: {
         next: () => {
-          this.logger.info("Websocket connection established successfully");
+          //this.logger.info("Websocket connection established successfully");
         }
       },
       closeObserver: {
         next: () => {
-          this.logger.info("Websocket connection closed. Restarting...");
+          //this.logger.info("Websocket connection closed. Restarting...");
           this.connect(chatId);
         }
       }

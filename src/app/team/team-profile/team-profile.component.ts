@@ -80,8 +80,8 @@ export class TeamProfileComponent implements OnInit {
     return Utils.isUserTeamOwner();
   }
 
-  get isTeamMember() {
-    return Utils.isUserTeamMember();
+  get isHackathonMember() {
+    return Utils.isUserHackathonMember(this.hackathonId);
   }
 
   redirectToTeamEdit() {

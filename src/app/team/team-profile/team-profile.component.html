@@ -34,7 +34,7 @@
           <button class="btn btn-success">Invite user</button>
         </a>
 
-        <button *ngIf="isTeamMember" (click)="joinToTeam()" class="btn btn-success">Join to team</button>
+        <button *ngIf="!isHackathonMember" (click)="joinToTeam()" class="btn btn-success">Join to team</button>
 
         <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">
           {{ team.isOpen ? 'Close for members' : 'Open for members' }}</button>

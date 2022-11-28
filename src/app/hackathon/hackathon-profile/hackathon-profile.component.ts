@@ -10,6 +10,7 @@ import {NGXLogger} from "ngx-logger";
 import {Utils} from "../../shared/Utils";
 import {HackathonRequest} from "../model/HackathonRequest";
 import {ToastrService} from "ngx-toastr";
+import * as Util from "util";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -37,7 +38,11 @@ export class HackathonProfileComponent implements OnInit {
   }
 
   joinHackathon() {
-     this.hackathonService.addUserToHackathon(this.hackathon.id).subscribe(
+
+    const user = Utils.currentUserFromLocalStorage;
+
+
+    this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).subscribe(
        () => {
          this.logger.info("User added to hackathon " + this.hackathon.name);
 
@@ -64,8 +69,6 @@ export class HackathonProfileComponent implements OnInit {
   // }
   isUserHackathonParticipant(): boolean {
 
-    const currentUser = Utils.currentUserFromLocalStorage;
-
-    return (currentUser.currentHackathonId === this.hackathon.id);
+    return Utils.isUserHackathonMember(this.hackathon.id);
   }
 }

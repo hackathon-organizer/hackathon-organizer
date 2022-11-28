@@ -1,24 +1,72 @@
-
 <section id="team-chat">
-  <div class="flex flex-col">
 
-    Users:
-    <div *ngFor="let user of users">
-      {{ user }}
+  <div id="video">
+
+    <div *ngIf="inCall" class="w-full relative">
+      <video class="z-10 rounded-lg mx-auto w-full bg-white" poster="assets/poster-no-video.svg" #remoteVideo
+             id="remote-view" [autoplay]="inCall"></video>
+
+      <video class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block"
+             poster="assets/poster-person.svg" #localVideo id="self-view" autoplay muted></video>
+
+
+      <div
+        class="absolute right-0 bottom-0 h-14 bg-gray-600 w-3/5 z-0 rounded-t-lg flex justify-center bg-opacity-40 space-x-14">
+        <button (click)="startVideo()" class="video-button" [ngClass]="localVideoActive ? 'bg-success' : ''">
+          <img src="assets/icons/camera.svg" alt="Camera">
+        </button>
+
+        <button (click)="startScreenShare()" class="video-button" [ngClass]="screenShareActive ? 'bg-success' : ''">
+          <img src="assets/icons/screen-share.svg" alt="Screen share">
+        </button>
+
+        <button (click)="muteMicrophone()" class="video-button" [ngClass]="microphoneActive ? 'bg-success' : ''">
+          <img *ngIf="microphoneActive" src="assets/icons/micro.svg" alt="Microphone">
+          <img *ngIf="!microphoneActive" src="assets/icons/mute.svg" alt="Mute microphone">
+        </button>
+
+        <button class="bg-error video-button hover:scale-110" (click)="hangUp()">
+          <img src="assets/icons/disconnect.svg" alt="Disconnect">
+        </button>
+
+        <button (click)="toggleFullscreen()" class="video-button">
+          <img src="assets/icons/fullscreen.svg" alt="Fullscreen">
+        </button>
+
+      </div>
     </div>
 
-<textarea rows="15" [(ngModel)]="str"  id="chat-window"></textarea>
-    <input class="my-5" type="text" [(ngModel)]="message" (keydown.enter)="sendTextMessage()">
-<input class="btn" (click)="sendTextMessage()"  type="submit" value="Send msg"/>
+    <audio #remoteAudio [autoplay]="inCall"></audio>
+
+
+    <br/>
+
+    <!--    <button class="btn" (click)="startVideo()"><img *ngIf="!inCall" src="../../../assets/icons/camera.svg" alt="Speaker icon">Share camera</button>-->
+    <!--    <button class="btn" (click)="pauseLocalVideo()">Stop Local</button>-->
+    <!--    <button class="btn" (click)="call()">Join voice chat</button>-->
+    <!--    <button class="btn" (click)="hangUp()">HangUp</button>-->
+    <!--    <button *ngIf="inCall" class="btn" (click)="startScreenShare()"><img *ngIf="!inCall" src="../../../assets/icons/screen-share.svg" alt="Speaker icon">Share screen</button>-->
   </div>
 
-   <video #localVideo id="self-view" autoplay></video>
-  <br/>
-  <video #remoteVideo id="remote-view" autoplay></video>
+  <div id="chat" class="w-4/5 mx-auto flex justify-center">
+    <div class="mx-8 flex flex-col w-4/5">
+      <textarea readonly class="textarea textarea-primary resize-none w-full" rows="15" [(ngModel)]="chatMessages"
+                id="chat-window"></textarea>
+      <div class="flex items-center mt-4">
+        <input class="mr-5 w-full input input-primary w-full" type="text" [(ngModel)]="message"
+               placeholder="Type your message here..." (keydown.enter)="sendTextMessage()">
+        <input class="btn btn-primary" (click)="sendTextMessage()" type="submit" value="Send"/>
+      </div>
+    </div>
+    <div class="ml-4 bg-gray-800 py-3 px-6 rounded-lg w-1/5 flex flex-col justify-between">
+      <div>
+        <span class="text-2xl text-success">Online users: </span>
+        <ul class="mt-3 space-y-2">
+          <li class="bg-gray-600 p-2 rounded-lg" *ngFor="let user of users"><img *ngIf="inCall" src="../../../assets/icons/speaker.svg" alt="Speaker icon">{{ user }}</li>
+        </ul>
+      </div>
 
-  <button  class="btn" (click)="startLocalVideo()">Start Local</button>
-  <button  class="btn" (click)="pauseLocalVideo()" >Stop Local</button>
-  <button  class="btn" (click)="call()" >Call</button>
-  <button class="btn" (click)="hangUp()" >HangUp</button>
-  <button class="btn" (click)="startScreenShare()" >Share</button>
+      <button (click)="call()" class="btn btn-info mt-4">Join voice chat</button>
+    </div>
+  </div>
 </section>

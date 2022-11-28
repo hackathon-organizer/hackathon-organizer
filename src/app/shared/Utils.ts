@@ -27,10 +27,27 @@ export class Utils {
   }
 
   public static isUserTeamOwner() {
-     return this.currentUserFromLocalStorage.id === this.currentUserTeamFromLocalStorage.ownerId;
+
+    if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
+      return this.currentUserFromLocalStorage.id === this.currentUserTeamFromLocalStorage.ownerId;
+    } else {
+      return false;
+    }
   }
 
   public static isUserTeamMember() {
+    if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
       return this.currentUserFromLocalStorage.currentTeamId === this.currentUserTeamFromLocalStorage.id;
+    } else {
+      return false;
+    }
+  }
+
+  public static isUserHackathonMember(hackathonId: number) {
+    if (this.currentUserFromLocalStorage) {
+      return this.currentUserFromLocalStorage.currentHackathonId === hackathonId;
+    } else {
+      return false;
+    }
   }
 }

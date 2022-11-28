@@ -46,8 +46,7 @@ export class HackathonService {
       ));
   }
 
-  addUserToHackathon(hackathonId: number):Observable<any> {
-    const userId = localStorage.getItem("userId");
+  addUserToHackathon(hackathonId: number, userId: number):Observable<any> {
 
     return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null).pipe(
       catchError((error) => this.errorHandler.handleError(error)
