@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {TeamProfileComponent} from './team-profile/team-profile.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -7,7 +7,13 @@ import {TeamRoutingModule} from "./team-routing.module";
 import {Router, RouterModule} from "@angular/router";
 import {TeamChatComponent} from './team-chat/team-chat.component';
 import {NgxPaginationModule} from "ngx-pagination";
+import {OpenViduAngularConfig, OpenViduAngularModule} from "openvidu-angular";
+import {environment} from "../../environments/environment.prod";
 
+
+const config: OpenViduAngularConfig = {
+  production: environment.production
+};
 
 @NgModule({
   declarations: [
@@ -24,7 +30,10 @@ import {NgxPaginationModule} from "ngx-pagination";
     ReactiveFormsModule,
     SharedModule,
     RouterModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+  ]      ,
+  schemas: [
+    CUSTOM_ELEMENTS_SCHEMA
   ]
 })
 export class TeamModule {

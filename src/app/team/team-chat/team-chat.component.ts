@@ -1,78 +1,68 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {Client, Versions} from "@stomp/stompjs";
+import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ChatMessage} from "../model/ChatMessage";
-import * as dayjs from "dayjs";
 import {ChatService} from "../../core/services/chat-service/chat.service";
 import {HttpClient} from "@angular/common/http";
 import {MessageType} from "../model/MessageType";
 import {NGXLogger} from "ngx-logger";
-import {log} from "util";
+import {OpenVidu, Publisher, Session, StreamEvent, StreamManager, Subscriber, VideoInsertMode} from 'openvidu-browser';
+import {BasicMessage} from "../model/BasicMessage";
+import {Utils} from "../../shared/Utils";
 
 @Component({
   selector: 'ho-team-chat',
   templateUrl: './team-chat.component.html',
   styleUrls: []
 })
-export class TeamChatComponent implements AfterViewInit {
+export class TeamChatComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('localVideo') localVideo!: ElementRef;
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
-  @ViewChild('remoteAudio') remoteAudio!: ElementRef;
-
-
-  mediaConstraints = {
-    audio: true,
-    video: {
-      frameRate: {ideal: 30, max: 60},
-      width: {ideal: 1280, max: 1920},
-      height: {ideal: 720, max: 1080},
-      disableSimulcast: true,
-      enableLayerSuspension: false,
-      preferH264: true,
-      disableH264: false,
-      disableRtx: true,
-      enableTcc: true,
-      desktopSharingFrameRate: {
-        min: 25,
-        max: 25
-      },
-    }
-  };
+  @ViewChild('subscribersAudio') subscribersAudio!: ElementRef;
+  @ViewChild('videos') videosContainer!: ElementRef;
 
   private routeSubscription: Subscription = new Subscription();
 
-  message: string = '';
+  message: string = "";
   messages: ChatMessage[] = [];
-
-  chatMessages = '';
+  chatMessages = "";
 
   chatRoomId: number = 0;
   chatRoomTitle: string = "";
   users: any[] = [];
 
-  private peerConnection!: RTCPeerConnection;
-  private localStream!: MediaStream;
 
-  storedVideo!: any;
+  OV!: OpenVidu;
+  session!: Session;
+  publisher!: StreamManager;
+  subscribers: StreamManager[] = [];
+  mainStreamManager!: StreamManager;
+  sessionToken?: string;
+  sessionId?: string;
+
+  locked = true;
+
+  audioActive = true;
+  videoActive = false;
+  screenActive = false;
 
   inCall = false;
-  localVideoActive = false;
-  microphoneActive = true;
-  cameraActive = false;
-  screenShareActive = false;
 
-  senders: RTCRtpSender[] = [];
-
-
-  constructor(private chatService: ChatService, private logger: NGXLogger,
-              private http: HttpClient, private route: ActivatedRoute,
+  constructor(private chatService: ChatService,
+              private logger: NGXLogger,
+              private http: HttpClient,
+              private route: ActivatedRoute,
               private teamService: TeamService) {
   }
 
   ngAfterViewInit(): void {
+
+    // TODO move to route subscription
+
+    this.chatService.connect(1);
+    this.chatService.messages$.subscribe(msg => this.messageHandler(msg));
 
     this.routeSubscription = this.route.params.subscribe(params => {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
@@ -80,346 +70,222 @@ export class TeamChatComponent implements AfterViewInit {
         this.chatRoomId = team.teamChatRoomId;
         this.chatRoomTitle = team.name;
 
-        this.chatService.getChatRoomMessages(1).subscribe(messages => {
+
+        this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
           this.messages = messages;
 
           messages.forEach(msg => this.updateChat(msg));
         });
       })
     });
-
-    this.addIncomingMessageHandler();
-    this.requestMediaDevices();
   }
 
-  async call(): Promise<void> {
+  messageHandler(message: BasicMessage) {
+
+    switch (message.messageType) {
+      case MessageType.SESSION: {
+
+        this.sessionId = message.data.videoSessionId;
+        this.sessionToken = message.data.videoSessionToken;
+
+        this.locked = false;
+        break;
+      }
+      case MessageType.JOIN: {
+        this.updateChatParticipants(message.data);
+        break;
+      }
+      case MessageType.MESSAGE: {
+        this.updateChat(message.data);
+        break;
+      }
+      case MessageType.VIDEO_IN_PROGRESS: {
+
+        if (!this.videoActive && !this.screenActive) {
+          this.locked = message.data.sharing;
+        }
+        break;
+      }
+    }
+  }
+
+  joinSession() {
     this.inCall = true;
 
-    this.createPeerConnection();
+    this.OV = new OpenVidu();
 
+    this.session = this.OV.initSession();
 
-    this.localStream.getTracks().forEach(
-      track => {
-          track.enabled = false;
-          this.senders.push(this.peerConnection.addTrack(track, this.localStream))
+    this.session.on('streamCreated', (event: StreamEvent) => {
+
+      let subscriber: Subscriber = this.session.subscribe(event.stream, undefined);
+
+      this.subscribers.push(subscriber);
+
+      if (subscriber.stream.hasAudio) {
+        subscriber.createVideoElement(this.subscribersAudio.nativeElement, VideoInsertMode.APPEND);
       }
-    );
 
-    this.startLocalAudio();
+      if (subscriber.stream.hasVideo) {
+        subscriber.removeAllVideos();
+        subscriber.addVideoElement(this.remoteVideo.nativeElement);
+      }
+    });
 
-    try {
+    this.session.on('streamDestroyed', (event: StreamEvent) => {
 
-      const offer: RTCSessionDescriptionInit = await this.peerConnection.createOffer();
+      this.deleteSubscriber(event.stream.streamManager);
+    });
 
-      await this.peerConnection.setLocalDescription(offer);
+    this.session.on('exception', (exception) => {
+      console.warn(exception);
+    });
 
-      //this.inCall = true;
+    const token = this.getToken();
 
-      // if (this.storedVideo) {
-      //   console.log(this.storedVideo)
-      //   this.remoteVideo.nativeElement.srcObject = this.storedVideo;
-      // } else {
-       // this.startLocalAudio();
-     // }
-
-
-
-      this.chatService.sendMessage({messageType: MessageType.OFFER, data: offer});
-
-      this.microphoneActive = true;
-    } catch (err: any) {
-      this.handleError(err);
-    }
-  }
-
-  hangUp(): void {
-    this.pauseLocalVideo();
-    this.localVideoActive = false;
-    this.screenShareActive = false;
-
-    this.chatService.sendMessage({messageType: MessageType.HANGUP, data: ''});
-    this.closeVideoCall();
-  }
-
-  private addIncomingMessageHandler(): void {
-    this.chatService.connect(1);
-
-    this.chatService.messages$.subscribe(msg => {
-
-        switch (msg.messageType) {
-          case MessageType.OFFER:
-            this.handleOfferMessage(msg.data);
-            break;
-          case MessageType.ANSWER:
-            this.handleAnswerMessage(msg.data);
-            break;
-          case MessageType.HANGUP:
-            this.handleHangupMessage();
-            break;
-          case MessageType.ICE_CANDIDATE:
-            this.handleICECandidateMessage(msg.data);
-            break;
-          case MessageType.MESSAGE:
-            this.updateChat(msg.data);
-            break;
-          case MessageType.JOIN:
-            this.updateChatParticipants(msg.data);
-            break;
-        }
-      },
-      this.handleError
-    );
-  }
-
-  /* ########################  MESSAGE HANDLERS  ################################## */
-
-  private handleOfferMessage(msg: RTCSessionDescriptionInit): void {
-    //this.logger.info("Handling incoming offer");
-    if (!this.peerConnection) {
-
-      //this.logger.info("Peer connection not exist. Creating one now...");
-
-      this.createPeerConnection();
-    }
-
-    if (!this.localStream) {
-
-      //this.logger.info("Local video not exist. Starting one now...");
-
-      this.startLocalAudio();
-    }
-
-
-    this.peerConnection.setRemoteDescription(new RTCSessionDescription(msg))
+    this.session.connect(token)
       .then(() => {
 
-        //this.logger.info("Adding media stream to local video");
+        let publisher: Publisher = this.OV.initPublisher(undefined, {
+          audioSource: undefined,
+          videoSource: false,
+          publishAudio: true,
+          publishVideo: false,
+        });
 
-        // if video...
-        // this.localStream.getVideoTracks().forEach(t => {
-        //   this.localVideo.nativeElement.srcObject = t;
-        // })
+        this.session.publish(publisher);
 
+        this.mainStreamManager = publisher;
+        this.publisher = publisher;
 
-        //this.logger.info("Adding media tracks to remote connection");
-
-        this.localStream.getTracks().forEach(
-          track => {
-             // this.peerConnection.addTrack(track, this.localStream)
-            console.log(track)
-
-            track.enabled = false;
-          }
-        );
-
-      }).then(() => {
-
-      //this.logger.info("Building SDP for answer message");
-
-      return this.peerConnection.createAnswer();
-    }).then((answer) => {
-
-      //this.logger.info("Setting local SDP");
-
-      return this.peerConnection.setLocalDescription(answer);
-    }).then(() => {
-
-      // this.logger.info("Sending local SDP to remote party");
-
-      this.chatService.sendMessage({messageType: MessageType.ANSWER, data: this.peerConnection.localDescription});
-      // this.inCall = true;
-    }).catch(this.handleError);
-  }
-
-  private handleAnswerMessage(msg: RTCSessionDescriptionInit): void {
-
-    //this.logger.info("Handling answer message", msg);
-
-    this.peerConnection.setRemoteDescription(msg);
-  }
-
-  private handleHangupMessage(): void {
-
-    this.logger.info("Handling hang up message");
-
-    this.closeVideoCall();
-  }
-
-  private handleICECandidateMessage(msg: RTCIceCandidate): void {
-
-    this.logger.info("Handling ice candidate", msg);
-
-    const candidate = new RTCIceCandidate(msg);
-    this.peerConnection.addIceCandidate(candidate).catch(this.handleError);
-  }
-
-  private async requestMediaDevices(): Promise<void> {
-
-    this.logger.info("Requesting users media devices");
-
-    try {
-      this.localStream = await navigator.mediaDevices.getUserMedia(this.mediaConstraints);
-      // this.pauseLocalVideo();
-    } catch (err: any) {
-      this.handleError(err);
-    }
-  }
-
-  startLocalAudio(): void {
-
-    // this.logger.info("Starting local video");
-
-    this.localStream.getAudioTracks().find(track => {
-        track.enabled = true;
-    });
-
-    console.log();
-  }
-
-  startVideo() {
-    this.localStream.getTracks().forEach(track => {
-      track.enabled = true;
-    });
-
-    this.localVideo.nativeElement.srcObject = this.localStream;
-
-    // this.localVideoActive = true;
-
-    // @ts-ignore
-    // this.senders.find(sender => sender.track.kind === 'video').track.enabled = true;
-
-
-    this.localVideoActive = !this.localVideoActive;
-  }
-
-  pauseLocalVideo(): void {
-
-    //this.logger.info("Pausing local video");
-
-    this.localStream.getTracks().forEach(track => {
-      track.enabled = false;
-    });
-    this.localVideo.nativeElement.srcObject = undefined;
-
-    this.localVideoActive = false;
-  }
-
-  private createPeerConnection(): void {
-
-    //this.logger.info("Creating new peer connection");
-
-    this.peerConnection = new RTCPeerConnection();
-
-    this.peerConnection.onicecandidate = this.handleICECandidateEvent;
-    this.peerConnection.onsignalingstatechange = this.handleSignalingStateChangeEvent;
-    this.peerConnection.ontrack = this.handleTrackEvent;
-  }
-
-  private closeVideoCall(): void {
-
-    if (this.peerConnection) {
-      this.peerConnection.ontrack = null;
-      this.peerConnection.onicecandidate = null;
-      this.peerConnection.onsignalingstatechange = null;
-
-      this.peerConnection.getTransceivers().forEach(transceiver => {
-        transceiver.stop();
+        this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
+      })
+      .catch(error => {
+        console.log('There was an error connecting to the session:', error.code, error.message);
       });
+  }
 
-      this.peerConnection.close();
-      this.inCall = false;
+  updatePublisher() {
+    if (this.publisher instanceof Publisher) {
+      this.session.unpublish(this.publisher);
     }
+
+    let newPublisher: Publisher = this.OV.initPublisher(undefined, {
+      audioSource: undefined,
+      videoSource: this.videoActive,
+      publishAudio: this.audioActive,
+      publishVideo: this.videoActive,
+      resolution: '1920x1080',
+      frameRate: 30,
+      insertMode: 'APPEND',
+      mirror: false
+    });
+
+    this.session.publish(newPublisher);
+
+    this.mainStreamManager = newPublisher;
+    this.publisher = newPublisher;
+
+    this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
   }
 
-  /* ########################  ERROR HANDLER  ################################## */
-  private handleError(err: Error): void {
+  audio() {
+    this.audioActive = !this.audioActive;
 
-    console.log(err);
-
-    // this.logger.error("Handling error ", err);
-
-    this.closeVideoCall();
+    this.updatePublisher();
   }
 
-  /* ########################  EVENT HANDLER  ################################## */
-  private handleICECandidateEvent = (event: RTCPeerConnectionIceEvent) => {
+  video() {
+    this.videoActive = !this.videoActive;
 
-    //this.logger.info("Handling new ice candidate", event.candidate);
-
-    if (event.candidate) {
+    if (this.videoActive) {
       this.chatService.sendMessage({
-        messageType: MessageType.ICE_CANDIDATE,
-        data: event.candidate
+        messageType: MessageType.VIDEO_IN_PROGRESS,
+        data: {
+          sharing: true
+        }
+      });
+    } else {
+      this.chatService.sendMessage({
+        messageType: MessageType.VIDEO_IN_PROGRESS,
+        data: {
+          sharing: false
+        }
       });
     }
+
+    this.updatePublisher();
   }
 
-  private handleSignalingStateChangeEvent = () => {
-
-    //this.logger.info("Signaling state changed");
-
-    switch (this.peerConnection.signalingState) {
-      case 'closed':
-        this.closeVideoCall();
-        break;
-    }
-  }
-
-  async startScreenShare() {
-
-    //this.logger.info("Starting sharing screen...");
-
-    const displayMediaStream = await navigator.mediaDevices.getDisplayMedia(this.mediaConstraints);
-
-    console.log(this.senders)
-
-
-    if (this.senders.length > 0) {
-
-      // @ts-ignore
-      await this.senders.find((sender: RTCRtpSender) => sender.track.kind === 'video').replaceTrack(displayMediaStream.getTracks()[0]);
+  startSharingScreen() {
+    if (this.publisher instanceof Publisher) {
+      this.session.unpublish(this.publisher);
     }
 
-    this.localVideo.nativeElement.srcObject = displayMediaStream;
+    let newPublisher: Publisher = this.OV.initPublisher(undefined, {
+      audioSource: undefined,
+      videoSource: "screen",
+      publishAudio: true,
+      publishVideo: true,
+      resolution: '1920x1080',
+      frameRate: 30,
+      insertMode: 'APPEND',
+      mirror: false
+    });
 
-    this.screenShareActive = true;
+    this.session.publish(newPublisher);
 
-    // TODO implement stop sharing
-  }
+    this.mainStreamManager = newPublisher;
+    this.publisher = newPublisher;
 
-  private handleTrackEvent = (event: RTCTrackEvent) => {
-
-    this.logger.info("Handling remote track event");
-
-    //console.log(event.streams)
-
-    console.log(event.streams)
-
-    // event.streams[0].getAudioTracks().forEach(t => {
-    //   this.remoteAudio.nativeElement.srcObject = t;
-    // });
-
-    // this.remoteAudio.nativeElement.srcObject = event.streams[0];
-    //this.remoteVideo.nativeElement.srcObject = event.streams[0];
-
-
-    event.streams.forEach(stream => {
-      console.log(stream)
-      stream.getTracks().forEach(track => {
-        console.log(track)
-        if (track.kind === 'audio' && track.enabled) {
-          console.log('audio')
-          this.remoteAudio.nativeElement.srcObject = event.streams[0];
-        } else if (track.kind === 'video' && track.enabled) {
-          this.remoteAudio.nativeElement.srcObject = null;
-          this.remoteVideo.nativeElement.srcObject = event.streams[0];
+    if (this.publisher instanceof Publisher) {
+      this.publisher.once('accessAllowed', (event) => {
+        this.publisher.stream.getMediaStream().getVideoTracks()[0].addEventListener('ended', () => {
+          console.log('User pressed the "Stop sharing" button');
+        });
+        if (this.publisher instanceof Publisher) {
+          this.session.publish(this.publisher);
         }
 
+      });
 
-      })
-    })
+      this.publisher.once('accessDenied', (event) => {
+        console.warn('ScreenShare: Access Denied');
+      });
+    }
 
-    //this.remoteVideo.nativeElement.srcObject = event.streams[0];
+    this.mainStreamManager.addVideoElement(this.remoteVideo.nativeElement);
+  }
+
+
+  getToken(): string {
+
+    if (this.sessionToken) {
+      return this.sessionToken;
+    } else {
+      throw new Error("No token found. Please refresh page.")
+    }
+  }
+
+  getSessionId(): string {
+
+    if (this.sessionId) {
+      return this.sessionId;
+    } else {
+      throw new Error("No session found. Please refresh page.")
+    }
+  }
+
+  leaveSession() {
+
+    this.inCall = false;
+  }
+
+  private deleteSubscriber(streamManager: StreamManager): void {
+    let index = this.subscribers.indexOf(streamManager, 0);
+    if (index > -1) {
+      this.subscribers.splice(index, 1);
+    }
   }
 
   private updateChatParticipants(users: any[]) {
@@ -433,21 +299,17 @@ export class TeamChatComponent implements AfterViewInit {
 
   sendTextMessage() {
     const chatMessage: ChatMessage = {
-      username: localStorage.getItem("username")!,
-      userId: localStorage.getItem("userId")!, entryText: this.message, chatId: 1
+      username: Utils.currentUserFromLocalStorage.username,
+      userId: Utils.currentUserFromLocalStorage.id,
+      entryText: this.message,
+      chatId: 1
     }
 
     this.updateChat(chatMessage);
 
-    const basicMessage = {messageType: MessageType.MESSAGE, data: chatMessage};
+    const message = {messageType: MessageType.MESSAGE, data: chatMessage};
 
-    this.chatService.sendMessage(basicMessage);
-  }
-
-  muteMicrophone() {
-    this.microphoneActive = !this.microphoneActive;
-    this.localStream.getAudioTracks().forEach(track => track.enabled = true);
-
+    this.chatService.sendMessage(message);
   }
 
   toggleFullscreen() {
@@ -462,5 +324,10 @@ export class TeamChatComponent implements AfterViewInit {
     } else if (remoteVideo.msRequestFullscreen) {
       remoteVideo.msRequestFullscreen();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.leaveSession();
+    this.routeSubscription.unsubscribe();
   }
 }

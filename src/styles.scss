@@ -44,6 +44,39 @@ textarea::-webkit-scrollbar-thumb {
   @apply p-4 flex justify-center items-center hover:scale-110;
 }
 
+.collapse {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .5s cubic-bezier(0, 1, 0, 1);
+
+  &.show {
+    max-height: 99rem;
+    transition: max-height .5s ease-in-out;
+  }
+}
+
+:root {
+  --ov-primary-color: #303030;
+  --ov-secondary-color: #3e3f3f;
+  --ov-tertiary-color: #598eff;
+  --ov-warn-color: #eb5144;
+  --ov-accent-color: #ffae35;
+  --ov-light-color: #e6e6e6;
+
+  --ov-logo-background-color: #3a3d3d;
+
+  --ov-text-color: #ffffff;
+
+  --ov-panel-text-color: #1d1d1d;
+  --ov-panel-background: #ffffff;
+
+  --ov-buttons-radius: 50%;
+  --ov-leave-button-radius: 10px;
+  --ov-video-radius: 5px;
+  --ov-panel-radius: 5px;
+}
+
 @tailwind components;
 @tailwind utilities;
 

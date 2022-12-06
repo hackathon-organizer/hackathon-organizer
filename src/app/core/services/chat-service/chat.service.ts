@@ -33,8 +33,11 @@ export class ChatService {
           this.messagesSubject.next(msg);
         }
       );
+    } else {
+      this.logger.info("Connection already exists");
     }
   }
+
 
   sendMessage(msg: BasicMessage): void {
     //this.logger.info("Sending message of type ", msg.messageType);
@@ -43,18 +46,18 @@ export class ChatService {
 
   private getNewWebSocket(chatId: number): WebSocketSubject<any> {
 
-    //this.logger.info("Creating new websocket connection");
+    this.logger.info("Creating new websocket connection");
 
     return webSocket({
       url: 'ws://localhost:9090/messages-websocket?username=' + localStorage.getItem('username') + '&chatId=' + chatId,
       openObserver: {
         next: () => {
-          //this.logger.info("Websocket connection established successfully");
+          this.logger.info("Websocket connection established successfully");
         }
       },
       closeObserver: {
         next: () => {
-          //this.logger.info("Websocket connection closed. Restarting...");
+          this.logger.info("Websocket connection closed. Restarting...");
           this.connect(chatId);
         }
       }
