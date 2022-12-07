@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 import {Utils} from "../../shared/Utils";
+import {Notification} from "../../user/model/Notification";
 
 @Component({
   selector: 'ho-menu',
@@ -13,6 +14,11 @@ export class MenuComponent implements OnInit {
   userHackathonId: number = 0;
   userTeamId: number = 0;
   currentUserId = 0;
+  username = "";
+
+  avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff";
+
+  notifications: Notification[] = [];
 
   constructor(private userService: UserService) {
   }
@@ -21,9 +27,16 @@ export class MenuComponent implements OnInit {
     this.userService.initWsConn();
 
     if (Utils.currentUserFromLocalStorage) {
-      this.currentUserId = Utils.currentUserFromLocalStorage.id;
-      this.userHackathonId = Utils.currentUserFromLocalStorage.currentHackathonId;
-      this.userTeamId = Utils.currentUserFromLocalStorage.currentTeamId;
+
+      const user = Utils.currentUserFromLocalStorage;
+
+      this.currentUserId = user.id;
+      this.userHackathonId = user.currentHackathonId;
+      this.userTeamId = user.currentTeamId;
+
+      this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
+
+      this.userService.userNotificationsObservable.subscribe(notifications => this.notifications = notifications);
     }
   }
 

@@ -1,4 +1,5 @@
 export enum NotificationType {
   INVITATION = "INVITATION",
-  MEETING = "MEETING"
+  MEETING = "MEETING",
+  TAGS = "TAGS"
 }

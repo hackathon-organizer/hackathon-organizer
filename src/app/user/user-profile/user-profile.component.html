@@ -42,13 +42,14 @@
       </div>
     </div>
 
-    <div>
+    <div id="#notifications">
       Notifications:
 
       <div *ngFor="let not of notificationsArray; let i = index;">
 
         <span *ngIf="not.notificationType === 'INVITATION'">User {{ asInvitation(not).fromUserName }} invited you to team {{ asInvitation(not).teamName }}</span>
         <span *ngIf="not.notificationType === 'MEETING'">You can join meeting with team {{ asMeeting(not).teamId }}</span>
+        <span *ngIf="not.notificationType === 'TAGS'">{{ not.message }}</span>
 
         <div *ngIf="not.notificationType === 'INVITATION'">
         <button class="m-5" (click)="acceptInvitation(i, true)">Accept</button>

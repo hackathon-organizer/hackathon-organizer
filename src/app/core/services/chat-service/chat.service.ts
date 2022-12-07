@@ -33,8 +33,6 @@ export class ChatService {
           this.messagesSubject.next(msg);
         }
       );
-    } else {
-      this.logger.info("Connection already exists");
     }
   }
 

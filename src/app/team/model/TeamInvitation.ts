@@ -1,4 +1,4 @@
-import {NotificationType} from "../../user/model/NotificationType";
+import {Notification} from "../../user/model/Notification";
 
 export interface TeamInvitation extends Notification{
 
@@ -8,5 +8,4 @@ export interface TeamInvitation extends Notification{
   invitationStatus: string;
   teamName: string;
   teamId: number;
-  notificationType: NotificationType
 }

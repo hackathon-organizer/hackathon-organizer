@@ -65,7 +65,7 @@ export class UserService {
     });
   }
 
-  openWsConn(kcUserId: string) {
+  openWsConn() {
     const client = new Client({
       brokerURL: 'ws://localhost:9090/hackathon-websocket',
       debug: function (str) {
@@ -127,6 +127,11 @@ export class UserService {
     this.http.get<User>('http://localhost:9090/api/v1/read/users/keycloak/' + this.getKcId()).subscribe(userData => {
       this.user = userData;
       console.log(userData);
+
+      if (userData.tags.length < 1) {
+        this.userNotifications.next(
+          this.userNotifications.value.concat({notificationType: NotificationType.TAGS, message: "Add some tags to find teams faster."} as Notification));
+      }
 
       localStorage.setItem("userId", String(userData.id));
       localStorage.setItem("username", userData.username);

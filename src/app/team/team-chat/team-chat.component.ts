@@ -59,17 +59,14 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
 
-    // TODO move to route subscription
-
-    this.chatService.connect(1);
-    this.chatService.messages$.subscribe(msg => this.messageHandler(msg));
-
     this.routeSubscription = this.route.params.subscribe(params => {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
 
         this.chatRoomId = team.teamChatRoomId;
         this.chatRoomTitle = team.name;
 
+        this.chatService.connect(this.chatRoomId);
+        this.chatService.messages$.subscribe(message => this.messageHandler(message));
 
         this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
           this.messages = messages;
