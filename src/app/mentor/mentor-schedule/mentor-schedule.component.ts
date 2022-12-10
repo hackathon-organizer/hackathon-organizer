@@ -91,12 +91,17 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   private getUserSchedule() {
-    this.userService.getUserSchedule(this.currentUser.currentHackathonId).subscribe(schedule => {
 
-      this.logger.info("User schedule received ", schedule)
+    if (this.currentUser.currentHackathonId){
+      this.userService.getUserSchedule(this.currentUser.currentHackathonId).subscribe(schedule => {
 
-      this.mapToCalendarEvents(schedule);
-    });
+        this.logger.info("User schedule received ", schedule)
+
+        this.mapToCalendarEvents(schedule);
+      });
+    } else {
+      this.logger.info("User is not a hackathon participant");
+    }
   }
 
   eventTimesChanged(timesChangedEvent: CalendarEventTimesChangedEvent): void {

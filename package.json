@@ -25,6 +25,7 @@
     "daisyui": "^2.20.0",
     "date-fns": "^2.29.1",
     "dayjs": "^1.11.5",
+    "deep-equal": "^2.1.0",
     "flatpickr": "^4.6.13",
     "keycloak-angular": "^12.1.0",
     "keycloak-js": "^19.0.1",

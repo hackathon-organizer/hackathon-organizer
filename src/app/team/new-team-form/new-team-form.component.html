@@ -33,7 +33,7 @@
 
         <div class="flex flex-wrap my-5">
         <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
-          <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">+
+          <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
           <input type="checkbox" class="appearance-none" (change)="markTag(i)" [formControlName]="tag.id" />{{ tags[i].name }}
           </label>
         </div>

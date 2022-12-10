@@ -6,6 +6,8 @@ import {HackathonService} from "../../core/services/hackathon-service/hackathon.
 import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
 import flatpickr from "flatpickr";
+import {Utils} from "../../shared/Utils";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'ho-new-hackathon-form',
@@ -15,12 +17,14 @@ import flatpickr from "flatpickr";
 export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
+  user = Utils.currentUserTeamFromLocalStorage;
 
   constructor(
     private formBuilder: FormBuilder,
     private hackathonService: HackathonService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private toastr: ToastrService
   ) {
   }
 
@@ -45,9 +49,15 @@ export class NewHackathonFormComponent implements OnInit {
       eventEndDate: this.newHackathonForm.get('endDate')?.value
     };
 
+    // TODO fork join
+
     this.hackathonService.createHackathon(hackathon).subscribe(hackathonResponse => {
 
-      this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
+      this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id}).subscribe(() => {
+        this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
+
+        this.toastr.success("Hackathon " + hackathon.name + " created successfully");
+      });
     });
   }
 

@@ -11,6 +11,7 @@ import {Utils} from "../../shared/Utils";
 import {HackathonRequest} from "../model/HackathonRequest";
 import {ToastrService} from "ngx-toastr";
 import * as Util from "util";
+import {UserService} from "../../core/services/user-service/user.service";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -23,8 +24,8 @@ export class HackathonProfileComponent implements OnInit {
 
   hackathon!: HackathonDto;
 
-  constructor(private hackathonService: HackathonService, private teamService: TeamService, private route: ActivatedRoute,
-              private logger: NGXLogger, private toastr: ToastrService) { }
+  constructor(private hackathonService: HackathonService, private teamService: TeamService, private userService: UserService,
+              private route: ActivatedRoute, private logger: NGXLogger, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
@@ -41,17 +42,21 @@ export class HackathonProfileComponent implements OnInit {
 
     const user = Utils.currentUserFromLocalStorage;
 
+    // TODO fork join
 
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).subscribe(
        () => {
          this.logger.info("User added to hackathon " + this.hackathon.name);
 
-         const currentUser: UserResponseDto = Utils.currentUserFromLocalStorage;
-         currentUser.currentHackathonId = this.hackathon.id;
+         this.userService.updateUserMembership({currentHackathonId: this.hackathon.id}).subscribe(() => {
 
-         Utils.updateUserInLocalStorage(currentUser);
+           const currentUser: UserResponseDto = Utils.currentUserFromLocalStorage;
+           currentUser.currentHackathonId = this.hackathon.id;
 
-         this.toastr.success("You are now member of hackathon " + this.hackathon.name);
+           Utils.updateUserInLocalStorage(currentUser);
+
+           this.toastr.success("You are now member of hackathon " + this.hackathon.name);
+         });
        });
   }
 

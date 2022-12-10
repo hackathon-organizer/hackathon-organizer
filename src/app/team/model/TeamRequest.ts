@@ -3,7 +3,7 @@ import {HackathonDto} from "../../hackathon/model/Hackathon";
 export interface Tag {
   readonly id: number;
   readonly name: string;
-  isSelected?: boolean;
+  isSelected: boolean;
 }
 
 export interface TeamRequest {

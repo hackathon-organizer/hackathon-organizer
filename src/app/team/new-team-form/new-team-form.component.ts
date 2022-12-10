@@ -95,7 +95,11 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
           this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
           Utils.updateTeamInLocalStorage(createdTeam);
-          this.toastr.success("Team " + team.name + " created successfully");
+
+          this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: createdTeam.id}).subscribe(() => {
+            this.toastr.success("Team " + team.name + " created successfully");
+
+          });
         });
       }
     }

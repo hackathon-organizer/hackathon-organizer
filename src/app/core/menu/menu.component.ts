@@ -11,12 +11,12 @@ import {Notification} from "../../user/model/Notification";
 export class MenuComponent implements OnInit {
 
 
-  userHackathonId: number = 0;
-  userTeamId: number = 0;
+  userHackathonId?: number = 0;
+  userTeamId?: number;
   currentUserId = 0;
   username = "";
 
-  avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff";
+  avatarUrl = "";
 
   notifications: Notification[] = [];
 
@@ -33,6 +33,8 @@ export class MenuComponent implements OnInit {
       this.currentUserId = user.id;
       this.userHackathonId = user.currentHackathonId;
       this.userTeamId = user.currentTeamId;
+
+      console.log(user.currentTeamId)
 
       this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
 

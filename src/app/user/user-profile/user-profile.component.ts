@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {Subscription} from "rxjs";
+import {forkJoin, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {UserResponseDto} from "../model/UserResponseDto";
 import {TeamService} from "../../core/services/team-service/team.service";
@@ -8,6 +8,11 @@ import {TeamInvitation} from "../../team/model/TeamInvitation";
 import {Notification} from "../model/Notification";
 import {NotificationType} from "../model/NotificationType";
 import {MeetingNotification} from "../../team/model/MeetingNotification";
+import {FormBuilder, FormGroup} from "@angular/forms";
+import {Tag} from "../../team/model/TeamRequest";
+import {ToastrService} from "ngx-toastr";
+import {Utils} from "../../shared/Utils";
+import {KeycloakService} from "keycloak-angular";
 
 @Component({
   selector: 'ho-user-profile',
@@ -21,8 +26,24 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   notificationsArray: Notification[] = [];
 
   user!: UserResponseDto;
+  avatarUrl = "";
 
-  constructor(private route: ActivatedRoute, private userService: UserService, private teamService: TeamService) {
+  editMode = false;
+
+  userEditForm!: FormGroup;
+  tags: Tag[] = [];
+
+  currentTeamName?: string;
+  currentUserId?: number;
+
+  userRoles: string[] = [];
+
+  constructor(private route: ActivatedRoute,
+              private userService: UserService,
+              private keycloakService: KeycloakService,
+              private teamService: TeamService,
+              private formBuilder: FormBuilder,
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
@@ -33,15 +54,19 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.routeSubscription = this.route.params.subscribe(params => {
 
-      this.userService.getUserById(params['id']).subscribe(user => this.user = user);
-    })
+      this.userService.getUserById(params['id']).subscribe(user => {
+        this.user = user;
+        this.currentUserId = Utils.currentUserFromLocalStorage.id;
 
-    console.log("current user");
-    console.log(this.userService.user);
+        this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
+
+        this.currentTeamName = Utils.currentUserTeamFromLocalStorage?.name;
+      });
+    });
   }
 
-  ngOnDestroy(): void {
-    this.routeSubscription.unsubscribe();
+  checkIfUserHasMentorRole() {
+    return this.userService.checkUserAccess;
   }
 
   inviteToTeam() {
@@ -55,11 +80,20 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe();
   }
 
-  acceptInvitation(inviteNumber: number, accepted: boolean) {
+  updateInvitation(inviteNumber: number, accepted: boolean) {
 
-    const invite = this.notificationsArray[inviteNumber];
+    const invite: TeamInvitation = this.notificationsArray[inviteNumber] as TeamInvitation;
 
-    this.teamService.updateInviteStatus(invite as TeamInvitation, accepted);
+    this.teamService.updateInviteStatus(invite, accepted).subscribe(() => {
+      if (accepted) {
+        this.userService.updateUserMembership({currentHackathonId: this.user.currentHackathonId, currentTeamId: invite.teamId})
+          .subscribe(() => this.toastr.success("You are now member of team " + invite.teamName));
+      } else {
+        this.toastr.success("Invitation rejected");
+      }
+
+      this.notificationsArray.splice(inviteNumber,  1);
+    });
   }
 
   asInvitation(notification: Notification): TeamInvitation {
@@ -68,5 +102,74 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   asMeeting(notification: Notification): MeetingNotification {
     return notification as MeetingNotification;
+  }
+
+  edit() {
+
+    this.userEditForm = this.formBuilder.group({
+      description: [this.user.description],
+    });
+
+    this.userService.getTags().subscribe(tagsResponse => {
+
+      this.tags = tagsResponse;
+
+      this.userEditForm.addControl("tags", this.buildTagsFormGroup(this.tags));
+
+      this.editMode = true;
+    });
+  }
+
+  buildTagsFormGroup(tags: Tag[]): FormGroup {
+    let group = this.formBuilder.group({});
+
+    tags.forEach(tag => {
+
+      const userTagsNames = this.user.tags.map(tag => tag.name);
+
+      if (userTagsNames.includes(tag.name)) {
+        tag.isSelected = true;
+      }
+      group.addControl(String(tag.id), this.formBuilder.control(false));
+    });
+
+    return group;
+  }
+
+  markTag(index: number) {
+    this.tags[index].isSelected = !this.tags[index].isSelected;
+  }
+
+  private getSelectedTags(): Tag[] {
+    return this.tags.filter(tag => tag.isSelected);
+  }
+
+  save() {
+    const updatedUser = {
+      description: this.userEditForm.get("description")?.value,
+      tags: this.getSelectedTags()
+    };
+
+    this.userService.updateUserProfile(updatedUser, this.user.id)
+      .subscribe(() => {
+
+        this.toastr.success("Profile updated successfully")
+        this.user.description = this.userEditForm.get("description")?.value;
+        this.user.tags = this.getSelectedTags();
+      });
+
+    this.editMode = false;
+  }
+
+  checkIfUserIsTeamOwner(): boolean {
+    if (this.user && this.currentUserId) {
+      return (this.user.id !== this.currentUserId) && this.userService.isUserTeamOwner;
+    } else {
+      return false;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription.unsubscribe();
   }
 }

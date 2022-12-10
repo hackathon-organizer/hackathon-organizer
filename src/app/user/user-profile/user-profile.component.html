@@ -6,7 +6,7 @@
 
       <div class="avatar">
         <div class="w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img src="https://placeimg.com/300/300/people"  alt="profile image"/>
+          <img src="{{ avatarUrl }}" alt="profile image"/>
         </div>
       </div>
 
@@ -14,31 +14,37 @@
 
 
     <div id="user-data" class="flex flex-col text-2xl">
-      <h4 *ngIf="user">Username: {{ user.username }}</h4>
 
-      <h4 class="mt-8">Team: </h4>
+      <div class="flex justify-between">
+        <h4 *ngIf="user">Username: {{ user.username }}</h4>
+
+        <label for="edit-modal" (click)="edit()" class="btn btn-outline btn-success">Edit</label>
+      </div>
+
+      <h4 *ngIf="currentTeamName" class="mt-8">Team: {{ currentTeamName }}</h4>
+      <h4 *ngIf="!currentTeamName" class="mt-8">Team: -----</h4>
 
       <div class="mt-8" id="about">
         <h4>About:</h4>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium architecto consectetur dicta fugiat minima molestias neque nihil non, numquam quia rem, rerum, sit voluptatibus. Accusamus autem dolorum nemo nisi ullam.</p>
+        <p *ngIf="user">{{ user.description }}</p>
+        <p *ngIf="!user">No description</p>
       </div>
 
-      <button (click)="inviteToTeam()">Invite to team</button>
-      <button class="btn" routerLink="schedule">Go to my schedule</button>
+      <button [disabled]="!checkIfUserIsTeamOwner()" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
+      <button *ngIf="checkIfUserHasMentorRole()" class="btn" routerLink="schedule">Go to my schedule</button>
     </div>
 
     <div class="col-span-2">
       <div class="flex flex-col">
-      <h4 class="text-3xl font-bold mb-5">User tags</h4>
+        <h4 class="text-3xl font-bold mb-5">User tags</h4>
 
-      <div class="flex flex-wrap">
-<!--        TODO use checkbox later -->
-        <div id="java-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-red-600 flex justify-center items-center cursor-pointer hover:bg-red-500 hover:text-white">Java</div>
-        <div id="html-pill" class="py-2 px-6 rounded-full border-2 w-auto m-2 border-white-600 flex justify-center items-center cursor-pointer hover:bg-white hover:text-black">HTML</div>
-        <div id="js-pill " class="py-2 px-6 rounded-full border-2 w-auto m-2 border-yellow-600 flex justify-center items-center cursor-pointer hover:bg-yellow-500 hover:text-white">JavaScript</div>
-      </div>
-
-<!--      <button class="btn btn-outline btn-success rounded-full px-8 m-5 w-24 h-full">Save</button>-->
+        <div *ngIf="user" class="flex flex-wrap my-5">
+          <div *ngFor="let tag of user.tags;">
+            <label class="flex items-center btn rounded-full m-2">+
+              <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -52,8 +58,8 @@
         <span *ngIf="not.notificationType === 'TAGS'">{{ not.message }}</span>
 
         <div *ngIf="not.notificationType === 'INVITATION'">
-        <button class="m-5" (click)="acceptInvitation(i, true)">Accept</button>
-        <button class="m-5" (click)="acceptInvitation(i,false)">Reject</button>
+          <button class="m-5" (click)="updateInvitation(i, true)">Accept</button>
+          <button class="m-5" (click)="updateInvitation(i,false)">Reject</button>
         </div>
 
         <div *ngIf="not.notificationType === 'MEETING'">
@@ -63,28 +69,34 @@
       </div>
 
     </div>
+    <div>
 
+      <input type="checkbox" [checked]="editMode" id="edit-modal" class="modal-toggle"/>
+      <div *ngIf="editMode" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box flex flex-col">
 
+          <label for="edit-modal" (click)="editMode = false" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
 
-   <div>
+          <h3 class="font-bold text-lg text-center">Profile edit</h3>
+          <form novalidate (ngSubmit)="save()" [formGroup]="userEditForm">
+            <span class="font-bold text-lg">About: </span>
+            <textarea formControlName="description" class="ho-textarea-primary" placeholder="Tell something about yourself" rows="5"></textarea>
 
+            <span class="font-bold text-lg">Select tags: </span>
+            <div class="flex flex-wrap my-2">
+              <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
+                <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
+                  <input type="checkbox" class="appearance-none" (change)="markTag(i)" [formControlName]="tag.id" />{{ tags[i].name }}
+                </label>
+              </div>
+            </div>
 
-
-
-
-   </div>
-
-
-
-
-
-
-
-
+          <div class="text-center mt-5">
+            <input type="submit" for="my-modal" class="btn btn-success" value="Save">
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-
-
-
-
-
 </section>

@@ -5,6 +5,8 @@ import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {InvitationDto} from "../../../team/model/InvitationDto";
 import {UserService} from "../user-service/user.service";
 import {Tag, Team, TeamRequest, TeamResponsePage} from "../../../team/model/TeamRequest";
+import {Utils} from "../../../shared/Utils";
+import {NotificationType} from "../../../user/model/NotificationType";
 
 @Injectable({
   providedIn: 'root'
@@ -22,20 +24,14 @@ export class TeamService {
 
     if (accepted) {
       teamInvite.invitationStatus = "ACCEPTED";
-
-      // TODO remove inv from array
     } else {
       teamInvite.invitationStatus = "REJECTED";
     }
 
     const teamId = teamInvite.teamId;
-
-    console.log("sendingPost...")
-    console.log(teamInvite);
-
     const x = new InvitationDto(teamInvite.id, teamInvite.fromUserName, teamInvite.invitationStatus, teamInvite.teamName, teamInvite.teamId);
 
-    this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', x).subscribe();
+    return this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', x);
   }
 
   sendTeamInvitation(userId: number, teamId: number, username: string): Observable<any> {
@@ -82,6 +78,12 @@ export class TeamService {
       //.pipe(
       // catchError((error) => this.errorHandler.handleError(error)
       // ));
+  }
+
+  public fetchUserInvites(currentHackathonId: number) {
+    const userId = Utils.currentUserFromLocalStorage.id;
+
+    return this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId + "?hackathonId=" + currentHackathonId);
   }
 
   searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {

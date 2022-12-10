@@ -49,9 +49,12 @@ export class TeamProfileComponent implements OnInit {
   joinToTeam() {
     this.teamService.addUserToTeam(this.teamId, this.userService.getUserId())
       .subscribe(() => {
-        this.toastr.success("Successfully joined to team");
 
-        this.router.navigate(["/"]);
+        this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: this.teamId}).subscribe(() => {
+
+          this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
+          this.toastr.success("Successfully joined to team");
+        })
       });
   }
 
