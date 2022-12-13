@@ -1,18 +1,18 @@
 <section id="hackathon-profile">
 
   <div class="flex justify-center items-center flex-col">
-    <h1 class="text-7xl font-bold mb-8">{{ hackathon.name }}</h1>
+    <h1 *ngIf="hackathon?.name" class="text-7xl font-bold mb-8">{{ hackathon.name }}</h1>
 
     <img src="https://via.placeholder.com/800x400">
   </div>
 
-  <div class="mt-12 flex justify-center space-x-5">
+  <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
 
     <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
-    <button *ngIf="hackathon.isActive && !isUserHackathonParticipant()" (click)="joinHackathon()"
+    <button *ngIf="hackathon?.isActive && !isUserHackathonParticipant()" (click)="joinHackathon()"
             class="btn btn-outline btn-accent">Join hackathon</button>
 
     <a routerLink="/hackathon/{{ hackathon.id }}/teams">
@@ -33,18 +33,8 @@
 
     <h4 class="text-3xl">Description:</h4>
 
-    <article class="mx-4">
-      <p>{{ hackathon.description }}</p>
+    <article class="m-4">
+      <p *ngIf="hackathon?.description">{{ hackathon.description }}</p>
     </article>
   </div>
-
-<!--  <div class="my-5" id="teams-suggestions">-->
-
-<!--    <span>Team recommendations:</span>-->
-
-<!--      <ul>-->
-<!--        <li *ngFor="let team of teamsSuggestions">{{ team.name }}</li>-->
-<!--      </ul>-->
-
-<!--  </div>-->
 </section>

@@ -107,6 +107,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   }
 
   joinSession() {
+
     this.inCall = true;
 
     this.OV = new OpenVidu();

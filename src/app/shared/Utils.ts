@@ -1,6 +1,7 @@
 import {UserResponseDto} from "../user/model/UserResponseDto";
 import {Team, TeamResponsePage} from "../team/model/TeamRequest";
 import {NGXLogger} from "ngx-logger";
+import equal from 'fast-deep-equal';
 
 export class Utils {
 
@@ -29,7 +30,7 @@ export class Utils {
   public static isUserTeamOwner() {
 
     if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
-      return this.currentUserFromLocalStorage.id === this.currentUserTeamFromLocalStorage.ownerId;
+      return Number(this.currentUserFromLocalStorage.id) === Number(this.currentUserTeamFromLocalStorage.ownerId);
     } else {
       return false;
     }
@@ -37,7 +38,7 @@ export class Utils {
 
   public static isUserTeamMember() {
     if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
-      return this.currentUserFromLocalStorage.currentTeamId === this.currentUserTeamFromLocalStorage.id;
+      return Number(this.currentUserFromLocalStorage.currentTeamId) === Number(this.currentUserTeamFromLocalStorage.id);
     } else {
       return false;
     }
@@ -45,7 +46,7 @@ export class Utils {
 
   public static isUserHackathonMember(hackathonId: number) {
     if (this.currentUserFromLocalStorage) {
-      return this.currentUserFromLocalStorage.currentHackathonId === hackathonId;
+      return Number(this.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
     } else {
       return false;
     }

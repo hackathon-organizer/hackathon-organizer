@@ -1,4 +1,3 @@
-import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
 import {Tag, TeamRequest} from "../../team/model/TeamRequest";
 
 export interface User {

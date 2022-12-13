@@ -1,5 +1,5 @@
 import {TagResponseDto} from "./TagResponseDto";
-import {HackathonDto} from "../../hackathon/model/Hackathon";
+import {HackathonResponse} from "../../hackathon/model/Hackathon";
 import {Tag} from "../../team/model/TeamRequest";
 
 export interface UserResponseDto {

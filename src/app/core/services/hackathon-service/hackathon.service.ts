@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {HackathonRequest} from "../../../hackathon/model/HackathonRequest";
 import {catchError, Observable, of} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
-import {HackathonDto, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
+import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
 import {ToastrService} from "ngx-toastr";
 import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
 import {TeamResponsePage} from "../../../team/model/TeamRequest";
@@ -20,18 +19,18 @@ export class HackathonService {
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/hackathons';
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
 
-  createHackathon(hackathon: HackathonRequest): Observable<any> {
+  createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
     hackathon = this.formatAndValidateDate(hackathon);
 
-    return this.http.post(this.BASE_URL_WRITE, hackathon).pipe(
+    return this.http.post<HackathonResponse>(this.BASE_URL_WRITE, hackathon).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
 
-  getHackathonDetailsById(id: number): Observable<HackathonDto> {
+  getHackathonDetailsById(id: number): Observable<HackathonResponse> {
 
-    return this.http.get<HackathonDto>(this.BASE_URL_READ + '/' + id).pipe(
+    return this.http.get<HackathonResponse>(this.BASE_URL_READ + '/' + id).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
@@ -62,7 +61,7 @@ export class HackathonService {
     const startDate = dayjs(hackathon.eventStartDate);
     const endDate = dayjs(hackathon.eventEndDate);
 
-    if (startDate.isBefore(endDate) || startDate.isAfter(endDate)) {
+    if (endDate.isBefore(startDate)) {
 
         this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
     }

@@ -13,30 +13,30 @@
     </div>
 
 
-    <div id="user-data" class="flex flex-col text-2xl">
+    <div id="user-data" class="flex flex-col">
 
       <span class="mt-8 text-3xl">Team: {{ team.name }}</span>
 
-      <div class="mt-8 text-xl" id="about">
-        <h4>About:</h4>
-        <p>{{ team.description }}</p>
+      <div class="mt-8 max-h-48 overflow-y-auto" id="about">
+        <h4 class="text-2xl">Description:</h4>
+        <p class="mt-2">{{ team.description }}</p>
       </div>
 
-      <div class="mt-10 space-x-4 space-y-3">
+      <div *ngIf="isHackathonMember" class="mt-10 space-x-4 space-y-3">
 
-        <a routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat">
+        <a *ngIf="isUserTeamMember" routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat">
           <button class="btn btn-accent">Join team chat</button>
         </a>
 
         <button class="btn btn-accent" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
 
-        <a routerLink="/hackathon/{{ hackathonId }}/participants">
+        <a *ngIf="isUserTeamMember" routerLink="/hackathon/{{ hackathonId }}/participants">
           <button class="btn btn-success">Invite user</button>
         </a>
 
-        <button *ngIf="!isHackathonMember" (click)="joinToTeam()" class="btn btn-success">Join to team</button>
+        <button *ngIf="!isOwner" (click)="joinToTeam()" class="btn btn-success">Join to team</button>
 
-        <button class="btn btn-info" (click)="openOrCloseTeamForMembers()">
+        <button *ngIf="isOwner" class="btn btn-info" (click)="openOrCloseTeamForMembers()">
           {{ team.isOpen ? 'Close for members' : 'Open for members' }}</button>
 
       </div>

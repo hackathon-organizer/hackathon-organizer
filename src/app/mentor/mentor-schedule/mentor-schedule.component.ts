@@ -1,38 +1,23 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef, OnDestroy,
   OnInit,
-  TemplateRef,
-  ViewChild
 } from '@angular/core';
 import {CalendarEvent, CalendarEventAction, CalendarEventTimesChangedEvent, CalendarView} from "angular-calendar";
-import {
-  startOfDay,
-  endOfDay,
-  subDays,
-  addDays,
-  endOfMonth,
-  isSameDay,
-  isSameMonth,
-  addHours,
-} from 'date-fns';
-import {map, Subject, Subscription} from "rxjs";
+
+import {Subject, Subscription} from "rxjs";
 import {EventColor} from 'calendar-utils';
 import {UserService} from "../../core/services/user-service/user.service";
-import {MentorModule} from "../mentor.module";
 import {ActivatedRoute} from "@angular/router";
 import {NGXLogger} from "ngx-logger";
-import {User} from "../../user/model/User";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {
   ScheduleEntryEvent,
   ScheduleEntryRequest,
-  ScheduleEntryResponse,
+  ScheduleEntryResponse, ScheduleEntrySession,
   TeamMeetingRequest
 } from "../model/ScheduleEntryEvent";
-import {ScheduleEntrySession} from "../model/ScheduleEntrySession";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
 import dayjs from "dayjs";
@@ -54,6 +39,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   private routeSubscription: Subscription = new Subscription();
   view: CalendarView = CalendarView.Day;
+  hackathonId: number = 0;
   CalendarView = CalendarView;
   viewDate: Date = new Date();
   refresh = new Subject<void>();
@@ -74,7 +60,10 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
       if (params['hackathonView'] === "1") {
 
-        this.route.params.subscribe(params => this.getHackathonSchedule(params["id"] as number));
+        this.route.params.subscribe(params => {
+          this.hackathonId = params["id"];
+          this.getHackathonSchedule(this.hackathonId)
+        });
       } else {
         this.getUserSchedule();
       }
@@ -84,7 +73,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   private getHackathonSchedule(hackathonId: number) {
     this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
 
-      this.logger.info("Hackathon hackathons schedule received ", schedule)
+      this.logger.info("Hackathon schedule received ", schedule)
 
       this.mapToCalendarEvents(schedule);
     });
@@ -130,22 +119,34 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   addEvent(): void {
 
-    const entryEvent: ScheduleEntryEvent = {
-      title: this.currentUser.username,
-      start: dayjs().toDate(),
-      end: dayjs().add(1, 'hour').toDate(),
-      color: colors.main,
-      draggable: true,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true,
-      },
-      isAvailable: true,
+    const entryEvent: ScheduleEntryRequest = {
+      sessionStart: dayjs().toDate(),
+      sessionEnd: dayjs().add(1, 'hour').toDate(),
+      entryColor: colors.main.secondary,
+      hackathonId: this.hackathonId
     };
 
-    const newEvent = this.mapToScheduleEntryRequest(entryEvent);
+    console.log(entryEvent)
 
-    this.userService.createEntryEvent(newEvent).subscribe(() => {
+    this.userService.createEntryEvent(entryEvent).subscribe((entryResponse) => {
+
+      if (entryResponse.entryColor != null) {
+        colors.main.secondary = entryResponse.entryColor;
+      }
+
+      const entryEvent: ScheduleEntryEvent = {
+        id: entryResponse.id,
+        title: this.currentUser.username,
+        start: dayjs(entryResponse.sessionStart).toDate(),
+        end: dayjs(entryResponse.sessionEnd).toDate(),
+        color: colors.main,
+        draggable: true,
+        resizable: {
+          beforeStart: true,
+          afterEnd: true,
+        },
+        isAvailable: entryResponse.isAvailable,
+      };
 
         this.events = [
           ...this.events,
@@ -166,24 +167,31 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
         this.events = this.events.filter((event) => event !== eventToDelete);
         this.scheduleUpdateSuccessToast()
+
+        this.refresh.next();
       });
   }
 
   updateEvents(): void {
 
-    const scheduleEntries: ScheduleEntryRequest[] = this.events.map(entry => this.mapToScheduleEntryRequest(entry));
+    const eventsCopy = Object.assign([], this.events);
+
+    const scheduleEntries: ScheduleEntryRequest[] = eventsCopy.map(entry => this.mapToScheduleEntryRequest(entry));
 
     this.logger.info("Sending schedule to save ", scheduleEntries);
 
-    this.userService.updateEntryEvents(this.currentUser.id, scheduleEntries).subscribe(() => this.scheduleUpdateSuccessToast());
+    this.userService.updateEntryEvents(this.currentUser.id, scheduleEntries).subscribe(() => {
+      this.events = eventsCopy;
+
+      this.scheduleUpdateSuccessToast()
+    });
   }
 
   private mapToCalendarEvents(entries: ScheduleEntryResponse[]): void {
 
     entries.map(entry => {
 
-    this.userService.getUserById(entry.userId).subscribe(
-     userResponse => {
+      console.log(entry)
 
        colors.main = {
          primary: colors.main.primary,
@@ -192,11 +200,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
        this.events.push({
          id: entry.id,
-         title: userResponse.username,
+         title: entry.username,
          start: new Date(entry.sessionStart),
          end: new Date(entry.sessionEnd),
          color: colors.main,
-         draggable: true,
+         draggable: this.canEditSchedule(),
          resizable: {
            beforeStart: true,
            afterEnd: true,
@@ -206,7 +214,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
        } as ScheduleEntryEvent)
 
        this.refresh.next();
-     })
     });
   }
 
@@ -261,5 +268,9 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   isUserTeamOwner(): boolean {
     return Utils.isUserTeamOwner();
+  }
+
+  canEditSchedule(): boolean {
+    return this.userService.checkUserAccess;
   }
 }

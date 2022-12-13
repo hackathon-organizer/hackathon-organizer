@@ -4,10 +4,10 @@ import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router, UrlSegment} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest} from "../model/TeamRequest";
-import {HackathonRequest} from "../../hackathon/model/HackathonRequest";
 import {Subscription} from "rxjs";
 import {Utils} from "../../shared/Utils";
 import {ToastrService} from "ngx-toastr";
+import {HackathonRequest} from "../../hackathon/model/Hackathon";
 
 @Component({
   selector: 'ho-new-team-form',
@@ -77,6 +77,10 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
   saveTeam() {
 
+    console.log(this.hackathonId)
+    console.log(this.currentUser)
+    console.log(this.teamId)
+
     if (this.hackathonId && this.currentUser) {
 
       const team: TeamRequest = this.buildTeam();
@@ -89,7 +93,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
           Utils.updateTeamInLocalStorage(updatedTeam);
           this.toastr.success("Team " + team.name + " updated successfully");
         });
-      } else if (this.teamId) {
+      } else {
 
         this.teamService.createTeam(team).subscribe(createdTeam => {
 

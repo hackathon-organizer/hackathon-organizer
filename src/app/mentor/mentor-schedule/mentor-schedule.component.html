@@ -32,7 +32,7 @@
 </div>
 <br/>
 
-<div class="flex justify-center">
+<div *ngIf="canEditSchedule()" class="flex justify-center">
   <label for="update-event-modal" class="btn btn-secondary m-5">Update schedule</label>
 </div>
 
@@ -63,6 +63,7 @@
           <th>Color</th>
           <th>Starts at</th>
           <th>Ends at</th>
+          <th>Information</th>
           <th>Remove</th>
         </tr>
         </thead>
@@ -105,6 +106,10 @@
             />
           </td>
           <td>
+            <textarea class="ho-textarea-primary resize-none" [(ngModel)]="event.info"
+                      placeholder="Additional information" rows="5" resize="false"></textarea>
+          </td>
+          <td>
             <button class="btn btn-error" (click)="deleteEvent(event)">
               Delete
             </button>
@@ -129,16 +134,21 @@
 
     <h5 class="text-3xl text-primary">{{ modalData.title }}</h5>
 
-    <div class="text-2xl my-12 font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
+    <div id="event-dates" class="flex mt-2">
+      <span>{{ modalData.start | date: 'medium' }}</span>&nbsp;&nbsp;-&nbsp;&nbsp;
+      <span>{{ modalData.end | date: 'medium' }}</span>
+    </div>
+
+    <div class="text-2xl my-6 font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
       <span *ngIf="modalData.isAvailable; else notAvailable">AVAILABLE</span>
       <ng-template #notAvailable>NOT AVAILABLE</ng-template>
     </div>
 
-    <div class="my-4 text-center">
-      <p class="text-md">{{ modalData.info }}</p>
+    <div id="about" class="w-11/12 max-h-56 overflow-y-auto">
+      <p class="text-md p-1 text-ellipsis overflow-hidden">{{ modalData.info }}</p>
     </div>
 
-    <button [disabled]="!isUserTeamOwner()" class="btn btn-primary w-2/5" (click)="assignTeam(modalData)">
+    <button [disabled]="!isUserTeamOwner()" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
       {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team</button>
 
   </div>
@@ -179,8 +189,8 @@
 
     <div class="flex items-center justify-center md:justify-around">
       <h5 class="text-3xl mr-5 text-primary hidden sm:block">{{ weekEvent.event.title }}</h5>
-      <div class="text-2xl mr-5 hidden sm:block font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
-        <span *ngIf="modalData.isAvailable; else notAvailable">AVAILABLE</span>
+      <div class="text-2xl mr-5 hidden sm:block font-bold" [ngClass]="weekEvent.event.isAvailable ? 'text-success' : 'text-error'">
+        <span *ngIf="weekEvent.event.isAvailable; else notAvailable">AVAILABLE</span>
         <ng-template #notAvailable>NOT AVAILABLE</ng-template>
       </div>
       <label (click)="handleEvent(weekEvent)" for="event-modal" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1">Show

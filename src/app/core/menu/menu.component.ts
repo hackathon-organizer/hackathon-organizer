@@ -34,8 +34,6 @@ export class MenuComponent implements OnInit {
       this.userHackathonId = user.currentHackathonId;
       this.userTeamId = user.currentTeamId;
 
-      console.log(user.currentTeamId)
-
       this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
 
       this.userService.userNotificationsObservable.subscribe(notifications => this.notifications = notifications);

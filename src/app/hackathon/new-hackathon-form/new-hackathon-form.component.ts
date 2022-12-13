@@ -1,13 +1,13 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
-import {HackathonRequest} from "../model/HackathonRequest";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
-import flatpickr from "flatpickr";
 import {Utils} from "../../shared/Utils";
 import {ToastrService} from "ngx-toastr";
+import {concatMap} from "rxjs";
+import {HackathonRequest} from "../model/Hackathon";
 
 @Component({
   selector: 'ho-new-hackathon-form',
@@ -17,7 +17,7 @@ import {ToastrService} from "ngx-toastr";
 export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
-  user = Utils.currentUserTeamFromLocalStorage;
+  user = Utils.currentUserFromLocalStorage;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -44,20 +44,22 @@ export class NewHackathonFormComponent implements OnInit {
       name: this.newHackathonForm.get('hackathonName')?.value,
       description: this.newHackathonForm.get('description')?.value,
       organizerInfo: this.newHackathonForm.get('organizerInfo')?.value,
-      ownerId: Number(localStorage.getItem("userId")),
+      ownerId: Utils.currentUserFromLocalStorage.id,
       eventStartDate: this.newHackathonForm.get('startDate')?.value,
       eventEndDate: this.newHackathonForm.get('endDate')?.value
     };
 
-    // TODO fork join
-
-    this.hackathonService.createHackathon(hackathon).subscribe(hackathonResponse => {
-
-      this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id}).subscribe(() => {
+    this.hackathonService.createHackathon(hackathon).pipe(
+      concatMap(hackathonResponse => {
         this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
+        this.user.currentHackathonId = hackathonResponse.id;
+        Utils.updateUserInLocalStorage(this.user);
 
-        this.toastr.success("Hackathon " + hackathon.name + " created successfully");
-      });
+          return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
+      }))
+        .subscribe(() => {
+
+          this.toastr.success("Hackathon " + hackathon.name + " created successfully");
     });
   }
 

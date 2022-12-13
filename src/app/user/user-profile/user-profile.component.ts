@@ -9,7 +9,7 @@ import {Notification} from "../model/Notification";
 import {NotificationType} from "../model/NotificationType";
 import {MeetingNotification} from "../../team/model/MeetingNotification";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {Tag} from "../../team/model/TeamRequest";
+import {Tag, Team, TeamResponsePage} from "../../team/model/TeamRequest";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
 import {KeycloakService} from "keycloak-angular";
@@ -37,6 +37,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   currentUserId?: number;
 
   userRoles: string[] = [];
+
+  teamSuggestions: Team[] = [];
 
   constructor(private route: ActivatedRoute,
               private userService: UserService,
@@ -75,7 +77,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const teamId = this.userService.user.currentTeamId!;
 
-    const username = localStorage.getItem("username") as string;
+    const username = this.user.username;
 
     this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe();
   }
@@ -120,6 +122,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  getUserTeamSuggestions() {
+        if (this.user.currentHackathonId) {
+        this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).subscribe(
+          suggestions => {
+            this.teamSuggestions = suggestions;
+          });
+        }
+  }
+
   buildTagsFormGroup(tags: Tag[]): FormGroup {
     let group = this.formBuilder.group({});
 
@@ -161,9 +172,19 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.editMode = false;
   }
 
-  checkIfUserIsTeamOwner(): boolean {
-    if (this.user && this.currentUserId) {
-      return (this.user.id !== this.currentUserId) && this.userService.isUserTeamOwner;
+  isUserInTeam(): boolean {
+    return Utils.isUserTeamMember();
+    // if (this.user) {
+    //   return (this.user.currentTeamId !== null && this.user.currentHackathonId !== null);
+    // } else {
+    //   return false;
+    // }
+  }
+
+  isThisMyProfile(): boolean {
+
+    if (this.user) {
+      return Number(this.user.id) === Number(this.currentUserId);
     } else {
       return false;
     }

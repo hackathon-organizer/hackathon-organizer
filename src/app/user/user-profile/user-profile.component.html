@@ -18,7 +18,7 @@
       <div class="flex justify-between">
         <h4 *ngIf="user">Username: {{ user.username }}</h4>
 
-        <label for="edit-modal" (click)="edit()" class="btn btn-outline btn-success">Edit</label>
+        <label *ngIf="!isThisMyProfile()" for="edit-modal" (click)="edit()" class="btn btn-outline btn-success">Edit</label>
       </div>
 
       <h4 *ngIf="currentTeamName" class="mt-8">Team: {{ currentTeamName }}</h4>
@@ -30,7 +30,7 @@
         <p *ngIf="!user">No description</p>
       </div>
 
-      <button [disabled]="!checkIfUserIsTeamOwner()" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
+      <button [disabled]="isThisMyProfile() || !isUserInTeam()" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
       <button *ngIf="checkIfUserHasMentorRole()" class="btn" routerLink="schedule">Go to my schedule</button>
     </div>
 
@@ -69,6 +69,16 @@
       </div>
 
     </div>
+
+    <!--  <div class="my-5" id="teams-suggestions">-->
+
+    <!--    <span>Team recommendations:</span>-->
+
+    <!--      <ul>-->
+    <!--        <li *ngFor="let team of teamsSuggestions">{{ team.name }}</li>-->
+    <!--      </ul>-->
+
+    <!--  </div>-->
     <div>
 
       <input type="checkbox" [checked]="editMode" id="edit-modal" class="modal-toggle"/>

@@ -18,7 +18,7 @@
         <span class="error-message" *ngIf="newHackathonForm.get('hackathonName')?.errors?.minlength">Hackathon name must be longer
           than 10 characters.</span>
 
-        <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary" rows="8"
+        <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary resize-none" rows="8"
                placeholder="Description (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('description')?.touched
           ||
           newHackathonForm.get('description')?.dirty) &&
@@ -30,7 +30,7 @@
         <span class="error-message" *ngIf="newHackathonForm.get('description')?.errors?.required &&
         newHackathonForm.get('description')?.touched">Please enter hackathon description.</span>
 
-        <textarea id="organizerInfoId" formControlName="organizerInfo" type="text" class="ho-textarea-primary" rows="8"
+        <textarea id="organizerInfoId" formControlName="organizerInfo" type="text" class="ho-textarea-primary resize-none" rows="8"
                placeholder="Organizer info (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('organizerInfo')?.touched
           ||
           newHackathonForm.get('organizerInfo')?.dirty) &&

@@ -11,10 +11,9 @@ import * as dayjs from 'dayjs';
 import {
   ScheduleEntryEvent,
   ScheduleEntryRequest,
-  ScheduleEntryResponse, TeamMeetingRequest
+  ScheduleEntryResponse, ScheduleEntrySession, TeamMeetingRequest
 } from "../../../mentor/model/ScheduleEntryEvent";
 import * as isBetween from 'dayjs/plugin/isBetween'
-import {ScheduleEntrySession} from "../../../mentor/model/ScheduleEntrySession";
 import {MeetingNotification} from "../../../team/model/MeetingNotification";
 import {NotificationType} from "../../../user/model/NotificationType";
 import {Notification} from '../../../user/model/Notification';
@@ -62,7 +61,7 @@ export class UserService {
 
       this.keycloakUserId = v!;
 
-      // this.openWsConn(this.keycloakUserId);
+      // this.openWsConn();
 
       this.fetchUserData();
     });
@@ -168,18 +167,26 @@ export class UserService {
     return roles.some(role => userRoles?.includes(role));
   }
 
-  get isUserTeamOwner(): boolean {
-    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("TEAM_OWNER");
+  isUserTeamOwner(teamId: number): boolean {
+
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("TEAM_OWNER") &&
+      this.user.currentTeamId === teamId;
+  }
+
+  isUserHackathonOwner(hackathonId: number): boolean {
+
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
+      this.user.currentHackathonId === hackathonId;
   }
 
   getUserId(): number {
   return Utils.currentUserFromLocalStorage.id;
   }
 
-  createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<any> {
+  createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
 
     this.logger.info("Saving user " + this.getUserId() + " schedule");
-    return this.http.post("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", entryEvent);
+    return this.http.post<ScheduleEntryResponse>("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", entryEvent);
   }
 
   updateEntryEvents(userId: number, schedule: ScheduleEntryRequest[]): Observable<any> {
@@ -296,16 +303,13 @@ export class UserService {
   getTags() {
 
     return this.http.get<Tag[]>("http://localhost:9090/api/v1/read/users/tags");
-    //   .pipe(map(tags => tags.map(tag => ({
-    //   ...tag, isSelected: false
-    // }))));
   }
 
   updateUserMembership(updatedUserMembership: UserMembershipRequest): Observable<any> {
 
-    const currentUserId = Utils.currentUserTeamFromLocalStorage.id;
+    const currentUserId = Utils.currentUserFromLocalStorage.id;
     updatedUserMembership.userId = currentUserId;
 
-    return this.http.patch("http://localhost:9090/api/v1/read/write/" + currentUserId + "/membership", updatedUserMembership);
+    return this.http.patch("http://localhost:9090/api/v1/write/users/" + currentUserId + "/membership", updatedUserMembership);
   }
 }

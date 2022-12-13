@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
-import {HackathonDto} from "../model/Hackathon";
+import {HackathonResponse} from "../model/Hackathon";
 import {PaginationInstance} from "ngx-pagination";
 
 @Component({
@@ -10,7 +10,7 @@ import {PaginationInstance} from "ngx-pagination";
 })
 export class HackathonsComponent implements OnInit {
 
-  hackathons: HackathonDto[] = [];
+  hackathons: HackathonResponse[] = [];
 
   loading = true;
 

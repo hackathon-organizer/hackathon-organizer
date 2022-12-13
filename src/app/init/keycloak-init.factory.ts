@@ -9,12 +9,15 @@ export function initializeKeycloak(
         url: 'http://localhost:8080' + '/auth',
         realm: 'hackathon-organizer',
         clientId: 'hackathon-organizer-client',
+
       },
       initOptions: {
-        // // must match to the configured value in keycloak
-        // redirectUri: 'http://localhost:4200/your_url',
-        // this will solved the error
-        checkLoginIframe: false
-      }
+        // redirectUri: 'http://localhost:4200/login',
+        // checkLoginIframe: false,
+        onLoad: 'check-sso',
+        silentCheckSsoRedirectUri:
+          window.location.origin + '/assets/silent-check-sso.html'
+      },
+      loadUserProfileAtStartUp: true
     });
 }

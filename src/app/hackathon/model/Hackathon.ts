@@ -1,4 +1,4 @@
-export interface HackathonDto {
+export interface HackathonResponse {
   id: number;
   name: string;
   description: string;
@@ -9,8 +9,17 @@ export interface HackathonDto {
 }
 
 export interface HackathonResponsePage {
-  content: HackathonDto[];
+  content: HackathonResponse[];
   number: number;
   totalElements: number;
   totalPages: number;
+}
+
+export interface HackathonRequest {
+  name: string;
+  description: string;
+  organizerInfo: string;
+  ownerId: number;
+  eventStartDate: Date | string;
+  eventEndDate: Date | string;
 }

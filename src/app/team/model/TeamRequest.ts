@@ -1,4 +1,4 @@
-import {HackathonDto} from "../../hackathon/model/Hackathon";
+import {HackathonResponse} from "../../hackathon/model/Hackathon";
 
 export interface Tag {
   readonly id: number;

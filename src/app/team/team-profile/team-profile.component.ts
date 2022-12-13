@@ -7,6 +7,7 @@ import {Team, TeamResponsePage} from "../model/TeamRequest";
 import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
+import equal from "fast-deep-equal";
 
 @Component({
   selector: 'ho-team-profile',
@@ -52,6 +53,7 @@ export class TeamProfileComponent implements OnInit {
 
         this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: this.teamId}).subscribe(() => {
 
+          Utils.currentUserFromLocalStorage.currentTeamId = this.teamId;
           this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
           this.toastr.success("Successfully joined to team");
         })
@@ -77,6 +79,10 @@ export class TeamProfileComponent implements OnInit {
 
   getTeamMembers() {
     return this.userService.getMembersByTeamId(this.teamId).subscribe(members => this.teamMembers = members);
+  }
+
+  get isUserTeamMember() {
+    return Utils.isUserTeamMember();
   }
 
   get isOwner() {
