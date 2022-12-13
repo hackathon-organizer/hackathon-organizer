@@ -123,7 +123,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       sessionStart: dayjs().toDate(),
       sessionEnd: dayjs().add(1, 'hour').toDate(),
       entryColor: colors.main.secondary,
-      hackathonId: this.hackathonId
+      hackathonId: this.hackathonId ? this.hackathonId : Number(this.currentUser.currentHackathonId)
     };
 
     console.log(entryEvent)
