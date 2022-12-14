@@ -69,7 +69,6 @@ export class TeamProfileComponent implements OnInit {
     this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
       this.team.isOpen = isOpen;
 
-      //this.toastr.success("Team is now " + this.team.isOpen ? 'open' : 'closed' + " for new members");
       this.toastr.success(`Team is now ${this.team.isOpen ? 'open' : 'closed'} for new members`);
     });
     } else {
@@ -82,7 +81,7 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isUserTeamMember() {
-    return Utils.isUserTeamMember();
+    return Utils.isUserTeamMember(this.teamId);
   }
 
   get isOwner() {

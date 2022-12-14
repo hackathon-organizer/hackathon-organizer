@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {forkJoin, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
@@ -6,10 +6,9 @@ import {UserResponseDto} from "../model/UserResponseDto";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {TeamInvitation} from "../../team/model/TeamInvitation";
 import {Notification} from "../model/Notification";
-import {NotificationType} from "../model/NotificationType";
 import {MeetingNotification} from "../../team/model/MeetingNotification";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {Tag, Team, TeamResponsePage} from "../../team/model/TeamRequest";
+import {Tag, Team} from "../../team/model/TeamRequest";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
 import {KeycloakService} from "keycloak-angular";
@@ -25,6 +24,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   notificationsArray: Notification[] = [];
 
+  currentUser!: UserResponseDto;
   user!: UserResponseDto;
   avatarUrl = "";
 
@@ -34,7 +34,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   tags: Tag[] = [];
 
   currentTeamName?: string;
-  currentUserId?: number;
+  userProfileId?: number;
+  isThisMyProfile = false;
 
   userRoles: string[] = [];
 
@@ -45,7 +46,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
               private keycloakService: KeycloakService,
               private teamService: TeamService,
               private formBuilder: FormBuilder,
-              private toastr: ToastrService) {
+              private toastr: ToastrService,
+              private ref: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
@@ -56,9 +58,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.routeSubscription = this.route.params.subscribe(params => {
 
-      this.userService.getUserById(params['id']).subscribe(user => {
+      this.userService.getUserById(params["id"]).subscribe(user => {
         this.user = user;
-        this.currentUserId = Utils.currentUserFromLocalStorage.id;
+        this.currentUser = Utils.currentUserFromLocalStorage;
+        this.userProfileId = params["id"];
+
+        this.isThisMyProfile = this.checkIfThisMyProfile();
 
         this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
 
@@ -73,13 +78,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   inviteToTeam() {
 
-    console.log(this.userService.user.currentTeamId);
-
     const teamId = this.userService.user.currentTeamId!;
 
     const username = this.user.username;
 
-    this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe();
+    this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe(() => {
+      this.toastr.success("Invite send to user " + username);
+    });
   }
 
   updateInvitation(inviteNumber: number, accepted: boolean) {
@@ -123,12 +128,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   getUserTeamSuggestions() {
-        if (this.user.currentHackathonId) {
-        this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).subscribe(
-          suggestions => {
-            this.teamSuggestions = suggestions;
-          });
-        }
+    if (this.user.currentHackathonId) {
+      this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).subscribe(
+        suggestions => {
+          this.teamSuggestions = suggestions;
+        });
+    }
   }
 
   buildTagsFormGroup(tags: Tag[]): FormGroup {
@@ -167,24 +172,19 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.toastr.success("Profile updated successfully")
         this.user.description = this.userEditForm.get("description")?.value;
         this.user.tags = this.getSelectedTags();
+
+        this.userService.removeTagsNotification();
+
+        this.ref.detectChanges();
       });
 
     this.editMode = false;
   }
 
-  isUserInTeam(): boolean {
-    return Utils.isUserTeamMember();
-    // if (this.user) {
-    //   return (this.user.currentTeamId !== null && this.user.currentHackathonId !== null);
-    // } else {
-    //   return false;
-    // }
-  }
-
-  isThisMyProfile(): boolean {
+  private checkIfThisMyProfile(): boolean {
 
     if (this.user) {
-      return Number(this.user.id) === Number(this.currentUserId);
+      return Number(this.currentUser.id) === Number(this.userProfileId);
     } else {
       return false;
     }
@@ -192,5 +192,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routeSubscription.unsubscribe();
+  }
+
+  getTeamUrl(teamId: number): string {
+    if (this.user.currentTeamId && teamId) {
+      return `/hackathon/${this.user.currentHackathonId}/team/${teamId}`;
+    } else {
+      return "/";
+    }
   }
 }

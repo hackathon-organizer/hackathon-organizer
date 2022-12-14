@@ -18,7 +18,8 @@
       <div class="flex justify-between">
         <h4 *ngIf="user">Username: {{ user.username }}</h4>
 
-        <label *ngIf="!isThisMyProfile()" for="edit-modal" (click)="edit()" class="btn btn-outline btn-success">Edit</label>
+        <label *ngIf="isThisMyProfile" for="edit-modal" (click)="edit()"
+               class="btn btn-outline btn-success">Edit</label>
       </div>
 
       <h4 *ngIf="currentTeamName" class="mt-8">Team: {{ currentTeamName }}</h4>
@@ -30,17 +31,17 @@
         <p *ngIf="!user">No description</p>
       </div>
 
-      <button [disabled]="isThisMyProfile() || !isUserInTeam()" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
-      <button *ngIf="checkIfUserHasMentorRole()" class="btn" routerLink="schedule">Go to my schedule</button>
+      <button [disabled]="isThisMyProfile" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
+      <button *ngIf="checkIfUserHasMentorRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my schedule</button>
     </div>
 
     <div class="col-span-2">
       <div class="flex flex-col">
-        <h4 class="text-3xl font-bold mb-5">User tags</h4>
+        <h4 class="text-3xl font-bold mb-5">Tags</h4>
 
         <div *ngIf="user" class="flex flex-wrap my-5">
           <div *ngFor="let tag of user.tags;">
-            <label class="flex items-center btn rounded-full m-2">+
+            <label class="pill">
               <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
             </label>
           </div>
@@ -48,62 +49,90 @@
       </div>
     </div>
 
-    <div id="#notifications">
-      Notifications:
+    <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
+      <input (click)="getUserTeamSuggestions()" type="checkbox"/>
+      <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
+        Show matching teams
+      </div>
+      <div class="collapse-content">
+        <div class="flex items-center justify-between my-2" *ngFor="let team of teamSuggestions; index as i">
+          <span>{{(i + 1)}}</span>
+          <span>{{ team.name }}</span>
+          <div class="flex flex-wrap items-center">
+            <span *ngIf="teamSuggestions.length < 1">Nothing found</span>
+            <div *ngFor="let tag of team.tags | slice:0:3; let ix = index">
+              <div class="pill-small">{{ tag.name }}</div>
+            </div>
+            <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
+          </div>
+          <a routerLink="{{ getTeamUrl(team.id) }}">
+            <button class="btn">Show details</button>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isThisMyProfile" id="#notifications">
+
+      <span class="text-xl font-medium">Notifications:</span>
 
       <div *ngFor="let not of notificationsArray; let i = index;">
 
-        <span *ngIf="not.notificationType === 'INVITATION'">User {{ asInvitation(not).fromUserName }} invited you to team {{ asInvitation(not).teamName }}</span>
-        <span *ngIf="not.notificationType === 'MEETING'">You can join meeting with team {{ asMeeting(not).teamId }}</span>
-        <span *ngIf="not.notificationType === 'TAGS'">{{ not.message }}</span>
+        <div class="alert alert-info shadow-lg mb-2">
+          <div>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+               class="stroke-current flex-shrink-0 w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
 
-        <div *ngIf="not.notificationType === 'INVITATION'">
-          <button class="m-5" (click)="updateInvitation(i, true)">Accept</button>
-          <button class="m-5" (click)="updateInvitation(i,false)">Reject</button>
+          <span *ngIf="not.notificationType === 'INVITATION'">User {{ asInvitation(not).fromUserName }} invited you to team {{ asInvitation(not).teamName }}</span>
+
+          <span *ngIf="not.notificationType === 'MEETING'">You can join meeting with team {{ asMeeting(not).teamId }}</span>
+
+          <span *ngIf="not.notificationType === 'TAGS'">{{ not.message }}</span>
+
+          <div class="flex flex-col items-center justify-center" *ngIf="not.notificationType === 'INVITATION'">
+            <button class="m-3 p-2 bg-success rounded-lg shadow" (click)="updateInvitation(i, true)">Accept</button>
+            <button class="m-3 p-2 bg-error rounded-lg shadow" (click)="updateInvitation(i,false)">Reject</button>
+          </div>
+
+          <div *ngIf="not.notificationType === 'MEETING'">
+            <button>JOIN</button>
+          </div>
+          </div>
         </div>
-
-        <div *ngIf="not.notificationType === 'MEETING'">
-          <button>JOIN</button>
-        </div>
-
       </div>
-
     </div>
-
-    <!--  <div class="my-5" id="teams-suggestions">-->
-
-    <!--    <span>Team recommendations:</span>-->
-
-    <!--      <ul>-->
-    <!--        <li *ngFor="let team of teamsSuggestions">{{ team.name }}</li>-->
-    <!--      </ul>-->
-
-    <!--  </div>-->
     <div>
 
       <input type="checkbox" [checked]="editMode" id="edit-modal" class="modal-toggle"/>
       <div *ngIf="editMode" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box flex flex-col">
 
-          <label for="edit-modal" (click)="editMode = false" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+          <label for="edit-modal" (click)="editMode = false"
+                 class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
 
           <h3 class="font-bold text-lg text-center">Profile edit</h3>
           <form novalidate (ngSubmit)="save()" [formGroup]="userEditForm">
             <span class="font-bold text-lg">About: </span>
-            <textarea formControlName="description" class="ho-textarea-primary" placeholder="Tell something about yourself" rows="5"></textarea>
+            <textarea formControlName="description" class="ho-textarea-primary"
+                      placeholder="Tell something about yourself" rows="5"></textarea>
 
             <span class="font-bold text-lg">Select tags: </span>
             <div class="flex flex-wrap my-2">
               <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
-                <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
-                  <input type="checkbox" class="appearance-none" (change)="markTag(i)" [formControlName]="tag.id" />{{ tags[i].name }}
+                <label class="flex items-center btn rounded-full m-2"
+                       [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
+                  <input type="checkbox" class="appearance-none" (change)="markTag(i)"
+                         [formControlName]="tag.id"/>{{ tags[i].name }}
                 </label>
               </div>
             </div>
 
-          <div class="text-center mt-5">
-            <input type="submit" for="my-modal" class="btn btn-success" value="Save">
-          </div>
+            <div class="text-center mt-5">
+              <input type="submit" for="my-modal" class="btn btn-success" value="Save">
+            </div>
           </form>
         </div>
       </div>

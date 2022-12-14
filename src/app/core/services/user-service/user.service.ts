@@ -1,17 +1,18 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, map, Observable, toArray} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
 import {Client} from "@stomp/stompjs";
 import {UserResponseDto, UserResponsePage} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
-import {User, UserMembershipRequest} from "../../../user/model/User";
+import {UserMembershipRequest} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
 import * as dayjs from 'dayjs';
 import {
-  ScheduleEntryEvent,
   ScheduleEntryRequest,
-  ScheduleEntryResponse, ScheduleEntrySession, TeamMeetingRequest
+  ScheduleEntryResponse,
+  ScheduleEntrySession,
+  TeamMeetingRequest
 } from "../../../mentor/model/ScheduleEntryEvent";
 import * as isBetween from 'dayjs/plugin/isBetween'
 import {MeetingNotification} from "../../../team/model/MeetingNotification";
@@ -20,7 +21,6 @@ import {Notification} from '../../../user/model/Notification';
 import {TeamService} from "../team-service/team.service";
 import {Tag} from "../../../team/model/TeamRequest";
 import {Utils} from "../../../shared/Utils";
-import * as Util from "util";
 
 
 @Injectable({
@@ -61,7 +61,7 @@ export class UserService {
 
       this.keycloakUserId = v!;
 
-      // this.openWsConn();
+      this.openWsConn();
 
       this.fetchUserData();
     });
@@ -87,7 +87,7 @@ export class UserService {
 
         const invite: TeamInvitation = JSON.parse(message.body) as TeamInvitation;
 
-        console.log(invite as TeamInvitation);
+        console.log('pierwszy');
 
         this.userNotifications.next(this.userNotifications.value.concat(invite));
       });
@@ -135,12 +135,13 @@ export class UserService {
   updateTeamInLocalStorage(userData: UserResponseDto) {
     if (userData.currentTeamId) {
       this.teamService.getTeamById(userData.currentTeamId as number).subscribe(teamResponse => {
-          Utils.updateTeamInLocalStorage(teamResponse)
+        Utils.updateTeamInLocalStorage(teamResponse)
       });
     }
   }
 
   sendNoTagsNotification(userData: UserResponseDto) {
+
     if (userData.tags.length < 1) {
       this.userNotifications.next(
         this.userNotifications.value.concat({
@@ -154,7 +155,7 @@ export class UserService {
     if (userData.currentHackathonId) {
       this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
         userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
-        this.userNotifications.next(userInvites);
+        this.userNotifications.next(this.userNotifications.value.concat(userInvites));
       });
     }
   }
@@ -180,7 +181,7 @@ export class UserService {
   }
 
   getUserId(): number {
-  return Utils.currentUserFromLocalStorage.id;
+    return Utils.currentUserFromLocalStorage.id;
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
@@ -226,7 +227,7 @@ export class UserService {
 
     // TODO if this.user is mentor...
 
-    if (this.user) {
+    if (this.checkUserAccess) {
       this.getUserSchedulePlan().subscribe(schedule => {
 
         console.log(schedule);
@@ -311,5 +312,12 @@ export class UserService {
     updatedUserMembership.userId = currentUserId;
 
     return this.http.patch("http://localhost:9090/api/v1/write/users/" + currentUserId + "/membership", updatedUserMembership);
+  }
+
+  removeTagsNotification() {
+    const toRemoveIdx = this.userNotifications.value.indexOf(
+      <Notification>this.userNotifications.value.find(notification => notification.notificationType === NotificationType.TAGS));
+
+    this.userNotifications.value.splice(toRemoveIdx, 1);
   }
 }

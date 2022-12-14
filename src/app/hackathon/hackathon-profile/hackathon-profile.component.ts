@@ -47,10 +47,7 @@ export class HackathonProfileComponent implements OnInit {
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
       this.userService.updateUserMembership({currentHackathonId: this.hackathon.id})
     )).subscribe(() => {
-      const currentUser: UserResponseDto = Utils.currentUserFromLocalStorage;
-      currentUser.currentHackathonId = this.hackathon.id;
-
-      Utils.updateUserInLocalStorage(currentUser);
+      Utils.currentUserFromLocalStorage.currentHackathonId = this.hackathon.id;
 
       this.toastr.success("You are now member of hackathon " + this.hackathon.name);
     });

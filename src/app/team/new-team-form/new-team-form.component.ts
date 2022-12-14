@@ -77,10 +77,6 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
   saveTeam() {
 
-    console.log(this.hackathonId)
-    console.log(this.currentUser)
-    console.log(this.teamId)
-
     if (this.hackathonId && this.currentUser) {
 
       const team: TeamRequest = this.buildTeam();

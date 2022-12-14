@@ -69,7 +69,10 @@ export class TeamService {
   // }
 
   getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<Team[]> {
-     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTags);
+
+     const userTagsNames = userTags.map(tag => tag.name);
+
+     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTagsNames);
   }
 
   getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {

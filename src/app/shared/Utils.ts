@@ -36,15 +36,17 @@ export class Utils {
     }
   }
 
-  public static isUserTeamMember() {
-    if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
-      return Number(this.currentUserFromLocalStorage.currentTeamId) === Number(this.currentUserTeamFromLocalStorage.id);
+  public static isUserTeamMember(teamId: number) {
+
+    if (this.currentUserFromLocalStorage && teamId) {
+      return Number(this.currentUserFromLocalStorage.currentTeamId) === Number(teamId);
     } else {
       return false;
     }
   }
 
   public static isUserHackathonMember(hackathonId: number) {
+
     if (this.currentUserFromLocalStorage) {
       return Number(this.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
     } else {

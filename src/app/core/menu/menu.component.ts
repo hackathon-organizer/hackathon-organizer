@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 import {Utils} from "../../shared/Utils";
 import {Notification} from "../../user/model/Notification";
+import {Subject, take, takeUntil} from "rxjs";
 
 @Component({
   selector: 'ho-menu',
@@ -30,14 +31,18 @@ export class MenuComponent implements OnInit {
 
       const user = Utils.currentUserFromLocalStorage;
 
+      console.log('laduje')
+
       this.currentUserId = user.id;
       this.userHackathonId = user.currentHackathonId;
       this.userTeamId = user.currentTeamId;
 
       this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
-
-      this.userService.userNotificationsObservable.subscribe(notifications => this.notifications = notifications);
     }
+
+    this.userService.userNotificationsObservable.subscribe(notifications => {
+      this.notifications = notifications
+    });
   }
 
   logout() {

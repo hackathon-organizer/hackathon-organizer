@@ -45,17 +45,24 @@
   @apply p-4 flex justify-center items-center hover:scale-110;
 }
 
-.collapse {
-  display: block;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height .5s cubic-bezier(0, 1, 0, 1);
-
-  &.show {
-    max-height: 99rem;
-    transition: max-height .5s ease-in-out;
-  }
+.pill {
+  @apply py-2 px-6 rounded-full border-2 w-auto m-2 border-white flex justify-center items-center font-bold;
 }
+
+.pill-small {
+  @apply px-2 rounded-full border m-1 border-white;
+}
+//.collapse {
+//  display: block;
+//  max-height: 0;
+//  overflow: hidden;
+//  transition: max-height .5s cubic-bezier(0, 1, 0, 1);
+//
+//  &.show {
+//    max-height: 99rem;
+//    transition: max-height .5s ease-in-out;
+//  }
+//}
 
 .avatar.notification:before {
   content: "";
