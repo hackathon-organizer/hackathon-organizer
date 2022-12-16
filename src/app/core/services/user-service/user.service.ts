@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
-import {Client} from "@stomp/stompjs";
+import {Client, IMessage} from "@stomp/stompjs";
 import {UserResponseDto, UserResponsePage} from "../../../user/model/UserResponseDto";
 import {TeamInvitation} from "../../../team/model/TeamInvitation";
 import {UserMembershipRequest} from "../../../user/model/User";
@@ -61,15 +61,20 @@ export class UserService {
 
       this.keycloakUserId = v!;
 
-      this.openWsConn();
 
       this.fetchUserData();
+
+      // this.openWsConn();
+
     });
   }
 
   openWsConn() {
+
+    console.log('connectiong to ' + 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id);
+
     const client = new Client({
-      brokerURL: 'ws://localhost:9090/hackathon-websocket',
+      brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
       debug: function (str) {
         console.log(str);
       },
@@ -78,20 +83,23 @@ export class UserService {
       heartbeatOutgoing: 4000,
     });
 
+    console.log("new")
+
+
     client.onConnect = (frame) => {
       // Do something, all subscribes must be done is this callback
       // This is needed because this will be executed after a (re)connect
       console.log("CONNECTING...");
-      client.subscribe('/user/topic/private-notifications', (message: any) => {
+      client.subscribe('/user/topic/invitations', (message: IMessage) => {
         // called when the client receives a STOMP message from the server
 
         const invite: TeamInvitation = JSON.parse(message.body) as TeamInvitation;
-
-        console.log('pierwszy');
-
+        invite.message = `User ${invite.fromUserName} invited you to team ${invite.teamName}`;
+        invite.notificationType = NotificationType.INVITATION;
         this.userNotifications.next(this.userNotifications.value.concat(invite));
+
       });
-    };
+    }
 
     client.onStompError = function (frame) {
       console.log('Broker reported error: ' + frame.headers['message']);
@@ -129,6 +137,8 @@ export class UserService {
       this.getUserTeamInvitations(userData);
 
       this.sendUserScheduleNotification();
+
+      this.openWsConn();
     });
   }
 

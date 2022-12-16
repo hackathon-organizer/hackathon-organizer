@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {forkJoin, Subscription} from "rxjs";
+import {forkJoin, Subject, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {UserResponseDto} from "../model/UserResponseDto";
 import {TeamService} from "../../core/services/team-service/team.service";
@@ -12,6 +12,7 @@ import {Tag, Team} from "../../team/model/TeamRequest";
 import {ToastrService} from "ngx-toastr";
 import {Utils} from "../../shared/Utils";
 import {KeycloakService} from "keycloak-angular";
+import {NotificationType} from "../model/NotificationType";
 
 @Component({
   selector: 'ho-user-profile',
@@ -41,6 +42,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   teamSuggestions: Team[] = [];
 
+  // @ts-ignore
+  private sub: Subject = new Subject();
+
   constructor(private route: ActivatedRoute,
               private userService: UserService,
               private keycloakService: KeycloakService,
@@ -54,6 +58,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.userService.userNotificationsObservable.subscribe((notifications) => {
       this.notificationsArray = notifications;
+
+      // this.ref.detectChanges();
+      // this.sub.next();
     });
 
     this.routeSubscription = this.route.params.subscribe(params => {
@@ -67,7 +74,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
         this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
 
-        this.currentTeamName = Utils.currentUserTeamFromLocalStorage?.name;
+        if (this.currentUser.id === this.user.id) {
+          this.currentTeamName = Utils.currentUserTeamFromLocalStorage.name;
+        } else if (this.user.currentTeamId) {
+          this.teamService.getTeamById(this.user.currentTeamId).subscribe((team: Team) => this.currentTeamName = team.name);
+        }
       });
     });
   }
@@ -87,28 +98,28 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateInvitation(inviteNumber: number, accepted: boolean) {
+  updateInvitation(invitationNumber: number, accepted: boolean) {
 
-    const invite: TeamInvitation = this.notificationsArray[inviteNumber] as TeamInvitation;
+    const invitation: TeamInvitation = this.notificationsArray[invitationNumber] as TeamInvitation;
 
-    this.teamService.updateInviteStatus(invite, accepted).subscribe(() => {
+    this.teamService.updateInviteStatus(invitation, accepted).subscribe(() => {
       if (accepted) {
-        this.userService.updateUserMembership({currentHackathonId: this.user.currentHackathonId, currentTeamId: invite.teamId})
-          .subscribe(() => this.toastr.success("You are now member of team " + invite.teamName));
+        this.userService.updateUserMembership({currentHackathonId: this.user.currentHackathonId, currentTeamId: invitation.teamId})
+          .subscribe(() => {
+
+            this.currentUser.currentTeamId = invitation.teamId;
+            this.userService.updateTeamInLocalStorage(this.currentUser);
+
+            this.currentTeamName = invitation.teamName;
+
+            this.toastr.success("You are now member of team " + invitation.teamName);
+          });
       } else {
         this.toastr.success("Invitation rejected");
       }
 
-      this.notificationsArray.splice(inviteNumber,  1);
+      this.notificationsArray.splice(invitationNumber,  1);
     });
-  }
-
-  asInvitation(notification: Notification): TeamInvitation {
-    return notification as TeamInvitation;
-  }
-
-  asMeeting(notification: Notification): MeetingNotification {
-    return notification as MeetingNotification;
   }
 
   edit() {
@@ -200,5 +211,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     } else {
       return "/";
     }
+  }
+
+  public get NotificationType() {
+    return NotificationType;
   }
 }
