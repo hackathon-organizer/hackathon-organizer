@@ -27,8 +27,12 @@
       <button class="btn btn-outline btn-secondary">Show schedule</button>
     </a>
 
-    <a routerLink="/hackathon/{{ hackathon.id }}/schedule" [queryParams]="{hackathonView: 1}">
-      <button class="btn btn-outline btn-secondary">Show schedule</button>
+    <a *ngIf="isUserJury()" routerLink="/hackathon/{{ hackathon.id }}/rating">
+      <button class="btn btn-outline btn-secondary">Rate teams</button>
+    </a>
+
+    <a *ngIf="isUserOrganizer()" routerLink="/hackathon/{{ hackathon.id }}/rating-criteria">
+      <button class="btn btn-outline btn-secondary">Update hackathon rating criteria</button>
     </a>
 
   </div>

@@ -316,4 +316,17 @@ export class UserService {
 
     this.userNotifications.value.splice(toRemoveIdx, 1);
   }
+
+  isUserJury(hackathonId: number): boolean {
+
+      return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("JURY") &&
+        this.user.currentHackathonId === hackathonId;
+
+  }
+
+  isUserOrganizer(hackathonId: number): boolean {
+
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
+      this.user.currentHackathonId === hackathonId;
+  }
 }

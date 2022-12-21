@@ -51,4 +51,12 @@ export class HackathonProfileComponent implements OnInit {
   isUserHackathonParticipant(): boolean {
     return UserManager.isUserHackathonMember(this.hackathon?.id);
   }
+
+  isUserJury() {
+    return this.userService.isUserJury(this.hackathon?.id);
+  }
+
+  isUserOrganizer() {
+    return this.userService.isUserOrganizer(this.hackathon?.id);
+  }
 }
