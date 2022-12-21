@@ -3,9 +3,9 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router, UrlSegment} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {Tag, TeamRequest} from "../model/TeamRequest";
+import {Tag, TeamRequest} from "../model/Team";
 import {Subscription} from "rxjs";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {HackathonRequest} from "../../hackathon/model/Hackathon";
 
@@ -19,12 +19,11 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
   private routeSubscription: Subscription = new Subscription();
 
   newTeamForm!: FormGroup;
-  hackathon!: HackathonRequest;
   teamId?: number;
   tags: Tag[] = [];
-  hackathonId: number = 0;
+  hackathonId?: number;
   editMode = false;
-  currentUser = Utils.currentUserFromLocalStorage;
+  user = UserManager.currentUserFromLocalStorage;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -38,20 +37,9 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.newTeamForm = this.formBuilder.group({
-      teamName: ['', {
-        validators: [Validators.required, Validators.minLength(5)], updateOn: 'blur'
-      }],
-      description: ['', {
-        validators: [Validators.required, Validators.minLength(15)], updateOn: 'blur'
-      }],
-    });
+    this.initFrom();
 
-    this.teamService.getAvailableTags().subscribe(tagsResponse => {
-
-      this.tags = tagsResponse;
-      this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
-    });
+    this.getTags();
 
     this.routeSubscription = this.route.params.subscribe(params => {
 
@@ -65,11 +53,30 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  buildTagsFormGroup(tags: Tag[]): FormGroup {
+  private initFrom(): void {
+
+    this.newTeamForm = this.formBuilder.group({
+      teamName: ['', {
+        validators: [Validators.required, Validators.minLength(5)], updateOn: 'blur'
+      }],
+      description: ['', {
+        validators: [Validators.required, Validators.minLength(15)], updateOn: 'blur'
+      }],
+    });
+  }
+
+  private getTags(): void {
+
+    this.teamService.getAvailableTags().subscribe(tagsResponse => {
+      this.tags = tagsResponse;
+      this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
+    });
+  }
+
+  private buildTagsFormGroup(tags: Tag[]): FormGroup {
+
     let group = this.formBuilder.group({});
-
     tags.forEach(tag => {
-
       group.addControl(String(tag.id), this.formBuilder.control(tag.isSelected));
     });
     return group;
@@ -77,7 +84,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
   saveTeam() {
 
-    if (this.hackathonId && this.currentUser) {
+    if (this.hackathonId && this.user) {
 
       const team: TeamRequest = this.buildTeam();
 
@@ -86,7 +93,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
         this.teamService.updateTeam(team, this.teamId).subscribe(updatedTeam => {
 
           this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + updatedTeam.id);
-          Utils.updateTeamInLocalStorage(updatedTeam);
+          UserManager.updateTeamInLocalStorage(updatedTeam);
           this.toastr.success("Team " + team.name + " updated successfully");
         });
       } else {
@@ -94,37 +101,37 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
         this.teamService.createTeam(team).subscribe(createdTeam => {
 
           this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
-          Utils.updateTeamInLocalStorage(createdTeam);
+          UserManager.updateTeamInLocalStorage(createdTeam);
 
-          this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: createdTeam.id}).subscribe(() => {
+          this.userService.updateUserMembership({
+            currentHackathonId: this.hackathonId,
+            currentTeamId: createdTeam.id
+          }).subscribe(() => {
             this.toastr.success("Team " + team.name + " created successfully");
-
           });
         });
       }
     }
   }
 
-  loadFormData(teamId: number) {
+  private loadFormData(teamId: number): void {
+
     this.teamService.getTeamById(teamId).subscribe(team => {
 
       this.newTeamForm.get('teamName')?.patchValue(team.name);
       this.newTeamForm.get('description')?.patchValue(team.name);
 
       team.tags.forEach(teamTag => {
-
         const tagToMark = this.tags.find(tag => tag.id === teamTag.id);
-
         if (tagToMark) {
           tagToMark.isSelected = true;
         }
       });
-
       this.newTeamForm.get('tags')?.patchValue(this.buildTagsFormGroup(this.tags));
     })
-}
+  }
 
-  markTag(index: number) {
+  markTag(index: number): void {
     this.tags[index].isSelected = !this.tags[index].isSelected;
   }
 
@@ -132,15 +139,19 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     this.routeSubscription.unsubscribe();
   }
 
-  private buildTeam() {
+  private buildTeam(): TeamRequest {
 
-    return {
-      ownerId: this.currentUser.id,
-      hackathonId: this.hackathonId,
-      name: this.newTeamForm.get('teamName')?.value,
-      description: this.newTeamForm.get('description')?.value,
-      tags: this.getSelectedTags(),
-    };
+    if (this.hackathonId) {
+      return {
+        ownerId: this.user.id,
+        hackathonId: this.hackathonId,
+        name: this.newTeamForm.get('teamName')?.value,
+        description: this.newTeamForm.get('description')?.value,
+        tags: this.getSelectedTags(),
+      };
+    } else {
+      throw new Error("Hackathon can't be null. Try refresh page.")
+    }
   }
 
   private getSelectedTags(): Tag[] {

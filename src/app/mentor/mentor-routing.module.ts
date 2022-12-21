@@ -5,7 +5,6 @@ import {MentorScheduleComponent} from "./mentor-schedule/mentor-schedule.compone
 
 
 const routes: Routes = [
-  //{path: ':id/schedule', component: MentorScheduleComponent}
 ];
 
 @NgModule({

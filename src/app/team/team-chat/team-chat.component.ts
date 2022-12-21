@@ -2,14 +2,13 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from '@angul
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {ChatMessage} from "../model/ChatMessage";
 import {ChatService} from "../../core/services/chat-service/chat.service";
 import {HttpClient} from "@angular/common/http";
 import {MessageType} from "../model/MessageType";
 import {NGXLogger} from "ngx-logger";
 import {OpenVidu, Publisher, Session, StreamEvent, StreamManager, Subscriber, VideoInsertMode} from 'openvidu-browser';
-import {BasicMessage} from "../model/BasicMessage";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
+import {BasicMessage, ChatMessage} from "../model/Chat";
 
 @Component({
   selector: 'ho-team-chat',
@@ -25,14 +24,11 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
 
   private routeSubscription: Subscription = new Subscription();
 
-  message: string = "";
-  messages: ChatMessage[] = [];
-  chatMessages = "";
+  chatEntry: string = "";
+  chatMessages: ChatMessage[] = [];
 
-  chatRoomId: number = 0;
-  chatRoomTitle: string = "";
+  chatRoomId?: number;
   users: any[] = [];
-
 
   OV!: OpenVidu;
   session!: Session;
@@ -63,13 +59,12 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
 
         this.chatRoomId = team.teamChatRoomId;
-        this.chatRoomTitle = team.name;
 
         this.chatService.connect(this.chatRoomId);
         this.chatService.messages$.subscribe(message => this.messageHandler(message));
 
         this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
-          this.messages = messages;
+          this.chatMessages = messages;
 
           messages.forEach(msg => this.updateChat(msg));
         });
@@ -77,7 +72,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  messageHandler(message: BasicMessage) {
+  private messageHandler(message: BasicMessage) {
 
     switch (message.messageType) {
       case MessageType.SESSION: {
@@ -131,12 +126,12 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     });
 
     this.session.on('streamDestroyed', (event: StreamEvent) => {
-
       this.deleteSubscriber(event.stream.streamManager);
     });
 
     this.session.on('exception', (exception) => {
-      console.warn(exception);
+      this.logger.warn("Session exception occurred: ", exception);
+      throw new Error("Session exception occurred. Please try again later.")
     });
 
     const token = this.getToken();
@@ -159,11 +154,11 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
         this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
       })
       .catch(error => {
-        console.log('There was an error connecting to the session:', error.code, error.message);
+        this.logger.info('There was an error connecting to the session:', error.code, error.message);
       });
   }
 
-  updatePublisher() {
+  private updatePublisher() {
     if (this.publisher instanceof Publisher) {
       this.session.unpublish(this.publisher);
     }
@@ -187,13 +182,13 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
   }
 
-  audio() {
+  toggleAudiSharing() {
     this.audioActive = !this.audioActive;
 
     this.updatePublisher();
   }
 
-  video() {
+  toggleVideoSharing() {
     this.videoActive = !this.videoActive;
 
     if (this.videoActive) {
@@ -239,16 +234,16 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     if (this.publisher instanceof Publisher) {
       this.publisher.once('accessAllowed', (event) => {
         this.publisher.stream.getMediaStream().getVideoTracks()[0].addEventListener('ended', () => {
-          console.log('User pressed the "Stop sharing" button');
+          this.logger.info("User pressed the \"Stop sharing\" button");
         });
         if (this.publisher instanceof Publisher) {
           this.session.publish(this.publisher);
         }
-
       });
 
       this.publisher.once('accessDenied', (event) => {
-        console.warn('ScreenShare: Access Denied');
+        this.logger.info("ScreenShare: Access Denied");
+        throw new Error("ScreenShare: Access Denied");
       });
     }
 
@@ -261,7 +256,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     if (this.sessionToken) {
       return this.sessionToken;
     } else {
-      throw new Error("No token found. Please refresh page.")
+      this.logger.info("No token found for session: ", this.session);
+      throw new Error("No token found. Please refresh page.");
     }
   }
 
@@ -270,11 +266,23 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     if (this.sessionId) {
       return this.sessionId;
     } else {
+      this.logger.info("No session found");
       throw new Error("No session found. Please refresh page.")
     }
   }
 
   leaveSession() {
+
+    if (this.publisher instanceof Publisher) {
+      this.session.unpublish(this.publisher);
+    }
+
+    this.chatService.sendMessage({
+      messageType: MessageType.VIDEO_IN_PROGRESS,
+      data: {
+        sharing: false
+      }
+    });
 
     this.inCall = false;
   }
@@ -290,24 +298,27 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.users = users;
   }
 
-  private updateChat(message: ChatMessage) {
+  sendTextMessage() {
 
-    this.chatMessages += message.username + ": " + message.entryText + '\n';
+    if (this.chatRoomId) {
+      const chatMessage: ChatMessage = {
+        username: UserManager.currentUserFromLocalStorage.username,
+        userId: UserManager.currentUserFromLocalStorage.id,
+        entryText: this.chatEntry,
+        teamId: this.chatRoomId
+      };
+
+      const message = {messageType: MessageType.MESSAGE, data: chatMessage};
+
+      this.chatService.sendMessage(message);
+    } else {
+      this.logger.info("Chat room id can't be null.");
+      throw new Error("Chat room id can't be null. Try refresh page");
+    }
   }
 
-  sendTextMessage() {
-    const chatMessage: ChatMessage = {
-      username: Utils.currentUserFromLocalStorage.username,
-      userId: Utils.currentUserFromLocalStorage.id,
-      entryText: this.message,
-      chatId: 1
-    }
-
-    this.updateChat(chatMessage);
-
-    const message = {messageType: MessageType.MESSAGE, data: chatMessage};
-
-    this.chatService.sendMessage(message);
+  private updateChat(message: ChatMessage) {
+    this.chatEntry += message.username + ": " + message.entryText + '\n';
   }
 
   toggleFullscreen() {

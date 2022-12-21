@@ -1,5 +1,3 @@
-import {HackathonResponse} from "../../hackathon/model/Hackathon";
-
 export interface Tag {
   readonly id: number;
   readonly name: string;
@@ -15,13 +13,13 @@ export interface TeamRequest {
 }
 
 export interface TeamResponsePage {
-  content: Team[];
+  content: TeamResponse[];
   number: number;
   totalElements: number;
   totalPages: number;
 }
 
-export interface Team {
+export interface TeamResponse {
   id: number;
   name: string;
   description: string;
@@ -29,4 +27,12 @@ export interface Team {
   isOpen: boolean;
   teamChatRoomId: number;
   tags: Tag[];
+}
+
+export interface TeamInvitationRequest {
+  id: number;
+  fromUserName: string;
+  invitationStatus: string;
+  teamName: string;
+  teamId: number;
 }

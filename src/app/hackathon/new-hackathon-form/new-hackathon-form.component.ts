@@ -4,7 +4,7 @@ import {Router} from "@angular/router";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {concatMap} from "rxjs";
 import {HackathonRequest} from "../model/Hackathon";
@@ -17,7 +17,6 @@ import {HackathonRequest} from "../model/Hackathon";
 export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
-  user = Utils.currentUserFromLocalStorage;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -40,26 +39,16 @@ export class NewHackathonFormComponent implements OnInit {
 
   createHackathon() {
 
-    const hackathon: HackathonRequest = {
-      name: this.newHackathonForm.get('hackathonName')?.value,
-      description: this.newHackathonForm.get('description')?.value,
-      organizerInfo: this.newHackathonForm.get('organizerInfo')?.value,
-      ownerId: Utils.currentUserFromLocalStorage.id,
-      eventStartDate: this.newHackathonForm.get('startDate')?.value,
-      eventEndDate: this.newHackathonForm.get('endDate')?.value
-    };
+    const hackathon: HackathonRequest = this.buildHackathon();
 
     this.hackathonService.createHackathon(hackathon).pipe(
       concatMap(hackathonResponse => {
         this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
-        this.user.currentHackathonId = hackathonResponse.id;
-        Utils.updateUserInLocalStorage(this.user);
+        UserManager.currentUserFromLocalStorage.currentHackathonId = hackathonResponse.id;
 
-          return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
-      }))
-        .subscribe(() => {
-
-          this.toastr.success("Hackathon " + hackathon.name + " created successfully");
+        return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
+      })).subscribe(() => {
+      this.toastr.success("Hackathon " + hackathon.name + " created successfully");
     });
   }
 
@@ -81,9 +70,18 @@ export class NewHackathonFormComponent implements OnInit {
         return null;
       }
 
-      return new Date(control.value) < today
-        ? {dateErrorMessage: 'You cannot use past dates'}
-        : null;
+      return new Date(control.value) < today ? {dateErrorMessage: 'You cannot use past dates'} : null;
     }
+  }
+
+  private buildHackathon(): HackathonRequest {
+    return {
+      name: this.newHackathonForm.get('hackathonName')?.value,
+      description: this.newHackathonForm.get('description')?.value,
+      organizerInfo: this.newHackathonForm.get('organizerInfo')?.value,
+      ownerId: UserManager.currentUserFromLocalStorage.id,
+      eventStartDate: this.newHackathonForm.get('startDate')?.value,
+      eventEndDate: this.newHackathonForm.get('endDate')?.value
+    };
   }
 }

@@ -11,7 +11,6 @@ import {
 } from 'angular-calendar';
 import {adapterFactory} from 'angular-calendar/date-adapters/date-fns';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {BrowserModule} from "@angular/platform-browser";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
 
@@ -21,13 +20,11 @@ import {ToastrModule} from "ngx-toastr";
 export class CustomDateFormatter extends CalendarNativeDateFormatter {
 
   public override dayViewHour({date, locale}: DateFormatterParams): string {
-    // change this to return a different date format
 
     return new Intl.DateTimeFormat('pl-PL', {
       hour: 'numeric',
       minute: 'numeric',
     }).format(date);
-    //return new Intl.DateTimeFormat(locale, {hour: 'numeric'}).format(date);
   }
 
   public override weekViewHour({ date, locale }: DateFormatterParams): string {
@@ -36,7 +33,6 @@ export class CustomDateFormatter extends CalendarNativeDateFormatter {
       minute: 'numeric',
     }).format(date);
   }
-
 }
 
 @NgModule({

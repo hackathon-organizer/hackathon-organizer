@@ -2,7 +2,7 @@
 
   <div class="flex justify-center">
   <button (click)="p.previous()" [disabled]="p.isFirstPage()" class="btn btn-md mx-4">
-    <span class="p-2" [ngClass]="{ }" >PREV</span>
+    <span class="p-2" >PREV</span>
   </button>
 
   <div *ngFor="let page of p.pages" class="btn-group" [class.current]="p.getCurrent() === page.value">
@@ -14,7 +14,7 @@
   </div>
 
   <button (click)="p.next()" [disabled]="p.isLastPage()" class="btn btn-md mx-4">
-    <span class="p-2" [ngClass]="{}">NEXT</span>
+    <span class="p-2">NEXT</span>
   </button>
   </div>
 

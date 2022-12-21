@@ -18,7 +18,7 @@
       <div class="flex justify-between">
         <h4 *ngIf="user">Username: {{ user.username }}</h4>
 
-        <label *ngIf="isThisMyProfile" for="edit-modal" (click)="edit()"
+        <label *ngIf="isThisMyProfile" for="edit-modal" (click)="editProfile()"
                class="btn btn-outline btn-success">Edit</label>
       </div>
 
@@ -76,7 +76,7 @@
 
       <span class="text-xl font-medium mb-6">Notifications:</span>
 
-      <div *ngFor="let not of notificationsArray; let i = index;">
+      <div *ngFor="let notification of notificationsArray; let i = index;">
 
         <div class="alert alert-info shadow-lg mb-2">
           <div class="flex flex-col">
@@ -85,14 +85,14 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span>{{ not.message }}</span>
+          <span>{{ notification.message }}</span>
 
-          <div class="flex flex-col items-center justify-center" *ngIf="not.notificationType === NotificationType.INVITATION">
+          <div class="flex flex-col items-center justify-center" *ngIf="notification.notificationType === NotificationType.INVITATION">
             <button class="m-3 p-2 bg-success rounded-lg shadow" (click)="updateInvitation(i, true)">Accept</button>
             <button class="m-3 p-2 bg-error rounded-lg shadow" (click)="updateInvitation(i,false)">Reject</button>
           </div>
 
-          <div *ngIf="not.notificationType === NotificationType.MEETING">
+          <div *ngIf="notification.notificationType === NotificationType.MEETING">
             <button>JOIN</button>
           </div>
           </div>

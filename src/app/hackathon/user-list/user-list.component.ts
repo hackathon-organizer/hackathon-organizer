@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
-import {User} from "../../user/model/User";
+import {User, UserResponse} from "../../user/model/User";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
-import {UserResponseDto} from "../../user/model/UserResponseDto";
-import {debounceTime, switchMap} from "rxjs";
+import {concatMap, debounceTime, switchMap} from "rxjs";
 import {FormControl} from "@angular/forms";
 
 @Component({
@@ -17,7 +16,7 @@ export class UserListComponent implements OnInit {
 
   loading = false;
   hackathonId = 1;
-  hackathonParticipants: UserResponseDto[] = [];
+  hackathonParticipants: UserResponse[] = [];
   participantsIds: number[] = [];
   usernameControl: FormControl = new FormControl();
 
@@ -27,20 +26,21 @@ export class UserListComponent implements OnInit {
     totalItems: 0
   };
 
-  constructor(private hackathonService: HackathonService, private route: ActivatedRoute, private userService: UserService) { }
+  constructor(private hackathonService: HackathonService, private route: ActivatedRoute, private userService: UserService) {
+  }
 
   ngOnInit(): void {
 
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(
+      concatMap((params) => {
+
+        this.hackathonId = params['id'];
+        return this.hackathonService.getHackathonParticipantsIds(this.hackathonId)
+      })).subscribe(participantsIds => {
 
       this.loading = true;
-      this.hackathonId = params['id'];
-
-      this.hackathonService.getHackathonParticipantsIds(this.hackathonId).subscribe(participantsIds => {
-             this.participantsIds = participantsIds;
-
-             this.getHackathonParticipants(1);
-      })
+      this.participantsIds = participantsIds;
+      this.getHackathonParticipants(1);
     });
 
     this.usernameControl.valueChanges.pipe(debounceTime(500),
@@ -48,11 +48,9 @@ export class UserListComponent implements OnInit {
 
         this.loading = true;
         return this.userService.findHackathonUsersByUsername(username, this.hackathonId, this.paginationConfig.currentPage - 1)
-      }))
-      .subscribe(usersResponse => {
-        this.hackathonParticipants = usersResponse.content;
+      })).subscribe(usersResponse => {
 
-        console.log(usersResponse)
+        this.hackathonParticipants = usersResponse.content;
 
         this.paginationConfig.currentPage = usersResponse.number + 1;
         this.paginationConfig.totalItems = usersResponse.totalElements;
@@ -69,7 +67,7 @@ export class UserListComponent implements OnInit {
     this.getHackathonParticipants(page);
   }
 
-  getHackathonParticipants(pageNumber: number) {
+  private getHackathonParticipants(pageNumber: number): void {
 
     this.userService.getParticipants(this.participantsIds, pageNumber - 1).subscribe(part => {
       this.hackathonParticipants = part.content;
@@ -84,5 +82,4 @@ export class UserListComponent implements OnInit {
   get currentPageNumber(): number {
     return this.paginationConfig.currentPage;
   }
-
 }

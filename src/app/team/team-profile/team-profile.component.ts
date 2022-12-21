@@ -2,12 +2,11 @@ import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Observable, Subscription} from "rxjs";
-import {Team, TeamResponsePage} from "../model/TeamRequest";
-import {UserResponseDto} from "../../user/model/UserResponseDto";
+import {concatMap, Subscription} from "rxjs";
+import {TeamResponse} from "../model/Team";
 import {ToastrService} from "ngx-toastr";
-import {Utils} from "../../shared/Utils";
-import equal from "fast-deep-equal";
+import {UserManager} from "../../shared/UserManager";
+import {UserResponse} from "../../user/model/User";
 
 @Component({
   selector: 'ho-team-profile',
@@ -18,29 +17,33 @@ export class TeamProfileComponent implements OnInit {
 
   private routeSubscription: Subscription = new Subscription();
 
-  searchUser: string = "";
   hackathonId: number = 0;
   teamId: number = 0;
-  team!: Team;
-  teamMembers: UserResponseDto[] = [];
-  user = Utils.currentUserFromLocalStorage;
+  team!: TeamResponse;
+  teamMembers: UserResponse[] = [];
+  user = UserManager.currentUserFromLocalStorage;
 
   editMode = false;
 
-
-  constructor(private userService: UserService, private teamService: TeamService, private route: ActivatedRoute,
-              private router: Router, private toastr: ToastrService) {
+  constructor(private userService: UserService,
+              private teamService: TeamService,
+              private route: ActivatedRoute,
+              private router: Router,
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
 
-    this.routeSubscription = this.route.params.subscribe(params => {
-      this.hackathonId = params['id'];
-      this.teamId = params['teamId'];
-    });
+    this.routeSubscription = this.route.params.pipe(
+      concatMap(params => {
 
-    this.teamService.getTeamById(this.teamId).subscribe(team => {
-      this.team = team;
+        this.hackathonId = params['id'];
+        this.teamId = params['teamId'];
+
+        return this.teamService.getTeamById(this.teamId);
+      })
+    ).subscribe(teamResponse => {
+      this.team = teamResponse;
 
       this.getTeamMembers();
     });
@@ -48,17 +51,17 @@ export class TeamProfileComponent implements OnInit {
 
 
   joinToTeam() {
-    this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).subscribe(() => {
 
-        this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: this.teamId}).subscribe(() => {
+    this.teamService.addUserToTeam(this.teamId, this.userService.getUserId()).pipe(
+      () => this.userService.updateUserMembership({currentHackathonId: this.hackathonId, currentTeamId: this.teamId})
+    ).subscribe(() => {
 
-          Utils.currentUserFromLocalStorage.currentTeamId = this.teamId;
+          UserManager.currentUserFromLocalStorage.currentTeamId = this.teamId;
           this.user.currentTeamId = this.teamId;
           this.userService.updateTeamInLocalStorage(this.user);
 
           this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
           this.toastr.success("Successfully joined to team");
-        })
       });
   }
 
@@ -83,20 +86,18 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isUserTeamMember() {
-    return Utils.isUserTeamMember(this.teamId);
+    return UserManager.isUserTeamMember(this.teamId);
   }
 
   get isOwner() {
-    return Utils.isUserTeamOwner();
+    return UserManager.isUserTeamOwner();
   }
 
   get isHackathonMember() {
-    return Utils.isUserHackathonMember(this.hackathonId);
+    return UserManager.isUserHackathonMember(this.hackathonId);
   }
 
   redirectToTeamEdit() {
      this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
   }
-
-
 }

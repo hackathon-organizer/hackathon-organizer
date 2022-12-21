@@ -19,7 +19,7 @@ import {
   TeamMeetingRequest
 } from "../model/ScheduleEntryEvent";
 import {ToastrService} from "ngx-toastr";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
 import dayjs from "dayjs";
 
 let colors: Record<string, EventColor> = {
@@ -45,7 +45,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   refresh = new Subject<void>();
   events: ScheduleEntryEvent[] = [];
   activeDayIsOpen: boolean = true;
-  currentUser = Utils.currentUserFromLocalStorage;
+  currentUser = UserManager.currentUserFromLocalStorage;
   modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
 
   constructor(private userService: UserService,
@@ -267,7 +267,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   isUserTeamOwner(): boolean {
-    return Utils.isUserTeamOwner();
+    return UserManager.isUserTeamOwner();
   }
 
   canEditSchedule(): boolean {

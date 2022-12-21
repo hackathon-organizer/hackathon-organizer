@@ -1,8 +1,7 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
-import {Utils} from "../../shared/Utils";
-import {Notification} from "../../user/model/Notification";
-import {Subject, take, takeUntil} from "rxjs";
+import {UserManager} from "../../shared/UserManager";
+import {Notification} from "../../team/model/Notifications";
 
 @Component({
   selector: 'ho-menu',
@@ -12,13 +11,11 @@ import {Subject, take, takeUntil} from "rxjs";
 export class MenuComponent implements OnInit {
 
 
-  userHackathonId?: number = 0;
+  userHackathonId?: number;
   userTeamId?: number;
-  currentUserId = 0;
+  currentUserId?: number;
   username = "";
-
   avatarUrl = "";
-
   notifications: Notification[] = [];
 
   constructor(private userService: UserService) {
@@ -27,9 +24,9 @@ export class MenuComponent implements OnInit {
   ngOnInit(): void {
     this.userService.initWsConn();
 
-    if (Utils.currentUserFromLocalStorage) {
+    if (UserManager.currentUserFromLocalStorage) {
 
-      const user = Utils.currentUserFromLocalStorage;
+      const user = UserManager.currentUserFromLocalStorage;
 
       console.log('laduje')
 

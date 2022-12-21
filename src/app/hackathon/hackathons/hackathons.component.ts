@@ -23,13 +23,11 @@ export class HackathonsComponent implements OnInit {
   constructor(private hackathonService: HackathonService) { }
 
   ngOnInit(): void {
-
     this.getHackathons(1);
   }
 
   getHackathons(pageNumber: number) {
-    this.hackathonService.getAllHackathons(pageNumber - 1).subscribe(
-      hackathonsResponse => {
+    this.hackathonService.getAllHackathons(pageNumber - 1).subscribe(hackathonsResponse => {
 
       this.hackathons = hackathonsResponse.content;
       this.paginationConfig.currentPage = hackathonsResponse.number + 1;
@@ -40,10 +38,9 @@ export class HackathonsComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
+
     this.loading = true;
-
     this.paginationConfig.currentPage = page;
-
     this.getHackathons(page);
   }
 

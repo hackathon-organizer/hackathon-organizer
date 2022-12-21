@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {catchError, map, Observable} from "rxjs";
-import {TeamInvitation} from "../../../team/model/TeamInvitation";
-import {InvitationDto} from "../../../team/model/InvitationDto";
+
 import {UserService} from "../user-service/user.service";
-import {Tag, Team, TeamRequest, TeamResponsePage} from "../../../team/model/TeamRequest";
-import {Utils} from "../../../shared/Utils";
+import {Tag, TeamResponse, TeamRequest, TeamResponsePage, TeamInvitationRequest} from "../../../team/model/Team";
+import {UserManager} from "../../../shared/UserManager";
 import {NotificationType} from "../../../user/model/NotificationType";
+import {TeamInvitationNotification} from "../../../team/model/Notifications";
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,7 @@ export class TeamService {
 
   }
 
-  updateInviteStatus(teamInvite: TeamInvitation, accepted: boolean) {
+  updateInviteStatus(teamInvite: TeamInvitationNotification, accepted: boolean) {
 
     if (accepted) {
       teamInvite.invitationStatus = "ACCEPTED";
@@ -29,9 +29,15 @@ export class TeamService {
     }
 
     const teamId = teamInvite.teamId;
-    const x = new InvitationDto(teamInvite.id, teamInvite.fromUserName, teamInvite.invitationStatus, teamInvite.teamName, teamInvite.teamId);
+    const invitationRequest = {
+      id: teamInvite.id,
+      fromUserName: teamInvite.fromUserName,
+      invitationStatus: teamInvite.invitationStatus,
+      teamName: teamInvite.teamName,
+      teamId: teamInvite.teamId
+    } as TeamInvitationRequest;
 
-    return this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', x);
+    return this.http.patch('http://localhost:9090/api/v1/write/teams/' + teamId + '/invites', invitationRequest);
   }
 
   sendTeamInvitation(userId: number, teamId: number, username: string): Observable<any> {
@@ -43,17 +49,17 @@ export class TeamService {
     });
   }
 
-  createTeam(team: TeamRequest): Observable<Team> {
-    return this.http.post<Team>('http://localhost:9090/api/v1/write/teams', team);
+  createTeam(team: TeamRequest): Observable<TeamResponse> {
+    return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
   }
 
   getAvailableTags(): Observable<Tag[]> {
     return this.http.get<Tag[]>('http://localhost:9090/api/v1/read/teams/tags');
   }
 
-  getTeamById(teamId: number): Observable<Team> {
+  getTeamById(teamId: number): Observable<TeamResponse> {
 
-    return this.http.get<Team>(this.BASE_URL_READ + '/' + teamId);
+    return this.http.get<TeamResponse>(this.BASE_URL_READ + '/' + teamId);
   }
 
   addUserToTeam(teamId: number, userId: number): Observable<any> {
@@ -68,11 +74,11 @@ export class TeamService {
   //   return this.http.get<boolean>(this.BASE_URL_READ + '/' + teamId + '/owners?userId=' + userId);
   // }
 
-  getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<Team[]> {
+  getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<TeamResponse[]> {
 
      const userTagsNames = userTags.map(tag => tag.name);
 
-     return this.http.post<Team[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTagsNames);
+     return this.http.post<TeamResponse[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTagsNames);
   }
 
   getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
@@ -84,9 +90,9 @@ export class TeamService {
   }
 
   public fetchUserInvites(currentHackathonId: number) {
-    const userId = Utils.currentUserFromLocalStorage.id;
+    const userId = UserManager.currentUserFromLocalStorage.id;
 
-    return this.http.get<TeamInvitation[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId + "?hackathonId=" + currentHackathonId);
+    return this.http.get<TeamInvitationNotification[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId + "?hackathonId=" + currentHackathonId);
   }
 
   searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
@@ -94,7 +100,7 @@ export class TeamService {
     return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
   }
 
-  updateTeam(team: TeamRequest, teamId: number): Observable<Team> {
-    return this.http.put<Team>('http://localhost:9090/api/v1/write/teams/' + teamId, team);
+  updateTeam(team: TeamRequest, teamId: number): Observable<TeamResponse> {
+    return this.http.put<TeamResponse>('http://localhost:9090/api/v1/write/teams/' + teamId, team);
   }
 }

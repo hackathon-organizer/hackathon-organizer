@@ -3,9 +3,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
 import {Client, IMessage} from "@stomp/stompjs";
-import {UserResponseDto, UserResponsePage} from "../../../user/model/UserResponseDto";
-import {TeamInvitation} from "../../../team/model/TeamInvitation";
-import {UserMembershipRequest} from "../../../user/model/User";
+import {UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
 import * as dayjs from 'dayjs';
 import {
@@ -15,12 +13,11 @@ import {
   TeamMeetingRequest
 } from "../../../mentor/model/ScheduleEntryEvent";
 import * as isBetween from 'dayjs/plugin/isBetween'
-import {MeetingNotification} from "../../../team/model/MeetingNotification";
 import {NotificationType} from "../../../user/model/NotificationType";
-import {Notification} from '../../../user/model/Notification';
 import {TeamService} from "../team-service/team.service";
-import {Tag} from "../../../team/model/TeamRequest";
-import {Utils} from "../../../shared/Utils";
+import {Tag} from "../../../team/model/Team";
+import {UserManager} from "../../../shared/UserManager";
+import {Notification, MeetingNotification, TeamInvitationNotification} from "../../../team/model/Notifications";
 
 
 @Injectable({
@@ -31,7 +28,7 @@ export class UserService {
   private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
 
-  user!: UserResponseDto;
+  user!: UserResponse;
 
   private loadingSource = new BehaviorSubject(true);
   loading = this.loadingSource.asObservable();
@@ -48,8 +45,6 @@ export class UserService {
       "&page=" + pageNumber + "&size=10");
   }
 
-  // Open ws connection
-
   async getKeycloakUserId(): Promise<string | undefined> {
     let userDetails = await this.keycloakService.loadUserProfile();
     return userDetails.id;
@@ -65,13 +60,10 @@ export class UserService {
       this.fetchUserData();
 
       // this.openWsConn();
-
     });
   }
 
   openWsConn() {
-
-    console.log('connectiong to ' + 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id);
 
     const client = new Client({
       brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
@@ -83,21 +75,15 @@ export class UserService {
       heartbeatOutgoing: 4000,
     });
 
-    console.log("new")
-
-
     client.onConnect = (frame) => {
-      // Do something, all subscribes must be done is this callback
-      // This is needed because this will be executed after a (re)connect
+
       console.log("CONNECTING...");
       client.subscribe('/user/topic/invitations', (message: IMessage) => {
-        // called when the client receives a STOMP message from the server
 
-        const invite: TeamInvitation = JSON.parse(message.body) as TeamInvitation;
+        const invite: TeamInvitationNotification = JSON.parse(message.body);
         invite.message = `User ${invite.fromUserName} invited you to team ${invite.teamName}`;
         invite.notificationType = NotificationType.INVITATION;
         this.userNotifications.next(this.userNotifications.value.concat(invite));
-
       });
     }
 
@@ -109,8 +95,8 @@ export class UserService {
     client.activate();
   }
 
-  getUserById(userId: number): Observable<UserResponseDto> {
-    return this.http.get<UserResponseDto>("http://localhost:9090/api/v1/read/users/" + userId);
+  getUserById(userId: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>("http://localhost:9090/api/v1/read/users/" + userId);
   }
 
   public getKcId(): string {
@@ -124,10 +110,10 @@ export class UserService {
 
   private fetchUserData() {
 
-    this.http.get<UserResponseDto>('http://localhost:9090/api/v1/read/users/keycloak/' + this.getKcId()).subscribe(userData => {
+    this.http.get<UserResponse>('http://localhost:9090/api/v1/read/users/keycloak/' + this.getKcId()).subscribe(userData => {
       this.user = userData;
 
-      Utils.updateUserInLocalStorage(userData);
+      UserManager.updateUserInLocalStorage(userData);
 
       this.updateTeamInLocalStorage(userData);
 
@@ -142,15 +128,15 @@ export class UserService {
     });
   }
 
-  updateTeamInLocalStorage(userData: UserResponseDto) {
+  updateTeamInLocalStorage(userData: UserResponse) {
     if (userData.currentTeamId) {
       this.teamService.getTeamById(userData.currentTeamId as number).subscribe(teamResponse => {
-        Utils.updateTeamInLocalStorage(teamResponse)
+        UserManager.updateTeamInLocalStorage(teamResponse)
       });
     }
   }
 
-  sendNoTagsNotification(userData: UserResponseDto) {
+  sendNoTagsNotification(userData: UserResponse) {
 
     if (userData.tags.length < 1) {
       this.userNotifications.next(
@@ -161,7 +147,7 @@ export class UserService {
     }
   }
 
-  getUserTeamInvitations(userData: UserResponseDto) {
+  getUserTeamInvitations(userData: UserResponse) {
     if (userData.currentHackathonId) {
       this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
         userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
@@ -191,7 +177,7 @@ export class UserService {
   }
 
   getUserId(): number {
-    return Utils.currentUserFromLocalStorage.id;
+    return UserManager.currentUserFromLocalStorage.id;
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
@@ -295,9 +281,9 @@ export class UserService {
     return this.http.patch("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId, entrySession)
   }
 
-  getMembersByTeamId(teamId: number): Observable<UserResponseDto[]> {
+  getMembersByTeamId(teamId: number): Observable<UserResponse[]> {
 
-    return this.http.get<UserResponseDto[]>("http://localhost:9090/api/v1/read/users/membership?teamId=" + teamId);
+    return this.http.get<UserResponse[]>("http://localhost:9090/api/v1/read/users/membership?teamId=" + teamId);
   }
 
   getParticipants(participantsIds: number[], pageNumber: number): Observable<UserResponsePage> {
@@ -318,7 +304,7 @@ export class UserService {
 
   updateUserMembership(updatedUserMembership: UserMembershipRequest): Observable<any> {
 
-    const currentUserId = Utils.currentUserFromLocalStorage.id;
+    const currentUserId = UserManager.currentUserFromLocalStorage.id;
     updatedUserMembership.userId = currentUserId;
 
     return this.http.patch("http://localhost:9090/api/v1/write/users/" + currentUserId + "/membership", updatedUserMembership);

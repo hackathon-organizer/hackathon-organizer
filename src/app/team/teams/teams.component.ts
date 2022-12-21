@@ -4,7 +4,7 @@ import {HackathonService} from "../../core/services/hackathon-service/hackathon.
 import {debounce, debounceTime, Subscription, switchMap} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
-import {Team} from "../model/TeamRequest";
+import {TeamResponse} from "../model/Team";
 import {FormControl, FormControlName} from "@angular/forms";
 
 @Component({
@@ -17,7 +17,7 @@ export class TeamsComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
   hackathonId: number = 0;
 
-  teams: Team[] = [];
+  teams: TeamResponse[] = [];
 
   loading = true;
   teamNameControl: FormControl = new FormControl();
@@ -53,11 +53,10 @@ export class TeamsComponent implements OnInit {
   }
 
   getHackathonTeams(hackathonId: number, pageNumber: number) {
+
       this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).subscribe(
         teamsResponse => {
         this.teams = teamsResponse.content;
-
-          console.log(teamsResponse)
 
         this.paginationConfig.currentPage = teamsResponse.number + 1;
         this.paginationConfig.totalItems = teamsResponse.totalElements;
@@ -67,10 +66,9 @@ export class TeamsComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
+
     this.loading = true;
-
     this.paginationConfig.currentPage = page;
-
     this.getHackathonTeams(this.hackathonId, page);
   }
 

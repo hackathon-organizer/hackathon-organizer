@@ -4,10 +4,7 @@ import {catchError, Observable, of} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
-import {ToastrService} from "ngx-toastr";
 import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
-import {TeamResponsePage} from "../../../team/model/TeamRequest";
-import {UserResponseDto} from "../../../user/model/UserResponseDto";
 
 @Injectable({
   providedIn: 'root'

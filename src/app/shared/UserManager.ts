@@ -1,29 +1,27 @@
-import {UserResponseDto} from "../user/model/UserResponseDto";
-import {Team, TeamResponsePage} from "../team/model/TeamRequest";
-import {NGXLogger} from "ngx-logger";
-import equal from 'fast-deep-equal';
+import {TeamResponse} from "../team/model/Team";
+import {UserResponse} from "../user/model/User";
 
-export class Utils {
+export class UserManager {
 
-  public static get currentUserFromLocalStorage(): UserResponseDto {
+  public static get currentUserFromLocalStorage(): UserResponse {
 
     const user = localStorage.getItem("user") as string;
 
-    return JSON.parse(user) as UserResponseDto;
+    return JSON.parse(user) as UserResponse;
   }
 
-  public static get currentUserTeamFromLocalStorage(): Team {
+  public static get currentUserTeamFromLocalStorage(): TeamResponse {
 
     const team = localStorage.getItem("team") as string;
 
-    return JSON.parse(team) as Team;
+    return JSON.parse(team) as TeamResponse;
   }
 
-  public static updateUserInLocalStorage(user: UserResponseDto): void {
+  public static updateUserInLocalStorage(user: UserResponse): void {
     localStorage.setItem("user", JSON.stringify(user));
   }
 
-  public static updateTeamInLocalStorage(team: Team): void {
+  public static updateTeamInLocalStorage(team: TeamResponse): void {
     localStorage.setItem("team", JSON.stringify(team));
   }
 

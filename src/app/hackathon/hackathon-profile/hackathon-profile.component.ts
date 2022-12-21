@@ -4,11 +4,9 @@ import {concatMap, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {HackathonResponse} from "../model/Hackathon";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {UserResponseDto} from "../../user/model/UserResponseDto";
 import {NGXLogger} from "ngx-logger";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
-import * as Util from "util";
 import {UserService} from "../../core/services/user-service/user.service";
 
 @Component({
@@ -22,39 +20,35 @@ export class HackathonProfileComponent implements OnInit {
 
   hackathon!: HackathonResponse;
 
-  constructor(private hackathonService: HackathonService, private teamService: TeamService, private userService: UserService,
-              private route: ActivatedRoute, private logger: NGXLogger, private toastr: ToastrService) { }
+  constructor(private hackathonService: HackathonService,
+              private userService: UserService,
+              private route: ActivatedRoute,
+              private toastr: ToastrService) {
+  }
 
   ngOnInit(): void {
 
-    this.routeSubscription = this.route.params.subscribe(params => {
-
-      this.hackathonService.getHackathonDetailsById(params['id']).subscribe(hackathon => {
-
+    this.routeSubscription = this.route.params.pipe(
+      concatMap((params) => this.hackathonService.getHackathonDetailsById(params['id']))
+    ).subscribe(hackathon => {
         this.hackathon = hackathon;
-      });
     });
   }
 
-  isUserHackathonOwner() {
-    return this.userService.isUserHackathonOwner(this.hackathon.id);
-  }
+  joinHackathon(): void {
 
-  joinHackathon() {
-
-    const user = Utils.currentUserFromLocalStorage;
+    const user = UserManager.currentUserFromLocalStorage;
 
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
       this.userService.updateUserMembership({currentHackathonId: this.hackathon.id})
     )).subscribe(() => {
-      Utils.currentUserFromLocalStorage.currentHackathonId = this.hackathon.id;
 
+      UserManager.currentUserFromLocalStorage.currentHackathonId = this.hackathon.id;
       this.toastr.success("You are now member of hackathon " + this.hackathon.name);
     });
   }
 
   isUserHackathonParticipant(): boolean {
-
-    return Utils.isUserHackathonMember(this.hackathon?.id);
+    return UserManager.isUserHackathonMember(this.hackathon?.id);
   }
 }

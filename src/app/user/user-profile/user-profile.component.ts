@@ -1,18 +1,16 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {forkJoin, Subject, Subscription} from "rxjs";
+import {concatMap, forkJoin, Subject, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
-import {UserResponseDto} from "../model/UserResponseDto";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {TeamInvitation} from "../../team/model/TeamInvitation";
-import {Notification} from "../model/Notification";
-import {MeetingNotification} from "../../team/model/MeetingNotification";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {Tag, Team} from "../../team/model/TeamRequest";
+import {Tag, TeamResponse} from "../../team/model/Team";
 import {ToastrService} from "ngx-toastr";
-import {Utils} from "../../shared/Utils";
+import {UserManager} from "../../shared/UserManager";
 import {KeycloakService} from "keycloak-angular";
 import {NotificationType} from "../model/NotificationType";
+import {Notification, TeamInvitationNotification} from "../../team/model/Notifications";
+import {UserResponse} from "../model/User";
 
 @Component({
   selector: 'ho-user-profile',
@@ -25,63 +23,55 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   notificationsArray: Notification[] = [];
 
-  currentUser!: UserResponseDto;
-  user!: UserResponseDto;
-  avatarUrl = "";
+  currentUser?: UserResponse;
+  user!: UserResponse;
+  userProfileId?: number;
+  userRoles: string[] = [];
+  isThisMyProfile = false;
 
+  avatarUrl = "";
   editMode = false;
 
   userEditForm!: FormGroup;
   tags: Tag[] = [];
-
   currentTeamName?: string;
-  userProfileId?: number;
-  isThisMyProfile = false;
-
-  userRoles: string[] = [];
-
-  teamSuggestions: Team[] = [];
-
-  // @ts-ignore
-  private sub: Subject = new Subject();
+  teamSuggestions: TeamResponse[] = [];
 
   constructor(private route: ActivatedRoute,
               private userService: UserService,
               private keycloakService: KeycloakService,
               private teamService: TeamService,
               private formBuilder: FormBuilder,
-              private toastr: ToastrService,
-              private ref: ChangeDetectorRef) {
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
 
     this.userService.userNotificationsObservable.subscribe((notifications) => {
       this.notificationsArray = notifications;
-
-      // this.ref.detectChanges();
-      // this.sub.next();
     });
 
-    this.routeSubscription = this.route.params.subscribe(params => {
-
-      this.userService.getUserById(params["id"]).subscribe(user => {
-        this.user = user;
-        this.currentUser = Utils.currentUserFromLocalStorage;
+    this.routeSubscription = this.route.params.pipe(
+      concatMap(params => {
         this.userProfileId = params["id"];
-
         this.isThisMyProfile = this.checkIfThisMyProfile();
 
-        this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
 
-        if (this.currentUser.id === this.user.id) {
-          this.currentTeamName = Utils.currentUserTeamFromLocalStorage.name;
-        } else if (this.user.currentTeamId) {
-          this.teamService.getTeamById(this.user.currentTeamId).subscribe((team: Team) => this.currentTeamName = team.name);
-        }
-      });
+        return this.userService.getUserById(params["id"])
+      })
+    ).subscribe(userResponse => {
+      this.user = userResponse;
+      this.currentUser = UserManager.currentUserFromLocalStorage;
+      this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + userResponse.username;
+
+      if (this.currentUser?.id === this.user.id) {
+        this.currentTeamName = UserManager.currentUserTeamFromLocalStorage.name;
+      } else if (this.user.currentTeamId) {
+        this.teamService.getTeamById(this.user.currentTeamId).subscribe((team) => this.currentTeamName = team.name);
+      }
     });
   }
+
 
   checkIfUserHasMentorRole() {
     return this.userService.checkUserAccess;
@@ -90,39 +80,38 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   inviteToTeam() {
 
     const teamId = this.userService.user.currentTeamId!;
-
-    const username = this.user.username;
+    const username = this.user?.username;
 
     this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe(() => {
       this.toastr.success("Invite send to user " + username);
     });
   }
 
-  updateInvitation(invitationNumber: number, accepted: boolean) {
+  updateInvitation(invitationIndex: number, accepted: boolean): void {
 
-    const invitation: TeamInvitation = this.notificationsArray[invitationNumber] as TeamInvitation;
+    const invitation: TeamInvitationNotification = this.notificationsArray[invitationIndex] as TeamInvitationNotification;
 
     this.teamService.updateInviteStatus(invitation, accepted).subscribe(() => {
       if (accepted) {
-        this.userService.updateUserMembership({currentHackathonId: this.user.currentHackathonId, currentTeamId: invitation.teamId})
+        this.userService.updateUserMembership({
+          currentHackathonId: this.currentUser?.currentHackathonId,
+          currentTeamId: invitation.teamId
+        })
           .subscribe(() => {
 
-            this.currentUser.currentTeamId = invitation.teamId;
-            this.userService.updateTeamInLocalStorage(this.currentUser);
-
+            this.currentUser!.currentTeamId = invitation.teamId;
+            this.userService.updateTeamInLocalStorage(this.currentUser!);
             this.currentTeamName = invitation.teamName;
-
             this.toastr.success("You are now member of team " + invitation.teamName);
           });
       } else {
         this.toastr.success("Invitation rejected");
       }
-
-      this.notificationsArray.splice(invitationNumber,  1);
+      this.notificationsArray.splice(invitationIndex, 1);
     });
   }
 
-  edit() {
+  editProfile() {
 
     this.userEditForm = this.formBuilder.group({
       description: [this.user.description],
@@ -147,7 +136,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  buildTagsFormGroup(tags: Tag[]): FormGroup {
+  private buildTagsFormGroup(tags: Tag[]): FormGroup {
     let group = this.formBuilder.group({});
 
     tags.forEach(tag => {
@@ -163,7 +152,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return group;
   }
 
-  markTag(index: number) {
+  markTag(index: number): void {
     this.tags[index].isSelected = !this.tags[index].isSelected;
   }
 
@@ -171,7 +160,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return this.tags.filter(tag => tag.isSelected);
   }
 
-  save() {
+  save(): void {
     const updatedUser = {
       description: this.userEditForm.get("description")?.value,
       tags: this.getSelectedTags()
@@ -185,8 +174,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.user.tags = this.getSelectedTags();
 
         this.userService.removeTagsNotification();
-
-        this.ref.detectChanges();
       });
 
     this.editMode = false;
@@ -195,7 +182,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private checkIfThisMyProfile(): boolean {
 
     if (this.user) {
-      return Number(this.currentUser.id) === Number(this.userProfileId);
+      return Number(this.currentUser?.id) === Number(this.userProfileId);
     } else {
       return false;
     }
@@ -213,7 +200,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  public get NotificationType() {
+  get NotificationType() {
     return NotificationType;
   }
 }
