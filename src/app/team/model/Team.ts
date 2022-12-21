@@ -27,6 +27,7 @@ export interface TeamResponse {
   isOpen: boolean;
   teamChatRoomId: number;
   tags: Tag[];
+  score?: number;
 }
 
 export interface TeamInvitationRequest {

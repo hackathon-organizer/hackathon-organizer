@@ -35,6 +35,10 @@
       <button class="btn btn-outline btn-secondary">Update hackathon rating criteria</button>
     </a>
 
+    <a *ngIf="isUserOrganizer()" routerLink="/hackathon/{{ hackathon.id }}/leaderboard">
+      <button class="btn btn-outline btn-secondary">Leaderboard</button>
+    </a>
+
   </div>
 
   <div id="hackathon-description" class="mt-4">

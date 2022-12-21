@@ -7,6 +7,7 @@ import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../
 import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
 import {Criteria} from "../../../hackathon/model/Criteria";
 import {NGXLogger} from "ngx-logger";
+import {TeamResponse} from "../../../team/model/Team";
 
 @Injectable({
   providedIn: 'root'
@@ -106,7 +107,7 @@ export class HackathonService {
 
     this.logger.info("Saving hackathon id: " + hackathonId +" team rating criteria", criteria);
 
-    return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
+    return this.http.patch(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria/answers', criteria);
   }
 
   deleteCriteria(idToDelete: number) {
@@ -114,5 +115,11 @@ export class HackathonService {
     this.logger.info("Deleting criteria with id", idToDelete);
 
     return this.http.delete(this.BASE_URL_WRITE + '/criteria/' + idToDelete);
+  }
+
+  getLeaderboard(hackathonId: number) {
+    this.logger.info("Returning hackathon id: " + hackathonId + " leaderboard");
+
+    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + '/' + hackathonId + '/leaderboard');
   }
 }

@@ -1,0 +1,36 @@
+<h3 class="text-center text-5xl mb-8">Leaderboard</h3>
+
+<ng-container *ngIf="loading">
+  <img class="mx-auto mt-36" src="assets/spinner.svg" alt="Loading spinner"/>
+</ng-container>
+
+<table *ngIf="!loading" class="table w-full">
+  <thead>
+  <tr>
+    <th></th>
+    <th>Name</th>
+    <th>Score</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let team of teams; index as i">
+    <th>
+      <span>{{(i+1)}}</span>
+    </th>
+    <td>
+      <div class="flex items-center space-x-3">
+        <div>
+          <div class="font-bold">{{ team.name }}</div>
+        </div>
+      </div>
+    </td>
+    <td>
+    {{ team.score }}
+    </td>
+    <th>
+      <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}"><button class="btn btn-ghost btn-xs">Details</button></a>
+    </th>
+  </tr>
+  </tbody>
+</table>

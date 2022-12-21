@@ -12,6 +12,7 @@ import {UserListComponent} from "./user-list/user-list.component";
 import {AuthGuard} from "../guard/auth.guard";
 import {HackathonRatingFormComponent} from "./hackathon-rating-form/hackathon-rating-form.component";
 import {RatingCriteriaFormComponent} from "./rating-criteria-form/rating-criteria-form.component";
+import {LeaderboardComponent} from "./leaderboard/leaderboard.component";
 
 
 
@@ -28,7 +29,8 @@ const routes: Routes = [
   {path: ':id/team/:teamId/invite', component: UserListComponent},
   {path: ':id/schedule', component: MentorScheduleComponent},
   {path: ':id/rating', component: HackathonRatingFormComponent},
-  {path: ':id/rating-criteria', component: RatingCriteriaFormComponent}
+  {path: ':id/rating-criteria', component: RatingCriteriaFormComponent},
+  {path: ':id/leaderboard', component: LeaderboardComponent}
 ];
 
 @NgModule({
@@ -38,6 +40,6 @@ const routes: Routes = [
 export class HackathonRoutingModule {
   static components = [
     HackathonsComponent, NewHackathonFormComponent, HackathonProfileComponent, UserListComponent,
-    HackathonRatingFormComponent, RatingCriteriaFormComponent
+    HackathonRatingFormComponent, RatingCriteriaFormComponent, LeaderboardComponent
   ];
 }
