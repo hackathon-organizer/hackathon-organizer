@@ -8,7 +8,7 @@ import {TeamResponse} from "../../team/model/Team";
 
 
 @Component({
-  selector: 'ho-hackathon-judging-form',
+  selector: 'ho-hackathon-rating-form',
   templateUrl: './hackathon-rating-form.component.html',
   styleUrls: []
 })
@@ -18,27 +18,31 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
   criteriaForm!: FormGroup;
 
-  teams!: TeamResponse[]
+  teams: TeamResponse[] = [];
 
   scale: number = 10;
 
   currentTeam!: TeamResponse;
 
-  currentTeamId: number = 0;
+  currentTeamId!: number;
+  hackathonId!: number;
 
-  teamNumber: number = 0;
+  teamNumber!: number;
 
-  constructor(private formBuilder: FormBuilder, private hackathonService: HackathonService, private route: ActivatedRoute,
-              private ref: ChangeDetectorRef) {
+  constructor(private formBuilder: FormBuilder,
+              private hackathonService: HackathonService,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
 
     this.subscription = this.route.params.subscribe(params => {
 
+      this.hackathonId = params["id"];
+
       forkJoin([
-        this.hackathonService.getHackathonRatingCriteria(params['id']),
-        this.hackathonService.getHackathonTeamsById(params['id'])
+        this.hackathonService.getHackathonRatingCriteria(this.hackathonId),
+        this.hackathonService.getHackathonTeamsById(this.hackathonId)
       ]).pipe(map(([criteria, teams]) => {
 
           this.teams = teams;
@@ -46,15 +50,12 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
           this.currentTeam = this.teams[0];
           this.currentTeamId = this.currentTeam.id;
 
-        console.log(criteria)
-
           criteria.forEach(c => {
             this.criteria.push(this.createCriteria(c.name, c.id))
           });
         }
-      )).subscribe();
+      ));
     });
-
 
     this.criteriaForm = this.formBuilder.group({
       criteria: this.formBuilder.array([])
@@ -62,7 +63,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   }
 
 
-  changeVal($event: any, index: number) {
+  changeValue($event: any, index: number) {
 
     const criteria = this.criteria.at(index);
 
@@ -70,9 +71,6 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
       teamId: this.currentTeamId,
       value: $event.target.value
     });
-
-    console.log(this.criteriaForm.value);
-    console.log(this.criteria.controls)
   }
 
   createCriteria(name: string, id: number): FormGroup {
@@ -82,7 +80,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
       name: name,
       criteriaAnswer: new FormGroup({
         teamId: new FormControl(0),
-        value: new FormControl('0'),
+        value: new FormControl("0"),
         userId: new FormControl(localStorage.getItem("userId"))
       })
     });
@@ -94,9 +92,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
     this.criteria.controls.forEach(c => answers.push(c.value as Criteria));
 
-    console.log(answers)
-
-    this.hackathonService.saveTeamRating(1, answers).subscribe();
+    this.hackathonService.saveTeamRating(this.hackathonId, answers).subscribe();
   }
 
   nextTeam() {
@@ -110,7 +106,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  prevTeam() {
+  previousTeam() {
 
     this.resetFormValues();
 
