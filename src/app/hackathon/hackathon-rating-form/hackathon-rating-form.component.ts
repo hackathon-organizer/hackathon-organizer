@@ -3,8 +3,9 @@ import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angul
 import {Criteria, CriteriaAnswer} from "../model/Criteria";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
-import {forkJoin, map, Subscription} from "rxjs";
+import {forkJoin, map, Observable, Subscription} from "rxjs";
 import {TeamResponse} from "../../team/model/Team";
+import {NGXLogger} from "ngx-logger";
 
 
 @Component({
@@ -22,19 +23,24 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
   scale: number = 10;
 
-  currentTeam!: TeamResponse;
+  currentTeam?: TeamResponse;
 
-  currentTeamId!: number;
+  currentTeamId?: number;
   hackathonId!: number;
 
-  teamNumber!: number;
+  teamsNumber: number = 0;
 
   constructor(private formBuilder: FormBuilder,
               private hackathonService: HackathonService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private logger: NGXLogger) {
   }
 
   ngOnInit(): void {
+
+    this.criteriaForm = this.formBuilder.group({
+      criteria: this.formBuilder.array([])
+    });
 
     this.subscription = this.route.params.subscribe(params => {
 
@@ -50,18 +56,11 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
           this.currentTeam = this.teams[0];
           this.currentTeamId = this.currentTeam.id;
 
-          criteria.forEach(c => {
-            this.criteria.push(this.createCriteria(c.name, c.id))
-          });
+          criteria.forEach(c => this.criteria.push(this.createCriteria(c.name, c.id)));
         }
-      ));
-    });
-
-    this.criteriaForm = this.formBuilder.group({
-      criteria: this.formBuilder.array([])
+      )).subscribe(() => this.logger.info("Criteria and teams for hackathon: {} fetched", this.hackathonId));
     });
   }
-
 
   changeValue($event: any, index: number) {
 
@@ -73,7 +72,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  createCriteria(name: string, id: number): FormGroup {
+  private createCriteria(name: string, id: number): FormGroup {
 
     return this.formBuilder.group({
       id: id,
@@ -86,39 +85,40 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  rateTeam() {
+  private rateTeam(): Observable<any>{
 
     const answers: Criteria[] = [];
 
     this.criteria.controls.forEach(c => answers.push(c.value as Criteria));
 
-    this.hackathonService.saveTeamRating(this.hackathonId, answers).subscribe();
+    return this.hackathonService.saveTeamRating(this.hackathonId, answers);
   }
 
   nextTeam() {
-    this.rateTeam();
 
-    this.resetFormValues();
+    this.rateTeam().subscribe(() => {
+      this.resetFormValues();
 
-    if (this.teamNumber < this.teams.length - 1) {
-      this.currentTeam = this.teams[++this.teamNumber];
-      this.currentTeamId = this.currentTeam.id;
-    }
+      if (this.teamsNumber < this.teams.length - 1) {
+        this.currentTeam = this.teams[++this.teamsNumber];
+        this.currentTeamId = this.currentTeam.id;
+      }
+    });
   }
 
   previousTeam() {
 
     this.resetFormValues();
 
-    if (this.teamNumber < 1) {
+    if (this.teamsNumber < 1) {
       return;
     } else {
-      this.currentTeam = this.teams[--this.teamNumber];
+      this.currentTeam = this.teams[--this.teamsNumber];
       this.currentTeamId = this.currentTeam.id;
     }
   }
 
-  resetFormValues() {
+  private resetFormValues() {
 
     this.criteria.controls.forEach(c => c.get("criteriaAnswer")?.patchValue({
       teamId: 0,

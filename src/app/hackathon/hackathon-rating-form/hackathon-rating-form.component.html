@@ -1,33 +1,40 @@
 <section id="criteria-form">
-  <h4>Team rating {{ currentTeam.name }}</h4>
-  <p>Here you can rate each team on given criteria.</p>
-  <button class="btn btn-secondary" (click)="previousTeam()">< Previous team</button>
-  <button class="btn btn-secondary" (click)="nextTeam()">Save and go to next team ></button>
 
-  <div class="mt-12 my-8" id="q-1">
+  <div class="mx-auto max-w-6xl">
+    <div class="flex flex-col items-center">
+      <h2 class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
+      <p class="mb-6">Here you can rate each team on given criteria</p>
 
-    <span>Team {{ teamNumber + 1}} of {{ teams.length }}</span>
+      <span *ngIf="teams.length > 0" class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
 
-    <form [formGroup]="criteriaForm" (ngSubmit)="rateTeam()">
+      <div class="btn-group btn-group-vertical lg:btn-group-horizontal">
+        <button class="btn btn-secondary" (click)="previousTeam()">< Previous team</button>
+        <button class="btn btn-secondary" (click)="nextTeam()">Save and go to next team ></button>
+      </div>
+    </div>
+    <div class="mt-12 my-8" id="q-1">
 
-      <div formArrayName="criteria" *ngFor="let c of criteria.controls; let i = index" class="mx-12">
 
-        <div [formGroupName]="i">
-          <h5 class="mb-4">{{ c.value.name }}</h5>
+      <form class="space-y-6" [formGroup]="criteriaForm">
 
-          <div formGroupName="criteriaAnswer">
+        <div formArrayName="criteria" *ngFor="let c of criteria.controls; let i = index" class="mx-12">
 
-            <input formControlName="value" (change)="changeValue($event, i)" type="range" min="0" max="100" value="0"
-                   class="range" step="10"/>
+          <div class="" [formGroupName]="i">
+            <h5 class="mb-4 text-xl text-center">{{ c.value.name }}</h5>
 
-            <div class="w-full flex justify-between text-xs px-2">
-              <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+            <div class="p-2" formGroupName="criteriaAnswer">
+
+              <input formControlName="value" (change)="changeValue($event, i)" type="range" min="0" max="100" value="0"
+                     class="range range-primary" step="10"/>
+
+              <div class="w-full flex justify-between text-xs mb-3">
+                <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+              </div>
+
             </div>
           </div>
         </div>
-      </div>
-
-      <input type="submit" value="Save">
-    </form>
+      </form>
+    </div>
   </div>
 </section>

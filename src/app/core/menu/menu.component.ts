@@ -28,8 +28,6 @@ export class MenuComponent implements OnInit {
 
       const user = UserManager.currentUserFromLocalStorage;
 
-      console.log('laduje')
-
       this.currentUserId = user.id;
       this.userHackathonId = user.currentHackathonId;
       this.userTeamId = user.currentTeamId;
