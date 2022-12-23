@@ -27,6 +27,10 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
+    this.criteriaForm = this.formBuilder.group({
+      criteria: this.formBuilder.array([])
+    });
+
     this.subscription = this.route.params.pipe(
       concatMap(params => {
         this.hackathonId = params["id"];
@@ -39,18 +43,14 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
       }
 
       criteria.forEach(c => this.criteria.push(this.createCriteria(c.id, c.name)));
-    });
-
-    this.criteriaForm = this.formBuilder.group({
-      criteria: this.formBuilder.array([])
-    });
+      });
   }
 
   private createCriteria(id?: number, name?: string): FormGroup {
     return this.formBuilder.group({
       id: id,
       hackathonId: this.hackathonId,
-      name: new FormControl(name ? name : "", [Validators.required, Validators.minLength(5)])
+      name: new FormControl(name ? name : "")
     });
   }
 
@@ -73,7 +73,7 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  remove(index: number): void {
+  removeCriteria(index: number): void {
 
     if (this.isUpdateMode) {
       const idToDelete = this.criteria.at(index).value.id;

@@ -1,33 +1,29 @@
 <section id="rating-criteria-form">
 
   <div class="p-4 mx-auto w-4/5">
-    <div class="p-4 lg:p-8">
+    <div class="p-4 lg:p-8 flex flex-col items-center justify-center">
 
-      <h2 class="text-center mb-6 text-4xl">Add rating criteria</h2>
-      <p class="text-center mb-6">Below add criteria which will be used by jury to rate teams</p>
+      <h2 class="mb-6 text-4xl">Add rating criteria</h2>
+      <p class="mb-6">Below add criteria which will be used by jury to rate teams</p>
+
+      <button (click)="addCriteria()" class="btn btn-info m-4">Add new</button>
 
       <form id="create-hackathon-form" novalidate [formGroup]="criteriaForm" (ngSubmit)="saveCriteria()"
-            class="flex flex-col items-center justify-center space-y-4">
+            class="flex flex-col items-center justify-center w-full space-y-4">
 
         <div class="w-full" *ngFor="let c of criteria.controls; let i=index">
 
-          <div class="flex w-full justify-center" [formGroupName]="i">
-            <input id="hackathonNameId" formControlName="name" type="text" class="ho-input-primary"
-                   placeholder="Type criteria here" [ngClass]="{'is-invalid': (criteriaForm.get('name')?.touched
-          ||
-          criteriaForm.get('name')?.dirty) &&
-          !criteriaForm.get('name')?.valid }"/>
+          <div formArrayName="criteria">
 
-            <span class="error-message" *ngIf="criteriaForm.get('name')?.errors?.required &&
-          criteriaForm.get('hackathonName')?.touched">Please enter hackathon name.</span>
-            <span class="error-message" *ngIf="criteriaForm.get('name')?.errors?.minlength">Hackathon name must be longer
-          than 5 characters.</span>
+            <div class="flex justify-center w-full" [formGroupName]="i">
+              <input id="nameId" formControlName="name" type="text" class="ho-input-primary" placeholder="Type criteria here"/>
 
-            <button (click)="remove(i)" class="ml-4 btn btn-error">Remove</button>
+              <button (click)="removeCriteria(i)" class="ml-4 btn btn-error">Remove</button>
+            </div>
           </div>
         </div>
 
-        <input [disabled]="!criteriaForm.valid" type="submit" class="btn btn-primary" value="Save">
+        <input type="submit" class="btn btn-success" value="Save">
       </form>
     </div>
   </div>
