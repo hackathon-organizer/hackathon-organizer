@@ -55,11 +55,7 @@ export class UserService {
     this.getKeycloakUserId().then(v => {
 
       this.keycloakUserId = v!;
-
-
       this.fetchUserData();
-
-      // this.openWsConn();
     });
   }
 
@@ -150,7 +146,10 @@ export class UserService {
   getUserTeamInvitations(userData: UserResponse) {
     if (userData.currentHackathonId) {
       this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
-        userInvites.map(inv => inv.notificationType = NotificationType.INVITATION);
+        userInvites.map(invitation => {
+          invitation.message = `User ${invitation.fromUserName} invited you to team ${invitation.teamName}`;
+          invitation.notificationType = NotificationType.INVITATION
+        });
         this.userNotifications.next(this.userNotifications.value.concat(userInvites));
       });
     }
@@ -220,8 +219,6 @@ export class UserService {
   }
 
   private sendUserScheduleNotification(index = 0) {
-
-    // TODO if this.user is mentor...
 
     if (this.checkUserAccess) {
       this.getUserSchedulePlan().subscribe(schedule => {

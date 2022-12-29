@@ -31,13 +31,19 @@
         <th>
           {{ team.name }}
         </th>
-        <td class="max-w-12">
-<!--          {{ team.description }}-->
+        <td>
+          <div class="flex flex-wrap my-5">
+            <div *ngFor="let tag of team.tags;">
+              <label class="pill">
+                <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
+              </label>
+            </div>
+          </div>
         </td>
         <th></th>
         <th>
           <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}">
-            <button class="btn btn-ghost btn-xs">Details</button>
+            <button class="btn btn-outline">Details</button>
           </a>
         </th>
       </tr>

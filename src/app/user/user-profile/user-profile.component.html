@@ -15,24 +15,30 @@
 
     <div id="user-data" class="flex flex-col text-2xl">
 
-      <div class="flex justify-between">
-        <h4 *ngIf="user">Username: {{ user.username }}</h4>
+      <div *ngIf="user" class="flex justify-between mt-6">
+        <h4>Username: {{ user.username }}</h4>
 
         <label *ngIf="isThisMyProfile" for="edit-modal" (click)="editProfile()"
                class="btn btn-outline btn-success">Edit</label>
       </div>
 
-      <h4 *ngIf="currentTeamName" class="mt-8">Team: {{ currentTeamName }}</h4>
-      <h4 *ngIf="!currentTeamName" class="mt-8">Team: -----</h4>
-
-      <div class="mt-8" id="about">
-        <h4>About:</h4>
-        <p *ngIf="user">{{ user.description }}</p>
-        <p *ngIf="!user">No description</p>
+      <div class="mt-4">
+      <h4 *ngIf="currentTeamName">Team: {{ currentTeamName }}</h4>
+      <h4 *ngIf="!currentTeamName">Team: -----</h4>
       </div>
 
-      <button [disabled]="isThisMyProfile" (click)="inviteToTeam()" class="btn btn-info my-5">Invite to team</button>
-      <button *ngIf="checkIfUserHasMentorRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my schedule</button>
+      <div class="my-6" id="about">
+        <h4>About:</h4>
+        <p *ngIf="user?.description">{{ user.description }}</p>
+        <p *ngIf="!user?.description">No description</p>
+      </div>
+
+      <button [disabled]="isThisMyProfile || !isUserIsHackathonParticipant()" (click)="inviteToTeam()"
+              class="btn btn-info my-5">Invite to team
+      </button>
+      <button *ngIf="checkIfUserHasMentorRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my
+        schedule
+      </button>
     </div>
 
     <div class="col-span-2">
@@ -49,52 +55,64 @@
       </div>
     </div>
 
-    <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
-      <input (click)="getUserTeamSuggestions()" type="checkbox"/>
-      <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
-        Show matching teams
-      </div>
-      <div class="collapse-content">
-        <div class="flex items-center justify-between my-2" *ngFor="let team of teamSuggestions; index as i">
-          <span>{{(i + 1)}}</span>
-          <span>{{ team.name }}</span>
-          <div class="flex flex-wrap items-center">
-            <span *ngIf="teamSuggestions.length < 1">Nothing found</span>
-            <div *ngFor="let tag of team.tags | slice:0:3">
-              <div class="pill-small">{{ tag.name }}</div>
-            </div>
-            <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
+    <div id="teams-suggestions">
+      <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
+        <input (click)="getUserTeamSuggestions()" type="checkbox"/>
+        <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
+          Show matching teams
+        </div>
+        <div class="collapse-content">
+
+          <div class="w-full text-center mt-4">
+            <span class="text-2xl" *ngIf="!teamSuggestions">Nothing found :(</span>
           </div>
-          <a routerLink="{{ getTeamUrl(team.id) }}">
-            <button class="btn">Show details</button>
-          </a>
+
+          <div class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary"
+               *ngFor="let team of teamSuggestions; index as i">
+
+            <span>{{(i + 1)}}</span>
+            <span>{{ team.name }}</span>
+            <div class="flex flex-wrap items-center">
+              <div *ngFor="let tag of team.tags | slice:0:3">
+                <div class="pill-small">{{ tag.name }}</div>
+              </div>
+              <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
+            </div>
+            <a routerLink="{{ getTeamUrl(team.id) }}">
+              <button class="btn">Show details</button>
+            </a>
+          </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="isThisMyProfile" id="#notifications">
+    <div *ngIf="isThisMyProfile" id="notifications">
 
-      <span class="text-xl font-medium mb-6">Notifications:</span>
+      <span class="text-xl font-medium">Notifications:</span>
 
-      <div *ngFor="let notification of notificationsArray; let i = index;">
+      <div class="mt-4" *ngFor="let notification of notificationsArray; let i = index;">
 
-        <div class="alert alert-info shadow-lg mb-2">
-          <div class="flex flex-col">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-               class="stroke-current flex-shrink-0 w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span>{{ notification.message }}</span>
+        <div class="alert alert-info shadow-lg mb-2 space-y-4 w-full">
+          <div class="flex justify-between w-full">
 
-          <div class="flex flex-col items-center justify-center" *ngIf="notification.notificationType === NotificationType.INVITATION">
-            <button class="m-3 p-2 bg-success rounded-lg shadow" (click)="updateInvitation(i, true)">Accept</button>
-            <button class="m-3 p-2 bg-error rounded-lg shadow" (click)="updateInvitation(i,false)">Reject</button>
-          </div>
+            <div class="flex">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                   class="stroke-current flex-shrink-0 w-6 h-6 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>{{ notification.message }}</span>
+            </div>
 
-          <div *ngIf="notification.notificationType === NotificationType.MEETING">
-            <button>JOIN</button>
-          </div>
+            <div class="flex items-center justify-center"
+                 *ngIf="notification.notificationType === NotificationType.INVITATION">
+              <button class="m-3 p-2 bg-success rounded-lg shadow" (click)="updateInvitation(i, true)">Accept</button>
+              <button class="m-3 p-2 bg-error rounded-lg shadow" (click)="updateInvitation(i,false)">Reject</button>
+            </div>
+
+            <div *ngIf="notification.notificationType === NotificationType.MEETING">
+              <button>JOIN</button>
+            </div>
           </div>
         </div>
       </div>

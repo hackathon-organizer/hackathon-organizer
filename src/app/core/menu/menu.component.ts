@@ -32,7 +32,7 @@ export class MenuComponent implements OnInit {
       this.userHackathonId = user.currentHackathonId;
       this.userTeamId = user.currentTeamId;
 
-      this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + user.username;
+      this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${user.username}&length=1`;
     }
 
     this.userService.userNotificationsObservable.subscribe(notifications => {

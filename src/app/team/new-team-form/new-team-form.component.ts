@@ -3,8 +3,8 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router, UrlSegment} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
-import {Tag, TeamRequest} from "../model/Team";
-import {Subscription} from "rxjs";
+import {Tag, TeamRequest, TeamResponse} from "../model/Team";
+import {concatMap, Subscription} from "rxjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {HackathonRequest} from "../../hackathon/model/Hackathon";
@@ -98,17 +98,21 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
         });
       } else {
 
-        this.teamService.createTeam(team).subscribe(createdTeam => {
+        this.teamService.createTeam(team).pipe(
+          concatMap((createdTeam: TeamResponse) => {
 
-          this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
-          UserManager.updateTeamInLocalStorage(createdTeam);
+            UserManager.currentUserFromLocalStorage.currentTeamId = createdTeam.id;
+            UserManager.updateTeamInLocalStorage(createdTeam);
 
-          this.userService.updateUserMembership({
-            currentHackathonId: this.hackathonId,
-            currentTeamId: createdTeam.id
-          }).subscribe(() => {
-            this.toastr.success("Team " + team.name + " created successfully");
-          });
+            this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
+
+            return this.userService.updateUserMembership({
+              currentHackathonId: this.hackathonId,
+              currentTeamId: createdTeam.id
+            });
+          })).subscribe(() => {
+
+          this.toastr.success("Team " + team.name + " created successfully");
         });
       }
     }
@@ -119,7 +123,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     this.teamService.getTeamById(teamId).subscribe(team => {
 
       this.newTeamForm.get('teamName')?.patchValue(team.name);
-      this.newTeamForm.get('description')?.patchValue(team.name);
+      this.newTeamForm.get('description')?.patchValue(team.description);
 
       team.tags.forEach(teamTag => {
         const tagToMark = this.tags.find(tag => tag.id === teamTag.id);

@@ -54,15 +54,14 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.params.pipe(
       concatMap(params => {
         this.userProfileId = params["id"];
-        this.isThisMyProfile = this.checkIfThisMyProfile();
-
 
         return this.userService.getUserById(params["id"])
       })
     ).subscribe(userResponse => {
       this.user = userResponse;
       this.currentUser = UserManager.currentUserFromLocalStorage;
-      this.avatarUrl = "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" + userResponse.username;
+      this.isThisMyProfile = this.checkIfThisMyProfile();
+      this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
       if (this.currentUser?.id === this.user.id) {
         this.currentTeamName = UserManager.currentUserTeamFromLocalStorage.name;
@@ -71,7 +70,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       }
     });
   }
-
 
   checkIfUserHasMentorRole() {
     return this.userService.checkUserAccess;
@@ -82,9 +80,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const teamId = this.userService.user.currentTeamId!;
     const username = this.user?.username;
 
+    if (teamId && username) {
     this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe(() => {
       this.toastr.success("Invite send to user " + username);
     });
+    } else {
+      throw new Error("You are not in any team");
+    }
   }
 
   updateInvitation(invitationIndex: number, accepted: boolean): void {
@@ -180,12 +182,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   private checkIfThisMyProfile(): boolean {
-
-    if (this.user) {
-      return Number(this.currentUser?.id) === Number(this.userProfileId);
-    } else {
-      return false;
-    }
+    return Number(this.currentUser?.id) === Number(this.userProfileId);
   }
 
   ngOnDestroy(): void {
@@ -202,5 +199,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   get NotificationType() {
     return NotificationType;
+  }
+
+  isUserIsHackathonParticipant() {
+    return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId) && this.currentUser?.currentTeamId;
   }
 }
