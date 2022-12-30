@@ -27,13 +27,14 @@
     </div>
   </div>
   <div class="my-4">
+    <span>{{ currentTime | async | date: 'HH:mm:ss' }}</span>
     <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
   </div>
 </div>
 <br/>
 
 <div *ngIf="canEditSchedule()" class="flex justify-center">
-  <label for="update-event-modal" class="btn btn-secondary m-5">Update schedule</label>
+  <label for="update-event-modal" class="btn btn-secondary mb-5">Update schedule</label>
 </div>
 
 <mwl-calendar-day-view
@@ -41,6 +42,7 @@
   [events]="events"
   [refresh]="refresh"
   [eventTemplate]="hoDayCell"
+  [minimumEventHeight]="60"
   (eventTimesChanged)="eventTimesChanged($event)"
   (eventClicked)="handleEvent($event.event)"
 >
@@ -135,8 +137,8 @@
     <h5 class="text-3xl text-primary">{{ modalData.title }}</h5>
 
     <div id="event-dates" class="flex mt-2">
-      <span>{{ modalData.start | date: 'medium' }}</span>&nbsp;&nbsp;-&nbsp;&nbsp;
-      <span>{{ modalData.end | date: 'medium' }}</span>
+      <span>{{ modalData.start | date: 'dd-MM-yyyy HH:mm' }}</span>&nbsp;&nbsp;-&nbsp;&nbsp;
+      <span>{{ modalData.end | date: 'dd-MM-yyyy HH:mm' }}</span>
     </div>
 
     <div class="text-2xl my-6 font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
@@ -149,7 +151,8 @@
     </div>
 
     <button [disabled]="!isUserTeamOwner()" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
-      {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team</button>
+      {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
+    </button>
 
   </div>
 </div>
@@ -189,7 +192,8 @@
 
     <div class="flex items-center justify-center md:justify-around">
       <h5 class="text-3xl mr-5 text-primary hidden sm:block">{{ weekEvent.event.title }}</h5>
-      <div class="text-2xl mr-5 hidden sm:block font-bold" [ngClass]="weekEvent.event.isAvailable ? 'text-success' : 'text-error'">
+      <div class="text-2xl mr-5 hidden sm:block font-bold"
+           [ngClass]="weekEvent.event.isAvailable ? 'text-success' : 'text-error'">
         <span *ngIf="weekEvent.event.isAvailable; else notAvailable">AVAILABLE</span>
         <ng-template #notAvailable>NOT AVAILABLE</ng-template>
       </div>

@@ -6,8 +6,7 @@ import {TeamChatComponent} from "./team-chat/team-chat.component";
 import {TeamsComponent} from "./teams/teams.component";
 
 
-const routes: Routes = [
-];
+const routes: Routes = [];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
@@ -15,6 +14,6 @@ const routes: Routes = [
 })
 export class TeamRoutingModule {
   static components = [
-     TeamProfileComponent, NewTeamFormComponent, TeamChatComponent, TeamsComponent
+    TeamProfileComponent, NewTeamFormComponent, TeamChatComponent, TeamsComponent
   ];
 }

@@ -13,33 +13,40 @@
           newTeamForm.get('teamName')?.dirty) &&
           !newTeamForm.get('teamName')?.valid }"/>
 
-        <span class="error-message" *ngIf="newTeamForm.get('teamName')?.errors?.required && newTeamForm.get('teamName')?.touched">
+        <span class="error-message"
+              *ngIf="newTeamForm.get('teamName')?.errors?.required && newTeamForm.get('teamName')?.touched">
           Please enter hackathon name.</span>
-        <span class="error-message" *ngIf="newTeamForm.get('teamName')?.errors?.minlength && newTeamForm.get('teamName')?.touched">
+        <span class="error-message"
+              *ngIf="newTeamForm.get('teamName')?.errors?.minlength && newTeamForm.get('teamName')?.touched">
           The team name must be longer than 5 characters.</span>
 
         <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary" rows="8"
-               placeholder="Description (required)" [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
+                  placeholder="Description (required)" [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
           ||
           newTeamForm.get('description')?.dirty) &&
           !newTeamForm.get('description')?.valid }"></textarea>
 
-        <span class="error-message" *ngIf="newTeamForm.get('description')?.errors?.minlength && newTeamForm.get('description')?.touched">
+        <span class="error-message"
+              *ngIf="newTeamForm.get('description')?.errors?.minlength && newTeamForm.get('description')?.touched">
           The description must be longer than 15 characters.</span>
-        <span class="error-message" *ngIf="newTeamForm.get('description')?.errors?.required && newTeamForm.get('description')?.touched">
+        <span class="error-message"
+              *ngIf="newTeamForm.get('description')?.errors?.required && newTeamForm.get('description')?.touched">
           Please enter team description.</span>
 
         <span class="text-center mt-4">Select tags that will help find new team members:</span>
 
         <div class="flex flex-wrap my-5">
-        <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
-          <label  class="flex items-center btn rounded-full m-2" [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
-          <input type="checkbox" class="appearance-none" (change)="markTag(i)" [formControlName]="tag.id" />{{ tags[i].name }}
-          </label>
-        </div>
+          <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
+            <label class="flex items-center btn rounded-full m-2"
+                   [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
+              <input type="checkbox" class="appearance-none" (change)="markTag(i)"
+                     [formControlName]="tag.id"/>{{ tags[i].name }}
+            </label>
+          </div>
         </div>
 
-        <input [disabled]="!newTeamForm.valid" type="submit" class="btn btn-primary" [value]="editMode ? 'Save' : 'Create'">
+        <input [disabled]="!newTeamForm.valid" type="submit" class="btn btn-primary"
+               [value]="editMode ? 'Save' : 'Create'">
       </form>
 
     </div>

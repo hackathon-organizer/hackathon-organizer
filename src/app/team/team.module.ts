@@ -4,10 +4,10 @@ import {TeamProfileComponent} from './team-profile/team-profile.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SharedModule} from "../shared/shared.module";
 import {TeamRoutingModule} from "./team-routing.module";
-import {Router, RouterModule} from "@angular/router";
+import {RouterModule} from "@angular/router";
 import {TeamChatComponent} from './team-chat/team-chat.component';
 import {NgxPaginationModule} from "ngx-pagination";
-import {OpenViduAngularConfig, OpenViduAngularModule} from "openvidu-angular";
+import {OpenViduAngularConfig} from "openvidu-angular";
 import {environment} from "../../environments/environment.prod";
 
 
@@ -31,7 +31,7 @@ const config: OpenViduAngularConfig = {
     SharedModule,
     RouterModule,
     NgxPaginationModule,
-  ]      ,
+  ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA
   ]

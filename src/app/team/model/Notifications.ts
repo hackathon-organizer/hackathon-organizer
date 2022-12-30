@@ -10,7 +10,7 @@ export interface MeetingNotification extends Notification {
   teamId: number;
 }
 
-export interface TeamInvitationNotification extends Notification{
+export interface TeamInvitationNotification extends Notification {
   id: number;
   fromUserName: string;
   toUserKeycloakId: string;

@@ -17,7 +17,7 @@ import {NotificationType} from "../../../user/model/NotificationType";
 import {TeamService} from "../team-service/team.service";
 import {Tag} from "../../../team/model/Team";
 import {UserManager} from "../../../shared/UserManager";
-import {Notification, MeetingNotification, TeamInvitationNotification} from "../../../team/model/Notifications";
+import {MeetingNotification, Notification, TeamInvitationNotification} from "../../../team/model/Notifications";
 
 
 @Injectable({
@@ -316,8 +316,8 @@ export class UserService {
 
   isUserJury(hackathonId: number): boolean {
 
-      return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("JURY") &&
-        this.user.currentHackathonId === hackathonId;
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("JURY") &&
+      this.user.currentHackathonId === hackathonId;
 
   }
 

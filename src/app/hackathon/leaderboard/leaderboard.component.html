@@ -16,7 +16,7 @@
   <tbody>
   <tr *ngFor="let team of teams; index as i">
     <th>
-      <span>{{(i+1)}}</span>
+      <span>{{(i + 1)}}</span>
     </th>
     <td>
       <div class="flex items-center space-x-3">
@@ -26,10 +26,12 @@
       </div>
     </td>
     <td>
-    {{ team.score }}
+      {{ team.score }}
     </td>
     <th>
-      <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}"><button class="btn btn-ghost btn-xs">Details</button></a>
+      <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}">
+        <button class="btn btn-ghost btn-xs">Details</button>
+      </a>
     </th>
   </tr>
   </tbody>

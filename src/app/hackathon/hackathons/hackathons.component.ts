@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {HackathonResponse} from "../model/Hackathon";
 import {PaginationInstance} from "ngx-pagination";
@@ -20,7 +20,8 @@ export class HackathonsComponent implements OnInit {
     totalItems: 0
   };
 
-  constructor(private hackathonService: HackathonService) { }
+  constructor(private hackathonService: HackathonService) {
+  }
 
   ngOnInit(): void {
     this.getHackathons(1);
@@ -49,6 +50,6 @@ export class HackathonsComponent implements OnInit {
   }
 
   get hackathonsCount() {
-      return this.paginationConfig.totalItems;
+    return this.paginationConfig.totalItems;
   }
 }

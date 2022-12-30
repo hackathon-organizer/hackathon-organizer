@@ -13,7 +13,8 @@
     </a>
 
     <button *ngIf="hackathon?.isActive && !isUserHackathonParticipant()" (click)="joinHackathon()"
-            class="btn btn-outline btn-accent">Join hackathon</button>
+            class="btn btn-outline btn-accent">Join hackathon
+    </button>
 
     <a routerLink="/hackathon/{{ hackathon.id }}/teams">
       <button class="btn btn-outline btn-info">Show teams</button>
@@ -24,7 +25,7 @@
     </a>
 
     <a routerLink="/hackathon/{{ hackathon.id }}/schedule" [queryParams]="{hackathonView: 1}">
-      <button class="btn btn-outline btn-secondary">Show schedule</button>
+      <button class="btn btn-outline btn-info">Show schedule</button>
     </a>
 
     <a *ngIf="isUserJury()" routerLink="/hackathon/{{ hackathon.id }}/rating">
@@ -36,7 +37,7 @@
     </a>
 
     <a *ngIf="isUserOrganizer()" routerLink="/hackathon/{{ hackathon.id }}/leaderboard">
-      <button class="btn btn-outline btn-secondary">Leaderboard</button>
+      <button class="btn btn-outline btn-info">Leaderboard</button>
     </a>
 
   </div>

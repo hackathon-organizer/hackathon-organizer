@@ -25,7 +25,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   private routeSubscription: Subscription = new Subscription();
 
   chatEntry: string = "";
-  chatMessages: ChatMessage[] = [];
+  chatMessages: string = "";
 
   chatRoomId?: number;
   users: any[] = [];
@@ -64,9 +64,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
         this.chatService.messages$.subscribe(message => this.messageHandler(message));
 
         this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
-          this.chatMessages = messages;
 
-          messages.forEach(msg => this.updateChat(msg));
+          messages.forEach(message => this.updateChat(message));
         });
       })
     });
@@ -313,12 +312,13 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       this.chatService.sendMessage(message);
     } else {
       this.logger.info("Chat room id can't be null.");
-      throw new Error("Chat room id can't be null. Try refresh page");
+      throw new Error("Chat room id can't be null. Try to refresh page");
     }
   }
 
   private updateChat(message: ChatMessage) {
-    this.chatEntry += message.username + ": " + message.entryText + '\n';
+
+    this.chatMessages += message.username + ": " + message.entryText + '\n';
   }
 
   toggleFullscreen() {
@@ -336,6 +336,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+
     this.leaveSession();
     this.routeSubscription.unsubscribe();
   }

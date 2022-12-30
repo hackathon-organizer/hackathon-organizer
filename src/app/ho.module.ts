@@ -40,10 +40,10 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     UserModule,
     MentorModule,
     LoggerModule.forRoot({
-        serverLoggingUrl: '/api/logs',
-        level: NgxLoggerLevel.DEBUG,
-        serverLogLevel: NgxLoggerLevel.ERROR
-      }),
+      serverLoggingUrl: '/api/logs',
+      level: NgxLoggerLevel.DEBUG,
+      serverLogLevel: NgxLoggerLevel.ERROR
+    }),
     CalendarModule.forRoot({
       provide: DateAdapter,
       useFactory: adapterFactory,

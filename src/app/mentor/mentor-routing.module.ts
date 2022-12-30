@@ -3,9 +3,7 @@ import {NgModule} from "@angular/core";
 import {MentorScheduleComponent} from "./mentor-schedule/mentor-schedule.component";
 
 
-
-const routes: Routes = [
-];
+const routes: Routes = [];
 
 @NgModule({
   imports: [RouterModule.forChild(routes),
@@ -14,6 +12,6 @@ const routes: Routes = [
 })
 export class MentorRoutingModule {
   static components = [
-     MentorScheduleComponent
+    MentorScheduleComponent
   ];
 }

@@ -1,21 +1,21 @@
 <pagination-template #p="paginationApi" (pageChange)="pageChangeEvent.emit($event)">
 
   <div class="flex justify-center">
-  <button (click)="p.previous()" [disabled]="p.isFirstPage()" class="btn btn-md mx-4">
-    <span class="p-2" >PREV</span>
-  </button>
+    <button (click)="p.previous()" [disabled]="p.isFirstPage()" class="btn btn-md mx-4">
+      <span class="p-2">PREV</span>
+    </button>
 
-  <div *ngFor="let page of p.pages" class="btn-group" [class.current]="p.getCurrent() === page.value">
-    <button class="btn btn-md mr-1" (click)="p.setCurrent(page.value)"
-       *ngIf="p.getCurrent() !== page.value">{{ page.label }}</button>
+    <div *ngFor="let page of p.pages" class="btn-group" [class.current]="p.getCurrent() === page.value">
+      <button class="btn btn-md mr-1" (click)="p.setCurrent(page.value)"
+              *ngIf="p.getCurrent() !== page.value">{{ page.label }}</button>
 
-    <button class="btn btn-md btn-active mr-1" *ngIf="p.getCurrent() === page.value"
-         [class.disabled]="p.isFirstPage()">{{ page.label }}</button>
-  </div>
+      <button class="btn btn-md btn-active mr-1" *ngIf="p.getCurrent() === page.value"
+              [class.disabled]="p.isFirstPage()">{{ page.label }}</button>
+    </div>
 
-  <button (click)="p.next()" [disabled]="p.isLastPage()" class="btn btn-md mx-4">
-    <span class="p-2">NEXT</span>
-  </button>
+    <button (click)="p.next()" [disabled]="p.isLastPage()" class="btn btn-md mx-4">
+      <span class="p-2">NEXT</span>
+    </button>
   </div>
 
 </pagination-template>

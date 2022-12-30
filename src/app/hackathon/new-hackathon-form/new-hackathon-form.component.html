@@ -18,8 +18,9 @@
         <span class="error-message" *ngIf="newHackathonForm.get('hackathonName')?.errors?.minlength">Hackathon name must be longer
           than 10 characters.</span>
 
-        <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary resize-none" rows="8"
-               placeholder="Description (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('description')?.touched
+        <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary resize-none"
+                  rows="8"
+                  placeholder="Description (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('description')?.touched
           ||
           newHackathonForm.get('description')?.dirty) &&
           !newHackathonForm.get('description')?.valid }"></textarea>
@@ -30,8 +31,9 @@
         <span class="error-message" *ngIf="newHackathonForm.get('description')?.errors?.required &&
         newHackathonForm.get('description')?.touched">Please enter hackathon description.</span>
 
-        <textarea id="organizerInfoId" formControlName="organizerInfo" type="text" class="ho-textarea-primary resize-none" rows="8"
-               placeholder="Organizer info (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('organizerInfo')?.touched
+        <textarea id="organizerInfoId" formControlName="organizerInfo" type="text"
+                  class="ho-textarea-primary resize-none" rows="8"
+                  placeholder="Organizer info (required)" [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('organizerInfo')?.touched
           ||
           newHackathonForm.get('organizerInfo')?.dirty) &&
           !newHackathonForm.get('organizerInfo')?.valid }"></textarea>
@@ -42,7 +44,8 @@
         <span class="error-message" *ngIf="newHackathonForm.get('organizerInfo')?.errors?.required &&
         newHackathonForm.get('organizerInfo')?.touched">Please enter organizer information.</span>
 
-        <input id="startDateId" formControlName="startDate" type="text" mwlFlatpickr class="ho-input-primary cursor-pointer"
+        <input id="startDateId" formControlName="startDate" type="text" mwlFlatpickr
+               class="ho-input-primary cursor-pointer"
                [enableTime]="true"
                [convertModelValue]="true"
                dateFormat="d-m-Y H:i"

@@ -1,6 +1,6 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {concatMap, forkJoin, Subject, Subscription} from "rxjs";
+import {concatMap, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
@@ -81,9 +81,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const username = this.user?.username;
 
     if (teamId && username) {
-    this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe(() => {
-      this.toastr.success("Invite send to user " + username);
-    });
+      this.teamService.sendTeamInvitation(this.user.id, teamId, username).subscribe(() => {
+        this.toastr.success("Invite send to user " + username);
+      });
     } else {
       throw new Error("You are not in any team");
     }

@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../../core/services/user-service/user.service";
-import {User, UserResponse} from "../../user/model/User";
+import {UserResponse} from "../../user/model/User";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
@@ -50,13 +50,13 @@ export class UserListComponent implements OnInit {
         return this.userService.findHackathonUsersByUsername(username, this.hackathonId, this.paginationConfig.currentPage - 1)
       })).subscribe(usersResponse => {
 
-        this.hackathonParticipants = usersResponse.content;
+      this.hackathonParticipants = usersResponse.content;
 
-        this.paginationConfig.currentPage = usersResponse.number + 1;
-        this.paginationConfig.totalItems = usersResponse.totalElements;
+      this.paginationConfig.currentPage = usersResponse.number + 1;
+      this.paginationConfig.totalItems = usersResponse.totalElements;
 
-        this.loading = false;
-      });
+      this.loading = false;
+    });
   }
 
   onPageChange(page: number): void {

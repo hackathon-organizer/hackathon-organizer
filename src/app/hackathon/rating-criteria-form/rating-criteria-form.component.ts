@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, FormControl, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -43,7 +43,7 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
       }
 
       criteria.forEach(c => this.criteria.push(this.createCriteria(c.id, c.name)));
-      });
+    });
   }
 
   private createCriteria(id?: number, name?: string): FormGroup {

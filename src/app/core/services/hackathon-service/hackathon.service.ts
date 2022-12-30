@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, Observable, of} from "rxjs";
+import {catchError, Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
@@ -17,7 +17,8 @@ export class HackathonService {
   constructor(private http: HttpClient,
               private logger: NGXLogger,
               private userService: UserService,
-              private errorHandler: GlobalErrorHandler) { }
+              private errorHandler: GlobalErrorHandler) {
+  }
 
   BASE_URL_WRITE = 'http://localhost:9090/api/v1/write/hackathons';
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
@@ -40,15 +41,17 @@ export class HackathonService {
 
   getAllHackathons(pageNumber: number): Observable<HackathonResponsePage> {
 
-    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ + "?page=" + pageNumber +"&size=10", {
-      headers : {'Access-Control-Allow-Origin': "*", 'Access-Control-Allow-Methods': ['GET', 'OPTIONS', 'PUT', 'POST'],
-        'Access-Control-Allow-Headers': ['Origin', 'Content-Type', 'X-Auth-Token']}
+    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ + "?page=" + pageNumber + "&size=10", {
+      headers: {
+        'Access-Control-Allow-Origin': "*", 'Access-Control-Allow-Methods': ['GET', 'OPTIONS', 'PUT', 'POST'],
+        'Access-Control-Allow-Headers': ['Origin', 'Content-Type', 'X-Auth-Token']
+      }
     }).pipe(
       catchError((error) => this.errorHandler.handleError(error)
       ));
   }
 
-  addUserToHackathon(hackathonId: number, userId: number):Observable<void> {
+  addUserToHackathon(hackathonId: number, userId: number): Observable<void> {
 
     return this.http.patch<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/participants/' + userId, null).pipe(
       catchError((error) => this.errorHandler.handleError(error)
@@ -66,7 +69,7 @@ export class HackathonService {
 
     if (endDate.isBefore(startDate)) {
 
-        this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
+      this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
     }
 
     hackathon.eventStartDate = dayjs(hackathon.eventStartDate).format("HH:mm:ss DD-MM-YYYY");
@@ -77,35 +80,35 @@ export class HackathonService {
 
   getHackathonTeamsById(hackathonId: number): Observable<TeamResponse[]> {
 
-    this.logger.info("Returning hackathon id: " + hackathonId +" teams");
+    this.logger.info("Returning hackathon id: " + hackathonId + " teams");
 
     return this.http.get<TeamResponse[]>(this.BASE_URL_READ + '/' + hackathonId + '/teams');
   }
 
   getHackathonRatingCriteria(hackathonId: number): Observable<Criteria[]> {
 
-    this.logger.info("Returning hackathon id: " + hackathonId +" criteria");
+    this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
 
     return this.http.get<Criteria[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria');
   }
 
   saveHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
 
-    this.logger.info("Saving hackathon id: " + hackathonId +" criteria", criteria);
+    this.logger.info("Saving hackathon id: " + hackathonId + " criteria", criteria);
 
     return this.http.post<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 
   updateHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
 
-    this.logger.info("Updating hackathon id: " + hackathonId +" criteria", criteria);
+    this.logger.info("Updating hackathon id: " + hackathonId + " criteria", criteria);
 
     return this.http.put<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 
   saveTeamRating(hackathonId: number, criteria: Criteria[]): Observable<void> {
 
-    this.logger.info("Saving hackathon id: " + hackathonId +" team rating criteria", criteria);
+    this.logger.info("Saving hackathon id: " + hackathonId + " team rating criteria", criteria);
 
     return this.http.patch<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria/answers', criteria);
   }

@@ -25,14 +25,15 @@
       <tbody>
       <tr *ngFor="let user of hackathonParticipants | paginate: paginationConfig; index as i;">
         <th>
-          <span *ngIf="currentPageNumber==0">{{(i+1)}}</span>
-          <span *ngIf="currentPageNumber>0">{{((currentPageNumber-1)*10)+(i+1)}}</span>
+          <span *ngIf="currentPageNumber==0">{{(i + 1)}}</span>
+          <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
         </th>
         <td>
           <div class="flex items-center space-x-3">
             <div class="avatar">
               <div class="mask mask-squircle w-12 h-12">
-                <img src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name={{user.username}}&length=1" alt="User avatar" />
+                <img src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name={{user.username}}&length=1"
+                     alt="User avatar"/>
               </div>
             </div>
             <div>
@@ -41,12 +42,19 @@
           </div>
         </td>
         <td>
-           <span *ngFor="let tag of user.tags">
-             {{ tag.name }}
-           </span>
+          <div class="flex flex-wrap my-2">
+            <div class="h-8" *ngFor="let tag of user.tags | slice:0:10">
+              <label class="pill-small">
+                <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
+              </label>
+            </div>
+            <span *ngIf="user.tags.length > 10">&nbsp;&nbsp;+{{ user.tags.length - 10 }}</span>
+          </div>
         </td>
         <th>
-          <a routerLink="/user/{{ user.id }}"><button class="btn btn-ghost btn-xs">Details</button></a>
+          <a routerLink="/user/{{ user.id }}">
+            <button class="btn btn-ghost btn-xs">Details</button>
+          </a>
         </th>
       </tr>
       </tbody>

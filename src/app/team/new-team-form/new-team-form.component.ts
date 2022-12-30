@@ -1,13 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../core/services/user-service/user.service";
-import {ActivatedRoute, Router, UrlSegment} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest, TeamResponse} from "../model/Team";
 import {concatMap, Subscription} from "rxjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
-import {HackathonRequest} from "../../hackathon/model/Hackathon";
 
 @Component({
   selector: 'ho-new-team-form',

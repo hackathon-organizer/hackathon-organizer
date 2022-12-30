@@ -1,11 +1,10 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {TeamService} from "../../core/services/team-service/team.service";
-import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
-import {debounce, debounceTime, Subscription, switchMap} from "rxjs";
+import {debounceTime, Subscription, switchMap} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
 import {TeamResponse} from "../model/Team";
-import {FormControl, FormControlName} from "@angular/forms";
+import {FormControl} from "@angular/forms";
 
 @Component({
   selector: 'ho-teams',
@@ -28,7 +27,8 @@ export class TeamsComponent implements OnInit {
     totalItems: 0
   };
 
-  constructor(private teamsService: TeamService, private route: ActivatedRoute) { }
+  constructor(private teamsService: TeamService, private route: ActivatedRoute) {
+  }
 
   ngOnInit(): void {
     this.routeSubscription = this.route.params.subscribe(params => {
@@ -54,8 +54,8 @@ export class TeamsComponent implements OnInit {
 
   getHackathonTeams(hackathonId: number, pageNumber: number) {
 
-      this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).subscribe(
-        teamsResponse => {
+    this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).subscribe(
+      teamsResponse => {
         this.teams = teamsResponse.content;
 
         this.paginationConfig.currentPage = teamsResponse.number + 1;

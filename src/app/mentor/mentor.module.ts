@@ -1,4 +1,4 @@
-import {CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MentorScheduleComponent} from './mentor-schedule/mentor-schedule.component';
 import {MentorRoutingModule} from "./mentor-routing.module";
@@ -28,7 +28,7 @@ export class CustomDateFormatter extends CalendarNativeDateFormatter {
     }).format(date);
   }
 
-  public override weekViewHour({ date, locale }: DateFormatterParams): string {
+  public override weekViewHour({date, locale}: DateFormatterParams): string {
     return new Intl.DateTimeFormat('pl-PL', {
       hour: 'numeric',
       minute: 'numeric',

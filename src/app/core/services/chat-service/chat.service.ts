@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable, Subject} from "rxjs";
 import {webSocket, WebSocketSubject} from "rxjs/webSocket";
@@ -11,7 +11,8 @@ import {BasicMessage, ChatMessage} from "../../../team/model/Chat";
 })
 export class ChatService {
 
-  constructor(private http: HttpClient, private logger: NGXLogger) { }
+  constructor(private http: HttpClient, private logger: NGXLogger) {
+  }
 
   private socket$!: WebSocketSubject<any>;
 
@@ -27,7 +28,7 @@ export class ChatService {
 
       this.socket$.subscribe(
         (msg: BasicMessage) => {
-         this.logger.info("Message of type received: ", msg.messageType);
+          this.logger.info("Message of type received: ", msg.messageType);
           this.messagesSubject.next(msg);
         }
       );

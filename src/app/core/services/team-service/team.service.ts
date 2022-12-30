@@ -1,11 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, map, Observable} from "rxjs";
-
-import {UserService} from "../user-service/user.service";
-import {Tag, TeamResponse, TeamRequest, TeamResponsePage, TeamInvitationRequest} from "../../../team/model/Team";
+import {Observable} from "rxjs";
+import {Tag, TeamInvitationRequest, TeamRequest, TeamResponse, TeamResponsePage} from "../../../team/model/Team";
 import {UserManager} from "../../../shared/UserManager";
-import {NotificationType} from "../../../user/model/NotificationType";
 import {TeamInvitationNotification} from "../../../team/model/Notifications";
 
 @Injectable({
@@ -76,17 +73,17 @@ export class TeamService {
 
   getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<TeamResponse[]> {
 
-     const userTagsNames = userTags.map(tag => tag.name);
+    const userTagsNames = userTags.map(tag => tag.name);
 
-     return this.http.post<TeamResponse[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTagsNames);
+    return this.http.post<TeamResponse[]>(this.BASE_URL_READ + "/suggestions?hackathonId=" + hackathonId, userTagsNames);
   }
 
   getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
 
-    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "?hackathonId=" + hackathonId + "&page=" + pageNumber + "&size=10") ;
-      //.pipe(
-      // catchError((error) => this.errorHandler.handleError(error)
-      // ));
+    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "?hackathonId=" + hackathonId + "&page=" + pageNumber + "&size=10");
+    //.pipe(
+    // catchError((error) => this.errorHandler.handleError(error)
+    // ));
   }
 
   public fetchUserInvites(currentHackathonId: number) {
@@ -97,7 +94,7 @@ export class TeamService {
 
   searchTeamByName(changedValue: string, hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
 
-    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10" );
+    return this.http.get<TeamResponsePage>(this.BASE_URL_READ + "/search?hackathonId=" + hackathonId + "&name=" + changedValue + "&page=" + pageNumber + "&size=10");
   }
 
   updateTeam(team: TeamRequest, teamId: number): Observable<TeamResponse> {

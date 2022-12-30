@@ -1,10 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from "./guard/auth.guard";
 import {HomepageComponent} from "./core/homepage/homepage.component";
 
 const routes: Routes = [
-  { path: '', component: HomepageComponent , canActivate: [AuthGuard]},
+  {path: '', component: HomepageComponent, canActivate: [AuthGuard]},
   // { path: '**', redirectTo: '' }
   {
     path: 'user',
@@ -28,4 +28,5 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class HoRoutingModule { }
+export class HoRoutingModule {
+}

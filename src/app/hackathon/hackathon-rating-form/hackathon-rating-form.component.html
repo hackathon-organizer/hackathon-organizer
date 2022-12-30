@@ -8,19 +8,26 @@
       <span *ngIf="teams.length > 0" class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
 
       <div class="btn-group btn-group-vertical lg:btn-group-horizontal">
-        <button class="btn btn-secondary" (click)="previousTeam()">< Previous team</button>
-        <button class="btn btn-secondary" (click)="nextTeam()">Save and go to next team ></button>
+        <button class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="previousTeam()">
+          < Previous team
+        </button>
+        <button class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+          Save and go to next team >
+        </button>
       </div>
     </div>
     <div class="mt-12 my-8" id="q-1">
 
+      <div class="text-center my-16">
+        <span *ngIf="criteria.controls.length < 1" class="text-3xl">No criteria created yet</span>
+      </div>
 
       <form class="space-y-6" [formGroup]="criteriaForm">
 
-        <div formArrayName="criteria" *ngFor="let c of criteria.controls; let i = index" class="mx-12">
+        <div formArrayName="criteria" *ngFor="let criteria of criteria.controls; let i = index" class="mx-12">
 
           <div class="" [formGroupName]="i">
-            <h5 class="mb-4 text-xl text-center">{{ c.value.name }}</h5>
+            <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>
 
             <div class="p-2" formGroupName="criteriaAnswer">
 

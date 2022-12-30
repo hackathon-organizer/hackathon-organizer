@@ -5,11 +5,11 @@ export interface Tag {
 }
 
 export interface TeamRequest {
-   ownerId: number;
-   hackathonId: number;
-   name: string;
-   description: string;
-   tags: Tag[];
+  ownerId: number;
+  hackathonId: number;
+  name: string;
+  description: string;
+  tags: Tag[];
 }
 
 export interface TeamResponsePage {

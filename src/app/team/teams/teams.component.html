@@ -17,7 +17,7 @@
       <tr>
         <th>Number</th>
         <th>Name</th>
-        <th>Description</th>
+        <th>Tags</th>
         <th></th>
         <th></th>
       </tr>
@@ -32,12 +32,13 @@
           {{ team.name }}
         </th>
         <td>
-          <div class="flex flex-wrap my-5">
-            <div *ngFor="let tag of team.tags;">
-              <label class="pill">
+          <div class="flex flex-wrap my-2">
+            <div class="h-8" *ngFor="let tag of team.tags | slice:0:10">
+              <label class="pill-small">
                 <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
               </label>
             </div>
+            <span *ngIf="team.tags.length > 10">&nbsp;&nbsp;+{{ team.tags.length - 10 }}</span>
           </div>
         </td>
         <th></th>

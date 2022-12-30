@@ -1,6 +1,6 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {Criteria, CriteriaAnswer} from "../model/Criteria";
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {Criteria} from "../model/Criteria";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
 import {forkJoin, map, Observable, Subscription} from "rxjs";
@@ -85,7 +85,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  private rateTeam(): Observable<any>{
+  private rateTeam(): Observable<any> {
 
     const answers: Criteria[] = [];
 

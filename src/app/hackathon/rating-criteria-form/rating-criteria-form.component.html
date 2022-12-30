@@ -16,7 +16,8 @@
           <div formArrayName="criteria">
 
             <div class="flex justify-center w-full" [formGroupName]="i">
-              <input id="nameId" formControlName="name" type="text" class="ho-input-primary" placeholder="Type criteria here"/>
+              <input id="nameId" formControlName="name" type="text" class="ho-input-primary"
+                     placeholder="Type criteria here"/>
 
               <button (click)="removeCriteria(i)" class="ml-4 btn btn-error">Remove</button>
             </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {TeamResponse} from "../../team/model/Team";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
@@ -16,7 +16,8 @@ export class LeaderboardComponent implements OnInit {
   loading = true;
 
   constructor(private hackathonService: HackathonService,
-              private route: ActivatedRoute) { }
+              private route: ActivatedRoute) {
+  }
 
   ngOnInit(): void {
 

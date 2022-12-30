@@ -29,7 +29,7 @@
         <button class="btn btn-accent m-3" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
 
         <a class="m-3" routerLink="/hackathon/{{ hackathonId }}/participants">
-          <button class="btn btn-success">Invite user</button>
+          <button class="btn btn-success">Invite users</button>
         </a>
 
         <button *ngIf="isOwner && team" class="btn btn-info m-3" (click)="openOrCloseTeamForMembers()">
@@ -59,9 +59,9 @@
 
       <span class="text-3xl font-bold mb-5">Members:</span>
 
-       <ul class="mt-4 list-disc">
-         <li class="ml-8 text-xl" *ngFor="let member of teamMembers">{{ member.username }}</li>
-       </ul>
+      <ul class="mt-4 list-disc">
+        <li class="ml-8 text-xl" *ngFor="let member of teamMembers">{{ member.username }}</li>
+      </ul>
 
     </div>
   </div>

@@ -50,7 +50,7 @@
 }
 
 .pill-small {
-  @apply px-2 rounded-full border m-1 border-white;
+  @apply px-2 py-1 rounded-full border m-5 md:m-1 border-white;
 }
 //.collapse {
 //  display: block;

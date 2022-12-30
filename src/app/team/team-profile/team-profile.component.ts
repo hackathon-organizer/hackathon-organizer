@@ -58,26 +58,26 @@ export class TeamProfileComponent implements OnInit {
         currentTeamId: this.teamId
       }))).subscribe(() => {
 
-          UserManager.currentUserFromLocalStorage.currentTeamId = this.teamId;
-          this.user.currentTeamId = this.teamId;
-          this.userService.updateTeamInLocalStorage(this.user);
+      UserManager.currentUserFromLocalStorage.currentTeamId = this.teamId;
+      this.user.currentTeamId = this.teamId;
+      this.userService.updateTeamInLocalStorage(this.user);
 
-          this.toastr.success("Successfully joined to team");
-          this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
-      });
+      this.toastr.success("Successfully joined to team");
+      this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
+    });
   }
 
   openOrCloseTeamForMembers() {
 
     const teamStatus = {userId: this.user.id, isOpen: !this.team.isOpen};
 
-    if (this.isOwner){
+    if (this.isOwner) {
 
-    this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
-      this.team.isOpen = isOpen;
+      this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
+        this.team.isOpen = isOpen;
 
-      this.toastr.success(`Team is now ${this.team.isOpen ? 'open' : 'closed'} for new members`);
-    });
+        this.toastr.success(`Team is now ${this.team.isOpen ? 'open' : 'closed'} for new members`);
+      });
     } else {
       throw new Error("User is not team owner");
     }
@@ -100,6 +100,6 @@ export class TeamProfileComponent implements OnInit {
   }
 
   redirectToTeamEdit() {
-     this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
+    this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
   }
 }

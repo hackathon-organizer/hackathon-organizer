@@ -1,39 +1,41 @@
 <section id="team-chat">
 
-    <div *ngIf="inCall" class="w-full relative block">
-      <video class="z-10 rounded-lg mx-auto w-full bg-white" poster="assets/poster-no-video.svg" #remoteVideo
-             id="remote-view"></video>
+  <div *ngIf="inCall" class="w-full relative block">
+    <video class="z-10 rounded-lg mx-auto w-full bg-white" poster="assets/poster-no-video.svg" #remoteVideo
+           id="remote-view"></video>
 
-      <video class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block"
-             poster="assets/poster-person.svg" #localVideo id="self-view" muted autoplay></video>
+    <video
+      class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block"
+      poster="assets/poster-person.svg" #localVideo id="self-view" muted autoplay></video>
 
+    <div
+      class="absolute right-0 bottom-0 h-14 bg-gray-600 w-3/5 z-10 rounded-t-lg flex justify-center bg-opacity-40 space-x-14">
+      <button [disabled]="locked" (click)="toggleVideoSharing()" class="video-button"
+              [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
+        <img src="assets/icons/camera.svg" alt="Camera">
+      </button>
 
-      <div
-        class="absolute right-0 bottom-0 h-14 bg-gray-600 w-3/5 z-10 rounded-t-lg flex justify-center bg-opacity-40 space-x-14">
-        <button [disabled]="locked" (click)="toggleVideoSharing()" class="video-button" [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
-          <img src="assets/icons/camera.svg" alt="Camera">
-        </button>
+      <button [disabled]="locked" (click)="startSharingScreen()" class="video-button"
+              [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
+        <img src="assets/icons/screen-share.svg" alt="Screen share">
+      </button>
 
-        <button [disabled]="locked" (click)="startSharingScreen()" class="video-button" [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
-          <img src="assets/icons/screen-share.svg" alt="Screen share">
-        </button>
+      <button (click)="toggleAudiSharing()" class="video-button" [ngClass]="audioActive ? 'btn-success' : ''">
+        <img *ngIf="!audioActive" src="assets/icons/micro.svg" alt="Microphone">
+        <img *ngIf="audioActive" src="assets/icons/mute.svg" alt="Mute microphone">
+      </button>
 
-        <button (click)="toggleAudiSharing()" class="video-button" [ngClass]="audioActive ? 'btn-success' : ''">
-          <img *ngIf="!audioActive" src="assets/icons/micro.svg" alt="Microphone">
-          <img *ngIf="audioActive" src="assets/icons/mute.svg" alt="Mute microphone">
-        </button>
+      <button (click)="leaveSession()" class="bg-error video-button hover:scale-110">
+        <img src="assets/icons/disconnect.svg" alt="Disconnect">
+      </button>
 
-        <button (click)="leaveSession()" class="bg-error video-button hover:scale-110" >
-          <img src="assets/icons/disconnect.svg" alt="Disconnect">
-        </button>
+      <button (click)="toggleFullscreen()" class="video-button">
+        <img src="assets/icons/fullscreen.svg" alt="Fullscreen">
+      </button>
 
-        <button (click)="toggleFullscreen()" class="video-button">
-          <img src="assets/icons/fullscreen.svg" alt="Fullscreen">
-        </button>
-
-        <div class="invisible" #subscribersAudio></div>
-      </div>
+      <div class="invisible" #subscribersAudio></div>
     </div>
+  </div>
 
 
   <div id="chat" class="w-4/5 mx-auto flex mt-8 justify-center">
@@ -54,7 +56,9 @@
         </ul>
       </div>
 
-      <button id="session-join-button" [disabled]="session" (click)="joinSession()" class="btn btn-info mt-4">Join voice chat</button>
+      <button id="session-join-button" [disabled]="session" (click)="joinSession()" class="btn btn-info mt-4">Join voice
+        chat
+      </button>
 
     </div>
   </div>

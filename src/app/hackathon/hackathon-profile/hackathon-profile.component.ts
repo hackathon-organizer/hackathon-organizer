@@ -1,10 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {HackathonResponse} from "../model/Hackathon";
-import {TeamService} from "../../core/services/team-service/team.service";
-import {NGXLogger} from "ngx-logger";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {UserService} from "../../core/services/user-service/user.service";
@@ -31,7 +29,7 @@ export class HackathonProfileComponent implements OnInit {
     this.routeSubscription = this.route.params.pipe(
       concatMap((params) => this.hackathonService.getHackathonDetailsById(params['id']))
     ).subscribe(hackathon => {
-        this.hackathon = hackathon;
+      this.hackathon = hackathon;
     });
   }
 

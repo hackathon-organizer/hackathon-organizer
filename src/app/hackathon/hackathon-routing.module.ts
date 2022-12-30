@@ -15,7 +15,6 @@ import {RatingCriteriaFormComponent} from "./rating-criteria-form/rating-criteri
 import {LeaderboardComponent} from "./leaderboard/leaderboard.component";
 
 
-
 const routes: Routes = [
   {path: '', component: HackathonsComponent, canActivate: [AuthGuard]},
   {path: 'new', component: NewHackathonFormComponent},
