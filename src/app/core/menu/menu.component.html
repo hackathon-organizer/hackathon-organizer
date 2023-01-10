@@ -31,7 +31,8 @@
       <button class="btn mr-3">Create hackathon</button>
     </a>
 
-    <div class="dropdown dropdown-end">
+    <button *ngIf="!isLoggedIn" class="btn btn-info p-3" (click)="login()">Login</button>
+    <div *ngIf="isLoggedIn" class="dropdown dropdown-end">
       <label tabindex="0" class="btn btn-ghost btn-circle avatar">
         <div class="avatar" [ngClass]="notifications.length > 0 ? 'notification' : ''">
           <div class="w-10 rounded-full">

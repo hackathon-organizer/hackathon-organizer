@@ -13,6 +13,7 @@ export interface ScheduleEntryResponse {
   userId: number;
   sessionStart: Date;
   sessionEnd: Date;
+  teamId?: number;
   entryColor?: string;
   isAvailable: boolean;
   info?: string;

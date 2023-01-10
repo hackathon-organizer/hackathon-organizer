@@ -12,7 +12,7 @@ export function initializeKeycloak(
 
       },
       initOptions: {
-        // redirectUri: 'http://localhost:4200/login',
+        redirectUri: window.location.origin,
         // checkLoginIframe: false,
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri:

@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {concatMap, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
@@ -9,8 +9,9 @@ import {ToastrService} from "ngx-toastr";
 import {UserManager} from "../../shared/UserManager";
 import {KeycloakService} from "keycloak-angular";
 import {NotificationType} from "../model/NotificationType";
-import {Notification, TeamInvitationNotification} from "../../team/model/Notifications";
+import {MeetingNotification, Notification, TeamInvitationNotification} from "../../team/model/Notifications";
 import {UserResponse} from "../model/User";
+import {Role} from "../model/Role";
 
 @Component({
   selector: 'ho-user-profile',
@@ -28,16 +29,16 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   userProfileId?: number;
   userRoles: string[] = [];
   isThisMyProfile = false;
-
+  isUserOrganizer = false;
   avatarUrl = "";
   editMode = false;
-
   userEditForm!: FormGroup;
   tags: Tag[] = [];
   currentTeamName?: string;
   teamSuggestions: TeamResponse[] = [];
 
   constructor(private route: ActivatedRoute,
+              private router: Router,
               private userService: UserService,
               private keycloakService: KeycloakService,
               private teamService: TeamService,
@@ -61,6 +62,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       this.user = userResponse;
       this.currentUser = UserManager.currentUserFromLocalStorage;
       this.isThisMyProfile = this.checkIfThisMyProfile();
+      this.isUserOrganizer = this.userService.isUserOrganizer(this.user.currentHackathonId as number);
       this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
       if (this.currentUser?.id === this.user.id) {
@@ -201,7 +203,31 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return NotificationType;
   }
 
-  isUserIsHackathonParticipant() {
-    return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId) && this.currentUser?.currentTeamId;
+  get Role() {
+    return Role;
+  }
+
+  get isUserIsHackathonParticipant() {
+
+    return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId);
+  }
+
+  get isUserTeamMember() {
+    return this.currentUser?.currentTeamId;
+  }
+
+  setUserRole(role: Role) {
+
+    if (this.userService.isUserOrganizer(this.user.currentHackathonId as number)) {
+      this.userService.updateUserRole(this.user.id, role)
+        .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
+    }
+  }
+
+  navigateToMeeting(invitationIndex: number) {
+
+    const inv = this.notificationsArray[invitationIndex] as MeetingNotification;
+
+    this.router.navigate(["hackathon", this.user.currentHackathonId, "team", inv.chatId, "chat"]);
   }
 }

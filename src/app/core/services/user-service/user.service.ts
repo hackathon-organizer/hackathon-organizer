@@ -18,6 +18,9 @@ import {TeamService} from "../team-service/team.service";
 import {Tag} from "../../../team/model/Team";
 import {UserManager} from "../../../shared/UserManager";
 import {MeetingNotification, Notification, TeamInvitationNotification} from "../../../team/model/Notifications";
+import {Role} from "../../../user/model/Role";
+import {RouterStateSnapshot, UrlTree} from "@angular/router";
+import {ToastrService} from "ngx-toastr";
 
 
 @Injectable({
@@ -35,7 +38,12 @@ export class UserService {
 
   private keycloakUserId = "";
 
-  constructor(private http: HttpClient, private keycloakService: KeycloakService, private logger: NGXLogger, private teamService: TeamService) {
+  constructor(private http: HttpClient,
+              private keycloakService: KeycloakService,
+              private logger: NGXLogger,
+              private toastr: ToastrService,
+              private teamService: TeamService) {
+
     dayjs.extend(isBetween);
   }
 
@@ -158,15 +166,9 @@ export class UserService {
   get checkUserAccess(): boolean {
 
     const userRoles = this.keycloakService.getKeycloakInstance().realmAccess?.roles;
-    const roles = ["MENTOR", "ORGANIZER", "JURY"];
+    const roles = ["MENTOR", "ORGANIZER"];
 
     return roles.some(role => userRoles?.includes(role));
-  }
-
-  isUserTeamOwner(teamId: number): boolean {
-
-    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("TEAM_OWNER") &&
-      this.user.currentTeamId === teamId;
   }
 
   isUserHackathonOwner(hackathonId: number): boolean {
@@ -220,28 +222,27 @@ export class UserService {
 
   private sendUserScheduleNotification(index = 0) {
 
-    if (this.checkUserAccess) {
-      this.getUserSchedulePlan().subscribe(schedule => {
+    // TODO concat map
 
-        console.log(schedule);
+    if (this.checkUserAccess && this.user.currentHackathonId) {
+      this.getUserSchedulePlan(this.user.currentHackathonId).subscribe(schedule => {
+
         let meeting = schedule[index];
 
-        const meetingNotification: MeetingNotification = {
-          chatId: 0,
-          teamId: meeting.teamId,
-          notificationType: NotificationType.MEETING
-        } as MeetingNotification;
+        if (meeting && meeting.teamId) {
 
-        console.log(meetingNotification)
+          this.teamService.getTeamById(meeting.teamId).subscribe(teamResponse => {
 
-        this.teamService.getTeamById(meeting.teamId).subscribe(team => {
-
-          meetingNotification.chatId = team.teamChatRoomId
+          const meetingNotification: MeetingNotification = {
+            chatId: teamResponse.teamChatRoomId,
+            message: `Meeting with team ${teamResponse.name}`,
+            notificationType: NotificationType.MEETING
+          } as MeetingNotification;
 
           let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
           let meetingEnd = dayjs(meeting.sessionEnd);
 
-          const scheduleMonitorInterval = setInterval(() => {
+          // const scheduleMonitorInterval = setInterval(() => {
 
             if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
 
@@ -252,20 +253,29 @@ export class UserService {
               if (meeting) {
                 this.sendUserScheduleNotification(index);
               } else {
-                clearInterval(scheduleMonitorInterval);
+                //clearInterval(scheduleMonitorInterval);
               }
             }
-          }, 10000);
-
-          scheduleMonitorInterval;
+          // }, 10000);
+          //
+          // scheduleMonitorInterval;
         });
+        }
       });
     }
   }
 
-  getUserSchedulePlan(): Observable<any[]> {
+  getUserSchedulePlan(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
-    return this.http.get<any[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule");
+    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule",
+      {params: {
+        hackathonId: hackathonId
+      }});
+  }
+
+  updateUserRole(userId: number, role: Role): Observable<void> {
+
+    return this.http.patch<void>(`http://localhost:9090/api/v1/write/users/${userId}/roles`, role);
   }
 
   removeScheduleEntry(userId: number, entryId: number) {
@@ -273,7 +283,7 @@ export class UserService {
     return this.http.delete("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId);
   }
 
-  updateUserScheduleEntry(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<any> {
+  updateUserScheduleEntryTime(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<any> {
 
     return this.http.patch("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId, entrySession)
   }
@@ -314,16 +324,34 @@ export class UserService {
     this.userNotifications.value.splice(toRemoveIdx, 1);
   }
 
+  login() {
+
+    this.keycloakService.login();
+  }
+
+  isLoggedIn() {
+    return this.keycloakService.isLoggedIn();
+  }
+
   isUserJury(hackathonId: number): boolean {
 
-    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("JURY") &&
-      this.user.currentHackathonId === hackathonId;
-
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.JURY) &&
+      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserOrganizer(hackathonId: number): boolean {
 
-    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
-      this.user.currentHackathonId === hackathonId;
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.ORGANIZER) &&
+      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+  }
+
+  isUserMentor(hackathonId: number) {
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.MENTOR) &&
+      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+  }
+
+  isUserTeamOwner(teamId: number) {
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
+      Number(UserManager.currentUserFromLocalStorage.currentTeamId) === Number(teamId);
   }
 }

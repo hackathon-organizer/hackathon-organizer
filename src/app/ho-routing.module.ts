@@ -4,12 +4,11 @@ import {AuthGuard} from "./guard/auth.guard";
 import {HomepageComponent} from "./core/homepage/homepage.component";
 
 const routes: Routes = [
-  {path: '', component: HomepageComponent, canActivate: [AuthGuard]},
+  {path: '', component: HomepageComponent},
   // { path: '**', redirectTo: '' }
   {
     path: 'user',
-    loadChildren: () => import('./user/user.module').then((m) => m.UserModule),
-    canActivate: [AuthGuard]
+    loadChildren: () => import('./user/user.module').then((m) => m.UserModule)
   },
   {
     path: 'hackathon',
@@ -19,8 +18,7 @@ const routes: Routes = [
   {
     path: 'team',
     loadChildren: () =>
-      import('./team/team.module').then((m) => m.TeamModule),
-    canActivate: [AuthGuard]
+      import('./team/team.module').then((m) => m.TeamModule)
   },
 ];
 

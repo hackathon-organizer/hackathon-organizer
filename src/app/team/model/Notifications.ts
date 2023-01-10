@@ -7,7 +7,6 @@ export interface Notification {
 
 export interface MeetingNotification extends Notification {
   chatId: number;
-  teamId: number;
 }
 
 export interface TeamInvitationNotification extends Notification {

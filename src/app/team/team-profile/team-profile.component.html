@@ -5,19 +5,19 @@
     <div class="m-12 flex justify-center" id="profile-image-wrapper">
 
       <div class="avatar">
-        <div class="w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img src="https://placeimg.com/300/300/people" alt="profile image"/>
+        <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+          <img src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name={{team?.name}}&length=1" alt="profile image"/>
         </div>
       </div>
     </div>
 
     <div id="user-data" class="flex flex-col">
 
-      <span class="mt-8 text-3xl">Team: <span *ngIf="team?.name">{{ team.name }}</span></span>
+      <span class="mt-8 text-3xl">Team: <span *ngIf="team?.name">{{ team?.name }}</span></span>
 
       <div class="mt-8 max-h-48 overflow-y-auto" id="about">
         <h4 class="text-2xl">Description:</h4>
-        <p *ngIf="team?.description" class="mt-2">{{ team.description }}</p>
+        <p *ngIf="team?.description" class="mt-2">{{ team?.description }}</p>
       </div>
 
       <div *ngIf="isHackathonMember && isUserTeamMember" class="mt-10 flex justify-center items-center">
@@ -46,7 +46,7 @@
         <span class="text-3xl font-bold mb-5">Tags:</span>
 
         <div *ngIf="team?.tags" class="flex flex-wrap">
-          <div id="pill" *ngFor="let tag of team.tags"
+          <div id="pill" *ngFor="let tag of team?.tags"
                class="pill">
             {{ tag.name }}
           </div>

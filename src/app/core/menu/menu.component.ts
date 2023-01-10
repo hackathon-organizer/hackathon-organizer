@@ -17,6 +17,7 @@ export class MenuComponent implements OnInit {
   username = "";
   avatarUrl = "";
   notifications: Notification[] = [];
+  isLoggedIn = false;
 
   constructor(private userService: UserService) {
   }
@@ -38,9 +39,15 @@ export class MenuComponent implements OnInit {
     this.userService.userNotificationsObservable.subscribe(notifications => {
       this.notifications = notifications
     });
+
+    this.userService.isLoggedIn().then(isLogged => this.isLoggedIn = isLogged);
   }
 
   logout() {
     this.userService.logout();
+  }
+
+  login() {
+    this.userService.login();
   }
 }

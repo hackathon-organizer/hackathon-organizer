@@ -38,23 +38,23 @@ export class HackathonProfileComponent implements OnInit {
     const user = UserManager.currentUserFromLocalStorage;
 
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
-      this.userService.updateUserMembership({currentHackathonId: this.hackathon.id})
+      this.userService.updateUserMembership({currentHackathonId: this.hackathon.id, currentTeamId: null})
     )).subscribe(() => {
 
-      UserManager.currentUserFromLocalStorage.currentHackathonId = this.hackathon.id;
+      user.currentHackathonId = this.hackathon.id;
       this.toastr.success("You are now member of hackathon " + this.hackathon.name);
     });
   }
 
   isUserHackathonParticipant(): boolean {
-    return UserManager.isUserHackathonMember(this.hackathon?.id);
+    return UserManager.isUserHackathonMember(this.hackathon.id);
   }
 
   isUserJury() {
-    return this.userService.isUserJury(this.hackathon?.id);
+    return this.userService.isUserJury(this.hackathon.id);
   }
 
   isUserOrganizer() {
-    return this.userService.isUserOrganizer(this.hackathon?.id);
+    return this.userService.isUserOrganizer(this.hackathon.id);
   }
 }

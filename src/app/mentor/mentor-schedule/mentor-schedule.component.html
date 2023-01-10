@@ -150,7 +150,11 @@
       <p class="text-md p-1 text-ellipsis overflow-hidden">{{ modalData.info }}</p>
     </div>
 
-    <button [disabled]="!isUserTeamOwner()" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
+    <button [disabled]="!canJoinToMeeting(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="joinMeeting(modalData.teamId)">
+      Join meeting
+    </button>
+
+    <button [disabled]="!canAssignTeam(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
       {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
     </button>
 

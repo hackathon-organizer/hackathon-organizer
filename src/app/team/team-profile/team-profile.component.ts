@@ -19,7 +19,7 @@ export class TeamProfileComponent implements OnInit {
 
   hackathonId: number = 0;
   teamId: number = 0;
-  team!: TeamResponse;
+  team?: TeamResponse;
   teamMembers: UserResponse[] = [];
   user = UserManager.currentUserFromLocalStorage;
 
@@ -69,14 +69,14 @@ export class TeamProfileComponent implements OnInit {
 
   openOrCloseTeamForMembers() {
 
-    const teamStatus = {userId: this.user.id, isOpen: !this.team.isOpen};
+    if (this.isOwner && this.team) {
 
-    if (this.isOwner) {
+      const teamStatus = {userId: this.user.id, isOpen: !this.team.isOpen};
 
       this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
-        this.team.isOpen = isOpen;
+        this.team!.isOpen = isOpen;
 
-        this.toastr.success(`Team is now ${this.team.isOpen ? 'open' : 'closed'} for new members`);
+        this.toastr.success(`Team is now ${this.team!.isOpen ? 'open' : 'closed'} for new members`);
       });
     } else {
       throw new Error("User is not team owner");
@@ -92,7 +92,7 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner() {
-    return UserManager.isUserTeamOwner();
+    return this.userService.isUserTeamOwner(this.teamId);
   }
 
   get isHackathonMember() {

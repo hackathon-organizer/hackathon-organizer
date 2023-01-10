@@ -1,5 +1,7 @@
 import {TeamResponse} from "../team/model/Team";
 import {UserResponse} from "../user/model/User";
+import {KeycloakService} from "keycloak-angular";
+import {Role} from "../user/model/Role";
 
 export class UserManager {
 
@@ -23,15 +25,6 @@ export class UserManager {
 
   public static updateTeamInLocalStorage(team: TeamResponse): void {
     localStorage.setItem("team", JSON.stringify(team));
-  }
-
-  public static isUserTeamOwner() {
-
-    if (this.currentUserFromLocalStorage && this.currentUserTeamFromLocalStorage) {
-      return Number(this.currentUserFromLocalStorage.id) === Number(this.currentUserTeamFromLocalStorage.ownerId);
-    } else {
-      return false;
-    }
   }
 
   public static isUserTeamMember(teamId: number) {

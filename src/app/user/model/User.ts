@@ -13,7 +13,7 @@ export interface User {
 export interface UserMembershipRequest {
   userId?: number;
   currentHackathonId?: number;
-  currentTeamId?: number;
+  currentTeamId?: number | null;
 }
 
 export interface UserResponse {
