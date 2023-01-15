@@ -10,7 +10,6 @@ import {Notification} from "../../team/model/Notifications";
 })
 export class MenuComponent implements OnInit {
 
-
   userHackathonId?: number;
   userTeamId?: number;
   currentUserId?: number;
@@ -23,7 +22,6 @@ export class MenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userService.initWsConn();
 
     if (UserManager.currentUserFromLocalStorage) {
 

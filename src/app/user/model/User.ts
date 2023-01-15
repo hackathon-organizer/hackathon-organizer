@@ -10,6 +10,11 @@ export interface User {
   currentTeamId?: number;
 }
 
+export interface UserDetails {
+  description: string;
+  tags: Tag[];
+}
+
 export interface UserMembershipRequest {
   userId?: number;
   currentHackathonId?: number;

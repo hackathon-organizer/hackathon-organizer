@@ -176,7 +176,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
     this.logger.info("Sending schedule to save ", scheduleEntries);
 
-    this.userService.updateEntryEvents(this.currentUser.id, scheduleEntries).subscribe(() => {
+    this.userService.updateEntryEvents(scheduleEntries).subscribe(() => {
       this.events = eventsCopy;
 
       this.scheduleUpdateSuccessToast()
@@ -265,7 +265,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   canEditSchedule(): boolean {
-    return this.userService.checkUserAccess;
+    return this.userService.isUserMentorOrOrganizer;
   }
 
   joinMeeting(teamId: string | number | undefined) {

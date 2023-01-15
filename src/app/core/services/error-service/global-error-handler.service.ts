@@ -2,13 +2,15 @@ import {ErrorHandler, Inject, Injectable, Injector} from '@angular/core';
 import {ToastrService} from "ngx-toastr";
 import {HttpErrorResponse} from "@angular/common/http";
 import {NEVER} from "rxjs";
+import {NGXLogger} from "ngx-logger";
 
 @Injectable({
   providedIn: 'root'
 })
 export class GlobalErrorHandler extends ErrorHandler {
 
-  constructor(@Inject(Injector) private injector: Injector) {
+  constructor(@Inject(Injector) private injector: Injector,
+              private logger: NGXLogger) {
     super();
   }
 
@@ -18,24 +20,9 @@ export class GlobalErrorHandler extends ErrorHandler {
 
   public override handleError(error: HttpErrorResponse | Error) {
     let errorMessage = '';
-
-    //TODO remove it
-    console.error(error);
-
-    if (error instanceof HttpErrorResponse) {
-
-      if (error.status === 0 || error.status === 500) {
-        errorMessage = 'No connection with server. Please try again later.';
-      } else {
-        errorMessage = `Server returned code: ${error.status}, error message is: ${error.error.message}`;
-      }
-
-    } else {
-      errorMessage = error.message;
-    }
-
+    this.logger.error(error);
+    errorMessage = error.message;
     this.toastrService.error(errorMessage, "Error");
-
     return NEVER;
   }
 }

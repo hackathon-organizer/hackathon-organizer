@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
 import {Client, IMessage} from "@stomp/stompjs";
-import {UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
+import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
 import * as dayjs from 'dayjs';
 import {
@@ -30,13 +30,10 @@ export class UserService {
 
   private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
-
   user!: UserResponse;
 
-  private loadingSource = new BehaviorSubject(true);
-  loading = this.loadingSource.asObservable();
-
-  private keycloakUserId = "";
+  BASE_URL_UPDATE = "http://localhost:9090/api/v1/write/users/";
+  BASE_URL_READ = "http://localhost:9090/api/v1/read/users";
 
   constructor(private http: HttpClient,
               private keycloakService: KeycloakService,
@@ -45,34 +42,34 @@ export class UserService {
               private teamService: TeamService) {
 
     dayjs.extend(isBetween);
+
+    this.getKeycloakUserId().then((keycloakId) => {
+      this.fetchUserData(keycloakId);
+    });
   }
 
   findHackathonUsersByUsername(username: string, hackathonId: number, pageNumber: number): Observable<UserResponsePage> {
-    return this.http.get<UserResponsePage>
-    ('http://localhost:9090/api/v1/read/users?username=' + username + '&hackathonId=' + hackathonId +
-      "&page=" + pageNumber + "&size=10");
+    return this.http.get<UserResponsePage>(this.BASE_URL_READ, {
+      params: {
+        username: username,
+        hackathonId: hackathonId,
+        page: pageNumber,
+        size: 10
+      }
+    });
   }
 
-  async getKeycloakUserId(): Promise<string | undefined> {
+  private async getKeycloakUserId(): Promise<string | undefined> {
     let userDetails = await this.keycloakService.loadUserProfile();
     return userDetails.id;
   }
 
-  initWsConn(): void {
-
-    this.getKeycloakUserId().then(v => {
-
-      this.keycloakUserId = v!;
-      this.fetchUserData();
-    });
-  }
-
-  openWsConn() {
+  private openNotificationWebSocketConnection(): void {
 
     const client = new Client({
       brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
-      debug: function (str) {
-        console.log(str);
+      debug: (message) => {
+        this.logger.info(message);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -81,58 +78,45 @@ export class UserService {
 
     client.onConnect = (frame) => {
 
-      console.log("CONNECTING...");
+      this.logger.info("Connecting to invitations service");
       client.subscribe('/user/topic/invitations', (message: IMessage) => {
 
         const invite: TeamInvitationNotification = JSON.parse(message.body);
         invite.message = `User ${invite.fromUserName} invited you to team ${invite.teamName}`;
         invite.notificationType = NotificationType.INVITATION;
         this.userNotifications.next(this.userNotifications.value.concat(invite));
+
+        this.logger.info("Invitation fetched: ", invite)
       });
     }
 
-    client.onStompError = function (frame) {
-      console.log('Broker reported error: ' + frame.headers['message']);
-      console.log('Additional details: ' + frame.body);
+    client.onStompError = (frame) => {
+      this.logger.error('Broker reported error: ' + frame.headers['message'] + "\n Additional details: " + frame.body);
     };
 
     client.activate();
   }
 
   getUserById(userId: number): Observable<UserResponse> {
-    return this.http.get<UserResponse>("http://localhost:9090/api/v1/read/users/" + userId);
+    return this.http.get<UserResponse>(this.BASE_URL_READ + userId);
   }
 
-  public getKcId(): string {
+  private fetchUserData(keycloakId?: string): void {
 
-    if (!this.keycloakUserId) {
-      console.log('Erorr');
-    }
-
-    return this.keycloakUserId;
-  }
-
-  private fetchUserData() {
-
-    this.http.get<UserResponse>('http://localhost:9090/api/v1/read/users/keycloak/' + this.getKcId()).subscribe(userData => {
+    this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
       this.user = userData;
 
       UserManager.updateUserInLocalStorage(userData);
 
-      this.updateTeamInLocalStorage(userData);
-
+      this.fetchAndUpdateTeamInLocalStorage(userData);
       this.sendNoTagsNotification(userData);
-
-      // this.loadingSource.next(false);
       this.getUserTeamInvitations(userData);
-
       this.sendUserScheduleNotification();
-
-      this.openWsConn();
+      this.openNotificationWebSocketConnection();
     });
   }
 
-  updateTeamInLocalStorage(userData: UserResponse) {
+  fetchAndUpdateTeamInLocalStorage(userData: UserResponse): void {
     if (userData.currentTeamId) {
       this.teamService.getTeamById(userData.currentTeamId as number).subscribe(teamResponse => {
         UserManager.updateTeamInLocalStorage(teamResponse)
@@ -140,18 +124,18 @@ export class UserService {
     }
   }
 
-  sendNoTagsNotification(userData: UserResponse) {
+  private sendNoTagsNotification(userData: UserResponse): void {
 
     if (userData.tags.length < 1) {
-      this.userNotifications.next(
-        this.userNotifications.value.concat({
-          notificationType: NotificationType.TAGS,
-          message: "Add some tags to get better team suggestions."
-        } as Notification));
+      this.userNotifications.next(this.userNotifications.value.concat({
+        notificationType: NotificationType.TAGS,
+        message: "Add some tags to get better team suggestions."
+      } as Notification));
     }
   }
 
-  getUserTeamInvitations(userData: UserResponse) {
+  private getUserTeamInvitations(userData: UserResponse): void {
+
     if (userData.currentHackathonId) {
       this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
         userInvites.map(invitation => {
@@ -163,7 +147,7 @@ export class UserService {
     }
   }
 
-  get checkUserAccess(): boolean {
+  get isUserMentorOrOrganizer(): boolean {
 
     const userRoles = this.keycloakService.getKeycloakInstance().realmAccess?.roles;
     const roles = ["MENTOR", "ORGANIZER"];
@@ -177,46 +161,54 @@ export class UserService {
       this.user.currentHackathonId === hackathonId;
   }
 
-  getUserId(): number {
+  private getUserId(): number {
     return UserManager.currentUserFromLocalStorage.id;
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
 
-    this.logger.info("Saving user " + this.getUserId() + " schedule");
-    return this.http.post<ScheduleEntryResponse>("http://localhost:9090/api/v1/write/users/" + this.getUserId() + "/schedule", entryEvent);
+    this.logger.info("Saving user " + this.getUserId() + " schedule: ", entryEvent);
+    return this.http.post<ScheduleEntryResponse>(this.BASE_URL_UPDATE + this.getUserId() + "/schedule", entryEvent);
   }
 
-  updateEntryEvents(userId: number, schedule: ScheduleEntryRequest[]): Observable<any> {
+  updateEntryEvents(schedule: ScheduleEntryRequest[]): Observable<void> {
 
-    this.logger.info("Saving user " + this.getUserId() + " schedule");
-    return this.http.put("http://localhost:9090/api/v1/write/users/" + userId + "/schedule", schedule);
+    this.logger.info("Saving user " + this.getUserId() + " schedule: ", schedule);
+    return this.http.put<void>(this.BASE_URL_UPDATE + this.getUserId() + "/schedule", schedule);
   }
 
   getUserSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
     this.logger.info("Requesting user " + this.getUserId() + " schedule");
-    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule?hackathonId=" + hackathonId);
+    return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + this.getUserId() + "/schedule", {
+      params: {
+        hackathonId: hackathonId
+      }
+    });
   }
 
   getHackathonSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
     this.logger.info("Requesting hackathon " + hackathonId + " schedule");
-    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/schedule?hackathonId=" + hackathonId)
+    return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + "schedule", {
+      params: {
+        hackathonId: hackathonId
+      }
+    });
   }
 
-  assignTeamToMeetingWithMentor(entryId: number, scheduleEntry: TeamMeetingRequest): Observable<any> {
+  assignTeamToMeetingWithMentor(entryId: number, scheduleEntry: TeamMeetingRequest): Observable<boolean> {
 
     this.logger.info("Saving team meeting with mentor ", scheduleEntry);
-    return this.http.patch("http://localhost:9090/api/v1/write/users/schedule/" + entryId + "/meeting", scheduleEntry);
+    return this.http.patch<boolean>(this.BASE_URL_UPDATE + "schedule/" + entryId + "/meeting", scheduleEntry);
   }
 
   logout() {
 
     this.keycloakService.logout('http://localhost:4200').then((success) => {
-      console.log("--> log: logout success ", success);
+      this.logger.info("logout success ", success);
     }).catch((error) => {
-      console.log("--> log: logout error ", error);
+      this.logger.info("logout error ", error);
     });
   }
 
@@ -224,8 +216,8 @@ export class UserService {
 
     // TODO concat map
 
-    if (this.checkUserAccess && this.user.currentHackathonId) {
-      this.getUserSchedulePlan(this.user.currentHackathonId).subscribe(schedule => {
+    if (this.isUserMentorOrOrganizer && this.user.currentHackathonId) {
+      this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
 
         let meeting = schedule[index];
 
@@ -233,16 +225,14 @@ export class UserService {
 
           this.teamService.getTeamById(meeting.teamId).subscribe(teamResponse => {
 
-          const meetingNotification: MeetingNotification = {
-            chatId: teamResponse.teamChatRoomId,
-            message: `Meeting with team ${teamResponse.name}`,
-            notificationType: NotificationType.MEETING
-          } as MeetingNotification;
+            const meetingNotification: MeetingNotification = {
+              chatId: teamResponse.teamChatRoomId,
+              message: `Meeting with team ${teamResponse.name}`,
+              notificationType: NotificationType.MEETING
+            } as MeetingNotification;
 
-          let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
-          let meetingEnd = dayjs(meeting.sessionEnd);
-
-          // const scheduleMonitorInterval = setInterval(() => {
+            let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
+            let meetingEnd = dayjs(meeting.sessionEnd);
 
             if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
 
@@ -252,84 +242,85 @@ export class UserService {
 
               if (meeting) {
                 this.sendUserScheduleNotification(index);
-              } else {
-                //clearInterval(scheduleMonitorInterval);
               }
             }
-          // }, 10000);
-          //
-          // scheduleMonitorInterval;
-        });
+          });
         }
       });
     }
   }
 
-  getUserSchedulePlan(hackathonId: number): Observable<ScheduleEntryResponse[]> {
-
-    return this.http.get<ScheduleEntryResponse[]>("http://localhost:9090/api/v1/read/users/" + this.getUserId() + "/schedule",
-      {params: {
-        hackathonId: hackathonId
-      }});
-  }
-
   updateUserRole(userId: number, role: Role): Observable<void> {
 
-    return this.http.patch<void>(`http://localhost:9090/api/v1/write/users/${userId}/roles`, role);
+    this.logger.info("Updating user " + userId + " role: ", role)
+    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/roles", role);
   }
 
-  removeScheduleEntry(userId: number, entryId: number) {
+  removeScheduleEntry(userId: number, entryId: number): Observable<void> {
 
-    return this.http.delete("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId);
+    this.logger.info("Removing user " + userId + " schedule entry: ", entryId);
+    return this.http.delete<void>(this.BASE_URL_UPDATE + userId + "schedule/" + entryId);
   }
 
-  updateUserScheduleEntryTime(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<any> {
+  updateUserScheduleEntryTime(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<void> {
 
-    return this.http.patch("http://localhost:9090/api/v1/write/users/" + userId + "/schedule/" + entryId, entrySession)
+    this.logger.info("Updating user " + userId + " schedule entry: ", entryId, entrySession);
+    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "schedule/" + entryId, entrySession)
   }
 
   getMembersByTeamId(teamId: number): Observable<UserResponse[]> {
 
-    return this.http.get<UserResponse[]>("http://localhost:9090/api/v1/read/users/membership?teamId=" + teamId);
+    this.logger.info("Requesting members of team " + teamId);
+    return this.http.get<UserResponse[]>(this.BASE_URL_READ + "membership", {
+      params: {
+        teamId: teamId
+      }
+    });
   }
 
   getParticipants(participantsIds: number[], pageNumber: number): Observable<UserResponsePage> {
 
-    return this.http.post<UserResponsePage>
-    ("http://localhost:9090/api/v1/read/users/hackathon-participants?page=" + pageNumber + "&size=10", participantsIds);
+    this.logger.info("Requesting participants");
+    return this.http.post<UserResponsePage>(this.BASE_URL_READ + "hackathon-participants", participantsIds, {
+        params: {
+         page: pageNumber,
+         size: 10
+        }
+    });
   }
 
-  updateUserProfile(updatedUser: {}, userId: number) {
+  updateUserProfile(updatedUser: UserDetails): Observable<UserResponsePage> {
 
-    return this.http.patch<UserResponsePage>("http://localhost:9090/api/v1/write/users/" + userId, updatedUser);
+    this.logger.info("Updating user " + this.getUserId() + " profile: ", updatedUser);
+    return this.http.patch<UserResponsePage>(this.BASE_URL_UPDATE + this.getUserId(), updatedUser);
   }
 
-  getTags() {
+  getTags(): Observable<Tag[]> {
 
-    return this.http.get<Tag[]>("http://localhost:9090/api/v1/read/users/tags");
+    this.logger.info("Requesting tags ");
+    return this.http.get<Tag[]>(this.BASE_URL_READ + "tags");
   }
 
-  updateUserMembership(updatedUserMembership: UserMembershipRequest): Observable<any> {
+  updateUserMembership(updatedUserMembership: UserMembershipRequest): Observable<void> {
 
-    const currentUserId = UserManager.currentUserFromLocalStorage.id;
-    updatedUserMembership.userId = currentUserId;
+    this.logger.info("Updating user " + this.getUserId() + " membership", updatedUserMembership);
+    updatedUserMembership.userId = this.getUserId();
 
-    return this.http.patch("http://localhost:9090/api/v1/write/users/" + currentUserId + "/membership", updatedUserMembership);
+    return this.http.patch<void>(this.BASE_URL_UPDATE + this.getUserId() + "/membership", updatedUserMembership);
   }
 
-  removeTagsNotification() {
+  removeTagsNotification(): void {
     const toRemoveIdx = this.userNotifications.value.indexOf(
       <Notification>this.userNotifications.value.find(notification => notification.notificationType === NotificationType.TAGS));
 
     this.userNotifications.value.splice(toRemoveIdx, 1);
   }
 
-  login() {
-
-    this.keycloakService.login();
+  login(): void {
+    this.keycloakService.login().then(() =>this.toastr.success("Login successful"));
   }
 
-  isLoggedIn() {
+  isLoggedIn(): Promise<boolean> {
     return this.keycloakService.isLoggedIn();
   }
 

@@ -10,7 +10,7 @@ import {HackathonModule} from "./hackathon/hackathon.module";
 import {UserModule} from "./user/user.module";
 import {initializeKeycloak} from "./init/keycloak-init.factory";
 import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {TeamModule} from "./team/team.module";
 import {HomepageComponent} from './core/homepage/homepage.component';
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
@@ -21,6 +21,7 @@ import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
 import {GlobalErrorHandler} from "./core/services/error-service/global-error-handler.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {ApiInterceptor} from "./core/interceptors/api.interceptor";
 
 @NgModule({
   declarations: [
@@ -65,9 +66,10 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
       deps: [KeycloakService],
     },
     {
-      provide: ErrorHandler,
-      useClass: GlobalErrorHandler,
-    },
+      provide: HTTP_INTERCEPTORS,
+      multi: true,
+      useClass: ApiInterceptor
+    }
   ],
   bootstrap: [HoComponent]
 })

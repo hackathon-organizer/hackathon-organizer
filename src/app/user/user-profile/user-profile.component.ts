@@ -74,7 +74,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   checkIfUserHasMentorRole() {
-    return this.userService.checkUserAccess;
+    return this.userService.isUserMentorOrOrganizer;
   }
 
   inviteToTeam() {
@@ -95,7 +95,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const invitation: TeamInvitationNotification = this.notificationsArray[invitationIndex] as TeamInvitationNotification;
 
-    this.teamService.updateInviteStatus(invitation, accepted).subscribe(() => {
+    this.teamService.updateInvitationStatus(invitation, accepted).subscribe(() => {
       if (accepted) {
         this.userService.updateUserMembership({
           currentHackathonId: this.currentUser?.currentHackathonId,
@@ -104,7 +104,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           .subscribe(() => {
 
             this.currentUser!.currentTeamId = invitation.teamId;
-            this.userService.updateTeamInLocalStorage(this.currentUser!);
+            this.userService.fetchAndUpdateTeamInLocalStorage(this.currentUser!);
             this.currentTeamName = invitation.teamName;
             this.toastr.success("You are now member of team " + invitation.teamName);
           });
@@ -170,13 +170,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       tags: this.getSelectedTags()
     };
 
-    this.userService.updateUserProfile(updatedUser, this.user.id)
-      .subscribe(() => {
+    this.userService.updateUserProfile(updatedUser).subscribe(() => {
 
         this.toastr.success("Profile updated successfully")
         this.user.description = this.userEditForm.get("description")?.value;
         this.user.tags = this.getSelectedTags();
-
         this.userService.removeTagsNotification();
       });
 
