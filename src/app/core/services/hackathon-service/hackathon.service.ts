@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
 import {GlobalErrorHandler} from "../error-service/global-error-handler.service";
-import {Criteria} from "../../../hackathon/model/Criteria";
+import {Criteria, CriteriaAnswer} from "../../../hackathon/model/Criteria";
 import {NGXLogger} from "ngx-logger";
 import {TeamResponse} from "../../../team/model/Team";
 
@@ -85,6 +85,14 @@ export class HackathonService {
     return this.http.get<TeamResponse[]>(this.BASE_URL_READ + '/' + hackathonId + '/teams');
   }
 
+  getHackathonRatingCriteriaAnswers(hackathonId: number, userId: number): Observable<CriteriaAnswer[]> {
+
+    this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
+
+    return this.http.get<CriteriaAnswer[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria/answers',
+      {params: {userId: userId}});
+  }
+
   getHackathonRatingCriteria(hackathonId: number): Observable<Criteria[]> {
 
     this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
@@ -106,11 +114,11 @@ export class HackathonService {
     return this.http.put<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria', criteria);
   }
 
-  saveTeamRating(hackathonId: number, criteria: Criteria[]): Observable<void> {
+  saveTeamRating(hackathonId: number, criteria: CriteriaAnswer[]): Observable<CriteriaAnswer[]> {
 
     this.logger.info("Saving hackathon id: " + hackathonId + " team rating criteria", criteria);
 
-    return this.http.patch<void>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria/answers', criteria);
+    return this.http.patch<CriteriaAnswer[]>(this.BASE_URL_WRITE + '/' + hackathonId + '/criteria/answers', criteria);
   }
 
   deleteCriteria(idToDelete: number): Observable<void> {

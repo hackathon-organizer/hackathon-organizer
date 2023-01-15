@@ -11,8 +11,11 @@
         <button class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="previousTeam()">
           < Previous team
         </button>
-        <button class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+        <button *ngIf="teamsNumber < teams.length - 1" class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
           Save and go to next team >
+        </button>
+        <button *ngIf="teamsNumber === teams.length - 1" class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+          Save
         </button>
       </div>
     </div>
@@ -29,7 +32,7 @@
           <div class="" [formGroupName]="i">
             <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>
 
-            <div class="p-2" formGroupName="criteriaAnswer">
+            <div class="p-2" formGroupName="answer">
 
               <input formControlName="value" (change)="changeValue($event, i)" type="range" min="0" max="100" value="0"
                      class="range range-primary" step="10"/>
@@ -37,7 +40,6 @@
               <div class="w-full flex justify-between text-xs mb-3">
                 <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
               </div>
-
             </div>
           </div>
         </div>

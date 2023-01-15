@@ -28,7 +28,7 @@
       <button class="btn btn-outline btn-info">Show schedule</button>
     </a>
 
-    <a *ngIf="isUserJury()" routerLink="/hackathon/{{ hackathon.id }}/rating">
+    <a *ngIf="isUserJury() || isUserOrganizer()" routerLink="/hackathon/{{ hackathon.id }}/rating">
       <button class="btn btn-outline btn-secondary">Rate teams</button>
     </a>
 

@@ -78,11 +78,11 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     if (this.isUpdateMode) {
       const idToDelete = this.criteria.at(index).value.id;
       this.hackathonService.deleteCriteria(idToDelete).subscribe(() => {
+
+        this.criteria.removeAt(index);
         this.toastr.success("Criteria deleted successfully");
       });
     }
-
-    this.criteria.removeAt(index);
   }
 
   get criteria(): FormArray {

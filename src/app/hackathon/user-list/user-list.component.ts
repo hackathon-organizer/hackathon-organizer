@@ -69,11 +69,11 @@ export class UserListComponent implements OnInit {
 
   private getHackathonParticipants(pageNumber: number): void {
 
-    this.userService.getParticipants(this.participantsIds, pageNumber - 1).subscribe(part => {
-      this.hackathonParticipants = part.content;
+    this.userService.getParticipants(this.participantsIds, pageNumber - 1).subscribe(participants => {
+      this.hackathonParticipants = participants.content;
 
-      this.paginationConfig.currentPage = part.number + 1;
-      this.paginationConfig.totalItems = part.totalElements;
+      this.paginationConfig.currentPage = participants.number + 1;
+      this.paginationConfig.totalItems = participants.totalElements;
 
       this.loading = false;
     });
