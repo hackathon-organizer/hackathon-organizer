@@ -17,21 +17,20 @@ export class MenuComponent implements OnInit {
   avatarUrl = "";
   notifications: Notification[] = [];
   isLoggedIn = false;
+  user = UserManager.currentUserFromLocalStorage;
 
   constructor(private userService: UserService) {
   }
 
   ngOnInit(): void {
 
-    if (UserManager.currentUserFromLocalStorage) {
+    if (this.user) {
 
-      const user = UserManager.currentUserFromLocalStorage;
+      this.currentUserId = this.user.id;
+      this.userHackathonId = this.user.currentHackathonId;
+      this.userTeamId = this.user.currentTeamId;
 
-      this.currentUserId = user.id;
-      this.userHackathonId = user.currentHackathonId;
-      this.userTeamId = user.currentTeamId;
-
-      this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${user.username}&length=1`;
+      this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${this.user.username}&length=1`;
     }
 
     this.userService.userNotificationsObservable.subscribe(notifications => {

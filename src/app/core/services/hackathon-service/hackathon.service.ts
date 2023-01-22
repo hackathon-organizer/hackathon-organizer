@@ -20,8 +20,8 @@ export class HackathonService {
               private errorHandler: GlobalErrorHandler) {
   }
 
-  BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/hackathons';
-  BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons';
+  BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/hackathons/';
+  BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons/';
 
   createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
@@ -32,7 +32,7 @@ export class HackathonService {
 
   getHackathonDetailsById(id: number): Observable<HackathonResponse> {
 
-    return this.http.get<HackathonResponse>(this.BASE_URL_READ + '/' + id);
+    return this.http.get<HackathonResponse>(this.BASE_URL_READ + id);
   }
 
   getAllHackathons(pageNumber: number): Observable<HackathonResponsePage> {
@@ -48,7 +48,7 @@ export class HackathonService {
 
   addUserToHackathon(hackathonId: number, userId: number): Observable<void> {
 
-    return this.http.patch<void>(this.BASE_URL_UPDATE + '/' + hackathonId + '/participants/' + userId, null)
+    return this.http.patch<void>(this.BASE_URL_UPDATE + hackathonId + '/participants/' + userId, null)
       ;
   }
 
@@ -75,49 +75,49 @@ export class HackathonService {
   getHackathonTeamsById(hackathonId: number): Observable<TeamResponse[]> {
 
     this.logger.info("Returning hackathon id: " + hackathonId + " teams");
-    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + '/' + hackathonId + '/teams');;
+    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/teams');;
   }
 
   getHackathonRatingCriteriaAnswers(hackathonId: number, userId: number): Observable<CriteriaAnswer[]> {
 
     this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
-    return this.http.get<CriteriaAnswer[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria/answers',
+    return this.http.get<CriteriaAnswer[]>(this.BASE_URL_READ + hackathonId + '/criteria/answers',
       {params: {userId: userId}});
   }
 
   getHackathonRatingCriteria(hackathonId: number): Observable<Criteria[]> {
 
     this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
-    return this.http.get<Criteria[]>(this.BASE_URL_READ + '/' + hackathonId + '/criteria');
+    return this.http.get<Criteria[]>(this.BASE_URL_READ + hackathonId + '/criteria');
   }
 
   saveHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
 
     this.logger.info("Saving hackathon id: " + hackathonId + " criteria", criteria);
-    return this.http.post<void>(this.BASE_URL_UPDATE + '/' + hackathonId + '/criteria', criteria);
+    return this.http.post<void>(this.BASE_URL_UPDATE + hackathonId + '/criteria', criteria);
   }
 
   updateHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
 
     this.logger.info("Updating hackathon id: " + hackathonId + " criteria", criteria);
-    return this.http.put<void>(this.BASE_URL_UPDATE + '/' + hackathonId + '/criteria', criteria);
+    return this.http.put<void>(this.BASE_URL_UPDATE + hackathonId + '/criteria', criteria);
   }
 
   saveTeamRating(hackathonId: number, criteria: CriteriaAnswer[]): Observable<CriteriaAnswer[]> {
 
     this.logger.info("Saving hackathon id: " + hackathonId + " team rating criteria", criteria);
-    return this.http.patch<CriteriaAnswer[]>(this.BASE_URL_UPDATE + '/' + hackathonId + '/criteria/answers', criteria)
+    return this.http.patch<CriteriaAnswer[]>(this.BASE_URL_UPDATE + hackathonId + '/criteria/answers', criteria)
       ;
   }
 
   deleteCriteria(idToDelete: number): Observable<void> {
 
     this.logger.info("Deleting criteria with id", idToDelete);
-    return this.http.delete<void>(this.BASE_URL_UPDATE + '/criteria/' + idToDelete);
+    return this.http.delete<void>(this.BASE_URL_UPDATE + 'criteria/' + idToDelete);
   }
 
   getLeaderboard(hackathonId: number): Observable<TeamResponse[]> {
     this.logger.info("Returning hackathon id: " + hackathonId + " leaderboard");
-    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + '/' + hackathonId + '/leaderboard');
+    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/leaderboard');
   }
 }

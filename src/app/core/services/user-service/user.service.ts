@@ -33,7 +33,7 @@ export class UserService {
   user!: UserResponse;
 
   BASE_URL_UPDATE = "http://localhost:9090/api/v1/write/users/";
-  BASE_URL_READ = "http://localhost:9090/api/v1/read/users";
+  BASE_URL_READ = "http://localhost:9090/api/v1/read/users/";
 
   constructor(private http: HttpClient,
               private keycloakService: KeycloakService,
@@ -103,7 +103,7 @@ export class UserService {
 
   private fetchUserData(keycloakId?: string): void {
 
-    this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
+    this.http.get<UserResponse>(this.BASE_URL_READ + '/keycloak/' + keycloakId).subscribe(userData => {
       this.user = userData;
 
       UserManager.updateUserInLocalStorage(userData);
