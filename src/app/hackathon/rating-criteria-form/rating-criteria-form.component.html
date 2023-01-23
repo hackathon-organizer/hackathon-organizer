@@ -15,11 +15,25 @@
 
           <div formArrayName="criteria">
 
-            <div class="flex justify-center w-full" [formGroupName]="i">
-              <input id="nameId" formControlName="name" type="text" class="ho-input-primary"
-                     placeholder="Type criteria here"/>
+            <div class="" [formGroupName]="i">
 
-              <button (click)="removeCriteria(i)" class="ml-4 btn btn-error">Remove</button>
+              <div class="flex justify-center w-full">
+                <input id="nameId" formControlName="name" type="text" class="ho-input-primary"
+                       placeholder="Type criteria here"
+                       [ngClass]="{'is-invalid': (criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched ||
+          criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.dirty) &&
+          !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }"/>
+
+                <button (click)="removeCriteria(i)" class="ml-4 btn btn-error">Remove</button>
+              </div>
+
+              <div id="error" class="mt-2 flex justify-center w-full">
+              <span class="error-message"
+                    *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.minlength">Criteria name must be longer than 5 characters.</span>
+
+                <span class="error-message" *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.required &&
+                    criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched">Please enter criteria name.</span>
+              </div>
             </div>
           </div>
         </div>

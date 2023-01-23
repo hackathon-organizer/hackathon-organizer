@@ -65,7 +65,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       this.isUserOrganizer = this.userService.isUserOrganizer(this.user.currentHackathonId as number);
       this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
-      if (this.currentUser?.id === this.user.id) {
+      if (this.currentUser?.id === this.user.id && UserManager.currentUserTeamFromLocalStorage) {
         this.currentTeamName = UserManager.currentUserTeamFromLocalStorage.name;
       } else if (this.user.currentTeamId) {
         this.teamService.getTeamById(this.user.currentTeamId).subscribe((team) => this.currentTeamName = team.name);

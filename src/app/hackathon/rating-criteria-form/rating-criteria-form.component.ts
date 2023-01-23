@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -50,12 +50,14 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     return this.formBuilder.group({
       id: id,
       hackathonId: this.hackathonId,
-      name: new FormControl(name ? name : "")
+      name: new FormControl(name ? name : "", [Validators.required, Validators.minLength(5)])
     });
   }
 
   addCriteria() {
     this.criteria.push(this.createCriteria());
+
+    console.log((this.criteriaForm.get('criteria') as FormArray).get('0')?.value);
   }
 
   saveCriteria() {
