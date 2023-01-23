@@ -56,8 +56,6 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
 
   addCriteria() {
     this.criteria.push(this.createCriteria());
-
-    console.log((this.criteriaForm.get('criteria') as FormArray).get('0')?.value);
   }
 
   saveCriteria() {
@@ -69,7 +67,9 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
         this.toastr.success("Criteria updated successfully")
       });
     } else {
-      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).subscribe(() => {
+      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).subscribe((criteriaResponse) => {
+
+        this.criteria.patchValue(criteriaResponse);
         this.toastr.success("Criteria created successfully");
       });
     }
@@ -77,14 +77,14 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
 
   removeCriteria(index: number): void {
 
-    if (this.isUpdateMode) {
-      const idToDelete = this.criteria.at(index).value.id;
-      this.hackathonService.deleteCriteria(idToDelete).subscribe(() => {
+    const idToDelete = this.criteria.at(index).value.id;
 
-        this.criteria.removeAt(index);
-        this.toastr.success("Criteria deleted successfully");
-      });
+    if (idToDelete) {
+      this.hackathonService.deleteCriteria(this.hackathonId, idToDelete).subscribe();
     }
+
+    this.criteria.removeAt(index);
+    this.toastr.success("Criteria deleted successfully");
   }
 
   get criteria(): FormArray {

@@ -91,10 +91,10 @@ export class HackathonService {
     return this.http.get<Criteria[]>(this.BASE_URL_READ + hackathonId + '/criteria');
   }
 
-  saveHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
+  saveHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<Criteria[]> {
 
     this.logger.info("Saving hackathon id: " + hackathonId + " criteria", criteria);
-    return this.http.post<void>(this.BASE_URL_UPDATE + hackathonId + '/criteria', criteria);
+    return this.http.post<Criteria[]>(this.BASE_URL_UPDATE + hackathonId + '/criteria', criteria);
   }
 
   updateHackathonRatingCriteria(hackathonId: number, criteria: Criteria[]): Observable<void> {
@@ -110,10 +110,10 @@ export class HackathonService {
       ;
   }
 
-  deleteCriteria(idToDelete: number): Observable<void> {
+  deleteCriteria(hackathonId: number, idToDelete: number): Observable<void> {
 
     this.logger.info("Deleting criteria with id", idToDelete);
-    return this.http.delete<void>(this.BASE_URL_UPDATE + 'criteria/' + idToDelete);
+    return this.http.delete<void>(this.BASE_URL_UPDATE + hackathonId + '/criteria/' + idToDelete);
   }
 
   getLeaderboard(hackathonId: number): Observable<TeamResponse[]> {
