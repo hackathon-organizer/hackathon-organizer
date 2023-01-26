@@ -40,6 +40,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   viewDate: Date = new Date();
   refresh = new Subject<void>();
   events: ScheduleEntryEvent[] = [];
+  userEvents: ScheduleEntryEvent[] = [];
   activeDayIsOpen: boolean = true;
   currentUser = UserManager.currentUserFromLocalStorage;
   modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
@@ -55,40 +56,24 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.subscription = this.route.queryParams.subscribe(params => {
-
-      if (params['hackathonView'] === "1") {
+    this.subscription =
 
         this.route.params.subscribe(params => {
           this.hackathonId = params["id"];
           this.getHackathonSchedule(this.hackathonId!)
         });
-      } else {
-        this.getUserSchedule();
-      }
-    });
+
   }
 
   private getHackathonSchedule(hackathonId: number) {
 
     this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
 
-      this.logger.info("Hackathon schedule received ", schedule)
-      this.mapToCalendarEvents(schedule);
+      this.logger.info("Hackathon schedule received ", schedule);
+      this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
+      this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
+        .map(entry => this.mapToCalendarEvent(entry));
     });
-  }
-
-  private getUserSchedule() {
-
-    if (this.currentUser.currentHackathonId) {
-      this.userService.getUserSchedule(this.currentUser.currentHackathonId).subscribe(schedule => {
-
-        this.logger.info("User schedule received ", schedule)
-        this.mapToCalendarEvents(schedule);
-      });
-    } else {
-      this.logger.info("User is not a hackathon participant");
-    }
   }
 
   eventTimesChanged(timesChangedEvent: CalendarEventTimesChangedEvent): void {
@@ -136,7 +121,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         start: dayjs(entryResponse.sessionStart).toDate(),
         end: dayjs(entryResponse.sessionEnd).toDate(),
         color: colors.main,
-        draggable: true,
+        draggable: this.currentUser.id === entryResponse.userId,
         resizable: {
           beforeStart: true,
           afterEnd: true,
@@ -183,33 +168,28 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  private mapToCalendarEvents(entries: ScheduleEntryResponse[]): void {
-
-    entries.map(entry => {
+  private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntryEvent {
 
       colors.main = {
         primary: colors.main.primary,
         secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
       }
 
-      this.events.push({
+    return {
         id: entry.id,
         title: entry.username,
         teamId: entry.teamId,
         start: new Date(entry.sessionStart),
         end: new Date(entry.sessionEnd),
         color: colors.main,
-        draggable: this.canEditSchedule(),
+        draggable: this.currentUser.id === entry.userId,
         resizable: {
           beforeStart: true,
           afterEnd: true,
         },
         isAvailable: entry.isAvailable,
         info: entry.info,
-      } as ScheduleEntryEvent)
-
-      this.refresh.next();
-    });
+      } as ScheduleEntryEvent;
   }
 
   assignTeam(event: ScheduleEntryEvent) {
@@ -226,6 +206,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       this.userService.assignTeamToMeetingWithMentor(event.id as number, teamMeetingRequest).subscribe((isAvailable) => {
 
         event.isAvailable = isAvailable;
+        this.modalData.teamId = isAvailable ? undefined : teamMeetingRequest.teamId;
         this.refresh.next();
         this.scheduleUpdateSuccessToast();
       });
@@ -257,27 +238,30 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   canAssignTeam(teamId: string | number | undefined): boolean {
-    if (teamId) {
-      return this.userService.isUserTeamOwner(Number(teamId));
-    } else {
-      return !!this.modalData.isAvailable;
-    }
+
+    return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
   }
 
   canEditSchedule(): boolean {
-    return this.userService.isUserMentorOrOrganizer;
+
+    if (this.hackathonId) {
+      return this.userService.isUserMentorOrOrganizer(this.hackathonId);
+    } else {
+      return false;
+    }
   }
 
   joinMeeting(teamId: string | number | undefined) {
+
     this.router.navigate(["hackathon", this.hackathonId, "team", teamId, "chat"]);
   }
 
   canJoinToMeeting(teamId: string | number | undefined) {
 
-    if (teamId && UserManager.isUserTeamMember(Number(teamId))) {
+    if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
     } else {
-      return this.isUserMentor(this.hackathonId);
+      return this.isUserMentor(this.hackathonId) && !this.modalData.isAvailable;
     }
   }
 
@@ -292,6 +276,10 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     } else {
       return false;
     }
+  }
+
+  get showEvent(): boolean {
+    return dayjs(this.modalData.start).isBefore(dayjs());
   }
 
   ngOnDestroy(): void {

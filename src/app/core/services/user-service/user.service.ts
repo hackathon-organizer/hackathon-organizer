@@ -19,7 +19,6 @@ import {Tag} from "../../../team/model/Team";
 import {UserManager} from "../../../shared/UserManager";
 import {MeetingNotification, Notification, TeamInvitationNotification} from "../../../team/model/Notifications";
 import {Role} from "../../../user/model/Role";
-import {RouterStateSnapshot, UrlTree} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 
 
@@ -147,18 +146,18 @@ export class UserService {
     }
   }
 
-  get isUserMentorOrOrganizer(): boolean {
+  isUserMentorOrOrganizer(hackathonId: number): boolean {
 
     const userRoles = this.keycloakService.getKeycloakInstance().realmAccess?.roles;
-    const roles = ["MENTOR", "ORGANIZER"];
 
-    return roles.some(role => userRoles?.includes(role));
+    return userRoles!.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
+      Number(this.user?.currentHackathonId) === Number(hackathonId);
   }
 
   isUserHackathonOwner(hackathonId: number): boolean {
 
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
-      this.user.currentHackathonId === hackathonId;
+      Number(this.user.currentHackathonId) ===  Number(hackathonId);
   }
 
   private getUserId(): number {
@@ -190,7 +189,7 @@ export class UserService {
   getHackathonSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
 
     this.logger.info("Requesting hackathon " + hackathonId + " schedule");
-    return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + "schedule", {
+    return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + "/schedule", {
       params: {
         hackathonId: hackathonId
       }
@@ -216,7 +215,7 @@ export class UserService {
 
     // TODO concat map
 
-    if (this.isUserMentorOrOrganizer && this.user.currentHackathonId) {
+    if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
       this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
 
         let meeting = schedule[index];
@@ -252,20 +251,21 @@ export class UserService {
 
   updateUserRole(userId: number, role: Role): Observable<void> {
 
-    this.logger.info("Updating user " + userId + " role: ", role)
-    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/roles", role);
+    const newRole = {role: role}
+    this.logger.info("Updating user " + userId + " role: ", newRole);
+    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/roles", newRole);
   }
 
   removeScheduleEntry(userId: number, entryId: number): Observable<void> {
 
     this.logger.info("Removing user " + userId + " schedule entry: ", entryId);
-    return this.http.delete<void>(this.BASE_URL_UPDATE + userId + "schedule/" + entryId);
+    return this.http.delete<void>(this.BASE_URL_UPDATE + userId + "/schedule/" + entryId);
   }
 
   updateUserScheduleEntryTime(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<void> {
 
     this.logger.info("Updating user " + userId + " schedule entry: ", entryId, entrySession);
-    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "schedule/" + entryId, entrySession)
+    return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/schedule/" + entryId, entrySession)
   }
 
   getMembersByTeamId(teamId: number): Observable<UserResponse[]> {
@@ -344,5 +344,10 @@ export class UserService {
   isUserTeamOwner(teamId: number) {
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
       Number(UserManager.currentUserFromLocalStorage.currentTeamId) === Number(teamId);
+  }
+
+  isUserTeamOwnerInHackathon(hackathonId: number) {
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
+      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
   }
 }

@@ -80,7 +80,7 @@ export class HackathonService {
 
   getHackathonRatingCriteriaAnswers(hackathonId: number, userId: number): Observable<CriteriaAnswer[]> {
 
-    this.logger.info("Returning hackathon id: " + hackathonId + " criteria");
+    this.logger.info("Returning hackathon id: " + hackathonId + " criteria answers");
     return this.http.get<CriteriaAnswer[]>(this.BASE_URL_READ + hackathonId + '/criteria/answers',
       {params: {userId: userId}});
   }

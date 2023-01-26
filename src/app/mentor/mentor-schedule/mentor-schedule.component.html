@@ -71,7 +71,7 @@
         </thead>
 
         <tbody>
-        <tr *ngFor="let event of events">
+        <tr *ngFor="let event of userEvents">
           <td>
             <input
               type="color"
@@ -151,6 +151,7 @@
       <p class="text-md p-1 text-ellipsis overflow-hidden">{{ modalData.info }}</p>
     </div>
 
+    <ng-container *ngIf="!showEvent">
     <button [disabled]="!canJoinToMeeting(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="joinMeeting(modalData.teamId)">
       Join meeting
     </button>
@@ -158,6 +159,7 @@
     <button [disabled]="!canAssignTeam(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
       {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
     </button>
+    </ng-container>
 
   </div>
 </div>

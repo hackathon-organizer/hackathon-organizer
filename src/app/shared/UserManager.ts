@@ -1,7 +1,5 @@
 import {TeamResponse} from "../team/model/Team";
 import {UserResponse} from "../user/model/User";
-import {KeycloakService} from "keycloak-angular";
-import {Role} from "../user/model/Role";
 
 export class UserManager {
 

@@ -53,15 +53,21 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
       ]).pipe(map(([criteria, answers, teams]) => {
 
           this.teams = teams;
+          this.setCurrentTeam();
 
-          this.currentTeam = this.teams[0];
-          this.currentTeamId = this.currentTeam.id;
-
-        this.answers = answers;
-        criteria.forEach(c => this.criteria.push(this.createCriteria(c.name, c.id)));
-       }
+          this.answers = answers;
+          criteria.forEach(c => this.criteria.push(this.createCriteria(c.name, c.id)));
+        }
       )).subscribe(() => this.logger.info("Criteria and teams for hackathon fetched", this.criteria.value, this.teams));
     });
+  }
+
+  private setCurrentTeam() {
+
+    if (this.teams.length > 0) {
+      this.currentTeam = this.teams[0];
+      this.currentTeamId = this.currentTeam.id;
+    }
   }
 
   private createCriteria(name: string, id: number): FormGroup {
@@ -112,7 +118,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
         if (index != -1) {
           this.answers[index] = answer;
         } else {
-         this.answers.push(answer);
+          this.answers.push(answer);
         }
       });
 

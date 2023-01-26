@@ -2,13 +2,14 @@
 
   <div class="mx-auto max-w-6xl">
     <div class="flex flex-col items-center">
-      <h2 class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
+      <h2 *ngIf="teams.length < 1" class="mb-6 text-4xl">Team: ------------</h2>
+      <h2 *ngIf="teams.length > 0" class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
       <p class="mb-6">Here you can rate each team on given criteria</p>
 
       <span *ngIf="teams.length > 0" class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
 
-      <div class="btn-group btn-group-vertical lg:btn-group-horizontal">
-        <button class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="previousTeam()">
+      <div *ngIf="criteria.controls.length > 0" class="btn-group btn-group-vertical lg:btn-group-horizontal">
+        <button class="btn btn-secondary" (click)="previousTeam()">
           < Previous team
         </button>
         <button *ngIf="teamsNumber < teams.length - 1" class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">

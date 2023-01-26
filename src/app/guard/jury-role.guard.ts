@@ -17,7 +17,7 @@ export class JuryRoleGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     return !!this.keycloak.getKeycloakInstance().realmAccess?.roles.includes("JURY") ||
-      !!this.keycloak.getKeycloakInstance().realmAccess?.roles.includes("MENTOR");
+      !!this.keycloak.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER");
   }
 }
 

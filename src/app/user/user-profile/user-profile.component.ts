@@ -73,9 +73,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  checkIfUserHasMentorRole() {
-    return this.userService.isUserMentorOrOrganizer;
+  checkIfUserHasMentorOrOrganizerRole() {
+
+    if (this.currentUser?.currentHackathonId) {
+      return this.userService.isUserMentorOrOrganizer(this.currentUser.currentHackathonId);
+    } else {
+      return false;
+    }
   }
+
 
   inviteToTeam() {
 
@@ -216,7 +222,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   setUserRole(role: Role) {
 
-    if (this.userService.isUserOrganizer(this.user.currentHackathonId as number)) {
+    if (this.currentUser?.currentHackathonId && this.userService.isUserOrganizer(this.currentUser.currentHackathonId)) {
+      console.log('sending')
       this.userService.updateUserRole(this.user.id, role)
         .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
     }

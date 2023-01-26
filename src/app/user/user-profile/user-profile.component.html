@@ -33,7 +33,7 @@
         <p *ngIf="!user?.description">No description</p>
       </div>
 
-      <div *ngIf="isUserIsHackathonParticipant">
+      <div class="flex justify-around" *ngIf="isUserIsHackathonParticipant">
         <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.MENTOR)" class="btn btn-info my-5">Set as mentor</button>
         <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.JURY)" class="btn btn-info my-5">Set as jury</button>
 
@@ -42,7 +42,7 @@
         </button>
       </div>
 
-      <button *ngIf="checkIfUserHasMentorRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my
+      <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my
         schedule
       </button>
     </div>
