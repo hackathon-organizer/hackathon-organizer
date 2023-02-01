@@ -1,50 +1,63 @@
 <section id="criteria-form">
 
-  <div class="mx-auto max-w-6xl">
-    <div class="flex flex-col items-center">
-      <h2 *ngIf="teams.length < 1" class="mb-6 text-4xl">Team: ------------</h2>
-      <h2 *ngIf="teams.length > 0" class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
-      <p class="mb-6">Here you can rate each team on given criteria</p>
+  <div class="p-4 mx-auto w-4/5">
 
-      <span *ngIf="teams.length > 0" class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
+    <h2 class="mb-6 text-center text-4xl">Rate teams</h2>
 
-      <div *ngIf="criteria.controls.length > 0" class="btn-group btn-group-vertical lg:btn-group-horizontal">
-        <button class="btn btn-secondary" (click)="previousTeam()">
-          < Previous team
-        </button>
-        <button *ngIf="teamsNumber < teams.length - 1" class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
-          Save and go to next team >
-        </button>
-        <button *ngIf="teamsNumber === teams.length - 1" class="btn btn-secondary" [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
-          Save
-        </button>
+    <ng-container *ngIf="teams.length > 0; else noTeams">
+      <div class="flex flex-col items-center">
+        <h2 class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
+        <p class="mb-6">Here you can rate each team on given criteria</p>
+
+
+        <span class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
+
+        <div *ngIf="criteria.controls.length > 0" class="btn-group btn-group-vertical lg:btn-group-horizontal">
+          <button class="btn btn-secondary" (click)="previousTeam()">
+            < Previous team
+          </button>
+          <button *ngIf="teamsNumber < teams.length - 1" class="btn btn-secondary"
+                  [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+            Save and go to next team >
+          </button>
+          <button *ngIf="teamsNumber === teams.length - 1" class="btn btn-secondary"
+                  [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+            Save
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="mt-12 my-8" id="q-1">
+      <div class="mt-12 my-8" id="q-1">
 
-      <div class="text-center my-16">
-        <span *ngIf="criteria.controls.length < 1" class="text-3xl">No criteria created yet</span>
-      </div>
+        <div class="text-center my-16">
+          <span *ngIf="criteria.controls.length < 1" class="text-3xl">No criteria created yet</span>
+        </div>
 
-      <form class="space-y-6" [formGroup]="criteriaForm">
+        <form class="space-y-6" [formGroup]="criteriaForm">
 
-        <div formArrayName="criteria" *ngFor="let criteria of criteria.controls; let i = index" class="mx-12">
+          <div formArrayName="criteria" *ngFor="let criteria of criteria.controls; let i = index" class="mx-12">
 
-          <div class="" [formGroupName]="i">
-            <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>
+            <div class="" [formGroupName]="i">
+              <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>
 
-            <div class="p-2" formGroupName="answer">
+              <div class="p-2" formGroupName="answer">
 
-              <input formControlName="value" (change)="changeValue($event, i)" type="range" min="0" max="100" value="0"
-                     class="range range-primary" step="10"/>
+                <input formControlName="value" (change)="changeValue($event, i)" type="range" min="0" max="100"
+                       value="0"
+                       class="range range-primary" step="10"/>
 
-              <div class="w-full flex justify-between text-xs mb-3">
-                <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+                <div class="w-full flex justify-between text-xs mb-3">
+                  <span *ngFor="let num of [].constructor(scale + 1); let i = index">{{ i }}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </ng-container>
+    <ng-template #noTeams>
+      <div class="text-center mt-24">
+        <span class="text-3xl">No teams created yet</span>
+      </div>
+    </ng-template>
   </div>
 </section>

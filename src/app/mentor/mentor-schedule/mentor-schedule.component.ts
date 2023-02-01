@@ -73,6 +73,12 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
       this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
         .map(entry => this.mapToCalendarEvent(entry));
+
+      this.refresh.next();
+
+      console.log(this.events)
+      console.log(this.userEvents)
+
     });
   }
 
@@ -115,6 +121,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         colors.main.secondary = entryResponse.entryColor;
       }
 
+      console.log(entryResponse.userId)
+
       const entryEvent: ScheduleEntryEvent = {
         id: entryResponse.id,
         title: this.currentUser.username,
@@ -134,6 +142,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         entryEvent
       ];
 
+      this.userEvents.push(entryEvent);
+
       this.refresh.next();
       this.scheduleUpdateSuccessToast();
     });
@@ -146,8 +156,9 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number)
       .subscribe(() => {
 
-        this.events = this.events.filter((event) => event !== eventToDelete);
-        this.scheduleUpdateSuccessToast()
+        this.events = this.events.filter((event) => event.id !== eventToDelete.id);
+        this.userEvents = this.userEvents.filter((event) => event.id !== eventToDelete.id);
+        this.scheduleUpdateSuccessToast();
 
         this.refresh.next();
       });
@@ -155,16 +166,16 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   updateEvents(): void {
 
-    const eventsCopy = Object.assign([], this.events);
+    const eventsCopy = Object.assign([], this.userEvents);
 
     const scheduleEntries: ScheduleEntryRequest[] = eventsCopy.map(entry => this.mapToScheduleEntryRequest(entry));
 
     this.logger.info("Sending schedule to save ", scheduleEntries);
 
     this.userService.updateEntryEvents(scheduleEntries).subscribe(() => {
-      this.events = eventsCopy;
+      this.events.concat(eventsCopy);
 
-      this.scheduleUpdateSuccessToast()
+      this.scheduleUpdateSuccessToast();
     });
   }
 
@@ -196,7 +207,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
     const teamId = this.currentUser.currentTeamId;
 
-    if (teamId && this.canAssignTeam(teamId)) {
+    if (teamId && this.canAssignTeam()) {
 
       const teamMeetingRequest: TeamMeetingRequest = {
         teamOwnerId: this.currentUser.id,
@@ -237,7 +248,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     this.modalData = event;
   }
 
-  canAssignTeam(teamId: string | number | undefined): boolean {
+  canAssignTeam(): boolean {
 
     return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
   }
@@ -261,20 +272,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
     } else {
-      return this.isUserMentor(this.hackathonId) && !this.modalData.isAvailable;
-    }
-  }
-
-  private isUserMentor(hackathonId: number | undefined) {
-
-    if (hackathonId) {
-      // Entire hackathon schedule
-      return this.userService.isUserMentor(hackathonId);
-    } else if (this.currentUser.currentHackathonId){
-      // Only user schedule
-      return this.userService.isUserMentor(this.currentUser.currentHackathonId);
-    } else {
-      return false;
+      return this.userService.isUserMentorOrOrganizer(this.hackathonId!) && !this.modalData.isAvailable &&
+        dayjs().isBetween(dayjs(this.modalData.start).subtract(15, "minutes"), dayjs(this.modalData.end));
     }
   }
 

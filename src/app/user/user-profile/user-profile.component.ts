@@ -216,14 +216,14 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId);
   }
 
-  get isUserTeamMember() {
-    return this.currentUser?.currentTeamId;
+  get isUserNotInMyHackathon() {
+
+    return Number(this.currentUser?.currentHackathonId) !== Number(this.user.currentHackathonId);
   }
 
   setUserRole(role: Role) {
 
     if (this.currentUser?.currentHackathonId && this.userService.isUserOrganizer(this.currentUser.currentHackathonId)) {
-      console.log('sending')
       this.userService.updateUserRole(this.user.id, role)
         .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
     }

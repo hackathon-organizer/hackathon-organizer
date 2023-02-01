@@ -6,6 +6,7 @@ import {HackathonResponse} from "../model/Hackathon";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {UserService} from "../../core/services/user-service/user.service";
+import dayjs from "dayjs";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -50,11 +51,15 @@ export class HackathonProfileComponent implements OnInit {
     return UserManager.isUserHackathonMember(this.hackathon.id);
   }
 
-  isUserJury() {
+  isUserJury(): boolean {
     return this.userService.isUserJury(this.hackathon.id);
   }
 
-  isUserOrganizer() {
+  isUserOrganizer(): boolean {
     return this.userService.isUserOrganizer(this.hackathon.id);
+  }
+
+  isActive(): boolean {
+    return dayjs().isBefore(this.hackathon.eventStartDate);
   }
 }

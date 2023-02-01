@@ -8,11 +8,11 @@
 
   <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
 
-    <a *ngIf="hackathon?.isActive && isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
+    <a *ngIf="isActive() && isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
-    <button *ngIf="hackathon?.isActive && !isUserHackathonParticipant()" (click)="joinHackathon()"
+    <button *ngIf="isActive() && !isUserHackathonParticipant()" (click)="joinHackathon()"
             class="btn btn-outline btn-accent">Join hackathon
     </button>
 
@@ -24,7 +24,7 @@
       <button class="btn btn-outline btn-info">Show participants</button>
     </a>
 
-    <a routerLink="/hackathon/{{ hackathon.id }}/schedule" [queryParams]="{hackathonView: 1}">
+    <a routerLink="/hackathon/{{ hackathon.id }}/schedule">
       <button class="btn btn-outline btn-info">Show schedule</button>
     </a>
 

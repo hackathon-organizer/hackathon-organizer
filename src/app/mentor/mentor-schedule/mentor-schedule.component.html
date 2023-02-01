@@ -45,6 +45,7 @@
   [minimumEventHeight]="60"
   (eventTimesChanged)="eventTimesChanged($event)"
   (eventClicked)="handleEvent($event.event)"
+  [dayStartHour]="8"
 >
 </mwl-calendar-day-view>
 
@@ -92,6 +93,7 @@
                    dateFormat="Y-m-dTH:i"
                    altFormat="F j, Y H:i"
                    placeholder="Not set"
+                   [time24hr]="true"
             />
           </td>
           <td>
@@ -106,6 +108,8 @@
                    dateFormat="Y-m-dTH:i"
                    altFormat="F j, Y H:i"
                    placeholder="Not set"
+                   [minDate]="event.start"
+                   [time24hr]="true"
             />
           </td>
           <td>
@@ -151,14 +155,15 @@
       <p class="text-md p-1 text-ellipsis overflow-hidden">{{ modalData.info }}</p>
     </div>
 
-    <ng-container *ngIf="!showEvent">
-    <button [disabled]="!canJoinToMeeting(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="joinMeeting(modalData.teamId)">
-      Join meeting
+
+    <button [disabled]="!canJoinToMeeting(modalData.teamId)" class="btn btn-primary w-2/5 mt-3"
+            (click)="joinMeeting(modalData.teamId)">Join meeting
     </button>
 
-    <button [disabled]="!canAssignTeam(modalData.teamId)" class="btn btn-primary w-2/5 mt-3" (click)="assignTeam(modalData)">
-      {{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
-    </button>
+    <ng-container *ngIf="!showEvent">
+      <button [disabled]="!canAssignTeam()" class="btn btn-primary w-2/5 mt-3"
+              (click)="assignTeam(modalData)">{{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
+      </button>
     </ng-container>
 
   </div>

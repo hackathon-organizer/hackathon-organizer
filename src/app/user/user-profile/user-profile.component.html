@@ -34,16 +34,18 @@
       </div>
 
       <div class="flex justify-around" *ngIf="isUserIsHackathonParticipant">
-        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.MENTOR)" class="btn btn-info my-5">Set as mentor</button>
-        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.JURY)" class="btn btn-info my-5">Set as jury</button>
+        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.MENTOR)"
+                class="btn btn-info my-5">Set as mentor</button>
+        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.JURY)"
+                class="btn btn-info my-5">Set as jury</button>
 
-        <button [disabled]="isThisMyProfile || isUserTeamMember" (click)="inviteToTeam()"
-                class="btn btn-info my-5">Invite to team
-        </button>
+        <button [disabled]="isThisMyProfile || isUserNotInMyHackathon || !currentUser?.currentTeamId ||
+currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
+                class="btn btn-info my-5">Invite to team</button>
       </div>
 
-      <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn" routerLink="schedule">Go to my
-        schedule
+      <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn"
+              routerLink="/hackathon/{{ currentUser?.currentHackathonId }}/schedule">Go to my schedule
       </button>
     </div>
 

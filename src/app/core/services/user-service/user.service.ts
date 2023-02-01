@@ -102,7 +102,7 @@ export class UserService {
 
   private fetchUserData(keycloakId?: string): void {
 
-    this.http.get<UserResponse>(this.BASE_URL_READ + '/keycloak/' + keycloakId).subscribe(userData => {
+    this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
       this.user = userData;
 
       UserManager.updateUserInLocalStorage(userData);
@@ -213,8 +213,6 @@ export class UserService {
 
   private sendUserScheduleNotification(index = 0) {
 
-    // TODO concat map
-
     if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
       this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
 
@@ -230,7 +228,7 @@ export class UserService {
               notificationType: NotificationType.MEETING
             } as MeetingNotification;
 
-            let meetingStart = dayjs(meeting.sessionStart).subtract(5, "minutes");
+            let meetingStart = dayjs(meeting.sessionStart).subtract(10, "minutes");
             let meetingEnd = dayjs(meeting.sessionEnd);
 
             if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
