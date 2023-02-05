@@ -45,6 +45,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   currentUser = UserManager.currentUserFromLocalStorage;
   modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
   currentTime: Observable<Date> = timer(0, 1000).pipe(map(() => new Date()));
+  loading = false;
 
   constructor(private userService: UserService,
               private teamService: TeamService,
@@ -56,13 +57,10 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.subscription =
-
-        this.route.params.subscribe(params => {
-          this.hackathonId = params["id"];
-          this.getHackathonSchedule(this.hackathonId!)
-        });
-
+    this.subscription = this.route.params.subscribe(params => {
+      this.hackathonId = params["id"];
+      this.getHackathonSchedule(this.hackathonId!)
+    });
   }
 
   private getHackathonSchedule(hackathonId: number) {
@@ -75,10 +73,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         .map(entry => this.mapToCalendarEvent(entry));
 
       this.refresh.next();
-
-      console.log(this.events)
-      console.log(this.userEvents)
-
     });
   }
 
@@ -108,6 +102,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   addEvent(): void {
 
+    this.loading = true;
+
     const entryEvent: ScheduleEntryRequest = {
       sessionStart: dayjs().toDate(),
       sessionEnd: dayjs().add(1, 'hour').toDate(),
@@ -120,8 +116,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       if (entryResponse.entryColor != null) {
         colors.main.secondary = entryResponse.entryColor;
       }
-
-      console.log(entryResponse.userId)
 
       const entryEvent: ScheduleEntryEvent = {
         id: entryResponse.id,
@@ -145,12 +139,14 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       this.userEvents.push(entryEvent);
 
       this.refresh.next();
+      this.loading = false;
       this.scheduleUpdateSuccessToast();
     });
   }
 
   deleteEvent(eventToDelete: CalendarEvent) {
 
+    this.loading = true;
     this.logger.info("Trying to delete event with id ", eventToDelete.id);
 
     this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number)
@@ -161,10 +157,13 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         this.scheduleUpdateSuccessToast();
 
         this.refresh.next();
+        this.loading = false;
       });
   }
 
   updateEvents(): void {
+
+    this.loading = true;
 
     const eventsCopy = Object.assign([], this.userEvents);
 
@@ -175,32 +174,33 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     this.userService.updateEntryEvents(scheduleEntries).subscribe(() => {
       this.events.concat(eventsCopy);
 
+      this.loading = false;
       this.scheduleUpdateSuccessToast();
     });
   }
 
   private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntryEvent {
 
-      colors.main = {
-        primary: colors.main.primary,
-        secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
-      }
+    colors.main = {
+      primary: colors.main.primary,
+      secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
+    }
 
     return {
-        id: entry.id,
-        title: entry.username,
-        teamId: entry.teamId,
-        start: new Date(entry.sessionStart),
-        end: new Date(entry.sessionEnd),
-        color: colors.main,
-        draggable: this.currentUser.id === entry.userId,
-        resizable: {
-          beforeStart: true,
-          afterEnd: true,
-        },
-        isAvailable: entry.isAvailable,
-        info: entry.info,
-      } as ScheduleEntryEvent;
+      id: entry.id,
+      title: entry.username,
+      teamId: entry.teamId,
+      start: new Date(entry.sessionStart),
+      end: new Date(entry.sessionEnd),
+      color: colors.main,
+      draggable: this.currentUser.id === entry.userId,
+      resizable: {
+        beforeStart: true,
+        afterEnd: true,
+      },
+      isAvailable: entry.isAvailable,
+      info: entry.info,
+    } as ScheduleEntryEvent;
   }
 
   assignTeam(event: ScheduleEntryEvent) {

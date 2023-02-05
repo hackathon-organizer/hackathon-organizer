@@ -17,6 +17,7 @@ import {HackathonRequest} from "../model/Hackathon";
 export class NewHackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
+  loading = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -39,6 +40,7 @@ export class NewHackathonFormComponent implements OnInit {
 
   createHackathon() {
 
+    this.loading = true;
     const hackathon: HackathonRequest = this.buildHackathon();
 
     this.hackathonService.createHackathon(hackathon).pipe(
@@ -48,6 +50,7 @@ export class NewHackathonFormComponent implements OnInit {
 
         return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
       })).subscribe(() => {
+      this.loading = false;
       this.toastr.success("Hackathon " + hackathon.name + " created successfully");
     });
   }

@@ -76,7 +76,10 @@
         <span *ngIf="newHackathonForm.errors?.dateErrorMessage" class="error-message">
           {{ newHackathonForm.errors?.dateErrorMessage }}</span>
 
-        <input [disabled]="!newHackathonForm.valid" type="submit" class="btn btn-primary" value="Create">
+        <ng-container *ngIf="loading">
+          <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+        </ng-container>
+        <input [disabled]="!newHackathonForm.valid || loading" type="submit" class="btn btn-primary" value="Create">
 
       </form>
     </div>
