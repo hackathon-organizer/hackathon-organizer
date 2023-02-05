@@ -15,7 +15,7 @@ import {ToastrService} from "ngx-toastr";
 })
 export class NewTeamFormComponent implements OnInit, OnDestroy {
 
-  private routeSubscription: Subscription = new Subscription();
+  private subscription: Subscription = new Subscription();
 
   newTeamForm!: FormGroup;
   teamId?: number;
@@ -23,6 +23,7 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
   hackathonId?: number;
   editMode = false;
   user = UserManager.currentUserFromLocalStorage;
+  loading = true;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -38,16 +39,21 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
 
     this.initFrom();
 
-    this.getTags();
+    this.teamService.getTags().pipe(concatMap(tagsResponse => {
 
-    this.routeSubscription = this.route.params.subscribe(params => {
+      this.setTags(tagsResponse);
+      return this.route.params;
+    })).subscribe(params => {
 
       this.hackathonId = params['id'];
 
       if (this.router.url.includes("edit")) {
-        this.loadFormData(params['teamId']);
+
         this.teamId = params['teamId'];
+        this.loadFormData();
         this.editMode = true;
+      } else {
+        this.loading = false;
       }
     });
   }
@@ -64,12 +70,10 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getTags(): void {
+  private setTags(tags: Tag[]): void {
 
-    this.teamService.getAvailableTags().subscribe(tagsResponse => {
-      this.tags = tagsResponse;
-      this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
-    });
+    this.tags = tags;
+    this.newTeamForm.addControl("tags", this.buildTagsFormGroup(this.tags));
   }
 
   private buildTagsFormGroup(tags: Tag[]): FormGroup {
@@ -117,29 +121,28 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadFormData(teamId: number): void {
+  private loadFormData(): void {
 
-    this.teamService.getTeamById(teamId).subscribe(team => {
+    this.teamService.getTeamById(this.teamId!).subscribe(team => {
 
       this.newTeamForm.get('teamName')?.patchValue(team.name);
       this.newTeamForm.get('description')?.patchValue(team.description);
 
       team.tags.forEach(teamTag => {
         const tagToMark = this.tags.find(tag => tag.id === teamTag.id);
+
         if (tagToMark) {
           tagToMark.isSelected = true;
         }
       });
       this.newTeamForm.get('tags')?.patchValue(this.buildTagsFormGroup(this.tags));
+
+      this.loading = false;
     })
   }
 
   markTag(index: number): void {
     this.tags[index].isSelected = !this.tags[index].isSelected;
-  }
-
-  ngOnDestroy(): void {
-    this.routeSubscription.unsubscribe();
   }
 
   private buildTeam(): TeamRequest {
@@ -160,4 +163,9 @@ export class NewTeamFormComponent implements OnInit, OnDestroy {
   private getSelectedTags(): Tag[] {
     return this.tags.filter(tag => tag.isSelected);
   }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
 }

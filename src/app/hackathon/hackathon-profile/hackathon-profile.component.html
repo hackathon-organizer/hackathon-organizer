@@ -8,7 +8,7 @@
 
   <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
 
-    <a *ngIf="isActive() && isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
+    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 

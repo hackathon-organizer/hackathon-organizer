@@ -51,7 +51,7 @@ export class TeamService {
     return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
   }
 
-  getAvailableTags(): Observable<Tag[]> {
+  getTags(): Observable<Tag[]> {
 
     return this.http.get<Tag[]>(this.BASE_URL_READ + "tags");
   }

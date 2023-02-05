@@ -314,6 +314,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       this.logger.info("Chat room id can't be null.");
       throw new Error("Chat room id can't be null. Try to refresh page");
     }
+
+    this.chatEntry = "";
   }
 
   private updateChat(message: ChatMessage) {
