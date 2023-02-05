@@ -9,11 +9,11 @@ import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 
 @Component({
-  selector: 'ho-new-team-form',
-  templateUrl: './new-team-form.component.html',
+  selector: 'ho-team-form',
+  templateUrl: './team-form.component.html',
   styleUrls: []
 })
-export class NewTeamFormComponent implements OnInit, OnDestroy {
+export class TeamFormComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription = new Subscription();
 

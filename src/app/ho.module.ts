@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, ErrorHandler, NgModule} from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 
@@ -19,7 +19,6 @@ import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calend
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
-import {GlobalErrorHandler} from "./core/services/error-service/global-error-handler.service";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ApiInterceptor} from "./core/interceptors/api.interceptor";
 
