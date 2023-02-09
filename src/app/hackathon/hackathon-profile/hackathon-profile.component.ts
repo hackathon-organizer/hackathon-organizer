@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
-import {concatMap, Subscription} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {HackathonResponse} from "../model/Hackathon";
 import {UserManager} from "../../shared/UserManager";
@@ -18,6 +18,7 @@ export class HackathonProfileComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   hackathon!: HackathonResponse;
+  loading = false;
 
   constructor(private hackathonService: HackathonService,
               private userService: UserService,
@@ -35,12 +36,13 @@ export class HackathonProfileComponent implements OnInit {
   }
 
   joinHackathon(): void {
+    this.loading = true;
 
     const user = UserManager.currentUserFromStorage;
 
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
       this.userService.updateUserMembership({currentHackathonId: this.hackathon.id, currentTeamId: null})
-    )).subscribe(() => {
+    )).pipe(finalize(() => this.loading = false)).subscribe(() => {
 
       user.currentHackathonId = this.hackathon.id;
       this.toastr.success("You are now member of hackathon " + this.hackathon.name);

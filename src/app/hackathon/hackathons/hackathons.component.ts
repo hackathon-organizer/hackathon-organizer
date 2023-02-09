@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {HackathonResponse} from "../model/Hackathon";
 import {PaginationInstance} from "ngx-pagination";
+import {finalize} from "rxjs";
 
 @Component({
   selector: 'ho-hackathons',
@@ -23,19 +24,25 @@ export class HackathonsComponent implements OnInit {
   constructor(private hackathonService: HackathonService) {
   }
 
+  get currentPageNumber() {
+    return this.paginationConfig.currentPage;
+  }
+
+  get hackathonsCount() {
+    return this.paginationConfig.totalItems;
+  }
+
   ngOnInit(): void {
     this.getHackathons(1);
   }
 
   getHackathons(pageNumber: number) {
-    this.hackathonService.getAllHackathons(pageNumber - 1).subscribe(hackathonsResponse => {
-
-      this.hackathons = hackathonsResponse.content;
-      this.paginationConfig.currentPage = hackathonsResponse.number + 1;
-      this.paginationConfig.totalItems = hackathonsResponse.totalElements;
-
-      this.loading = false;
-    });
+    this.hackathonService.getAllHackathons(pageNumber - 1).pipe(finalize(() => this.loading = false))
+      .subscribe(hackathonsResponse => {
+        this.hackathons = hackathonsResponse.content;
+        this.paginationConfig.currentPage = hackathonsResponse.number + 1;
+        this.paginationConfig.totalItems = hackathonsResponse.totalElements;
+      });
   }
 
   onPageChange(page: number): void {
@@ -43,13 +50,5 @@ export class HackathonsComponent implements OnInit {
     this.loading = true;
     this.paginationConfig.currentPage = page;
     this.getHackathons(page);
-  }
-
-  get currentPageNumber() {
-    return this.paginationConfig.currentPage;
-  }
-
-  get hackathonsCount() {
-    return this.paginationConfig.totalItems;
   }
 }

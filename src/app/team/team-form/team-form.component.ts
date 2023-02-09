@@ -4,7 +4,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest, TeamResponse} from "../model/Team";
-import {concatMap, Subscription} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 
@@ -24,6 +24,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
   editMode = false;
   user = UserManager.currentUserFromStorage;
   loading = true;
+  loadingCreate = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -86,6 +87,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
   }
 
   saveTeam() {
+    this.loadingCreate = true;
 
     if (this.hackathonId && this.user) {
 
@@ -93,18 +95,21 @@ export class TeamFormComponent implements OnInit, OnDestroy {
 
       if (this.editMode && this.teamId) {
 
-        this.teamService.updateTeam(team, this.teamId).subscribe(updatedTeam => {
+        this.teamService.updateTeam(team, this.teamId).pipe(finalize(() => this.loadingCreate = false))
+          .subscribe(updatedTeam => {
 
-          this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + updatedTeam.id);
-          UserManager.updateTeamInStorage(updatedTeam);
-          this.toastr.success("Team " + team.name + " updated successfully");
-        });
+            this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + updatedTeam.id);
+            UserManager.updateTeamInStorage(updatedTeam);
+            this.toastr.success("Team " + team.name + " updated successfully");
+          });
       } else {
 
         this.teamService.createTeam(team).pipe(
           concatMap((createdTeam: TeamResponse) => {
 
-            UserManager.currentUserFromStorage.currentTeamId = createdTeam.id;
+            this.user.currentTeamId = createdTeam.id;
+
+            UserManager.updateUserInStorage(this.user);
             UserManager.updateTeamInStorage(createdTeam);
 
             this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
@@ -113,8 +118,9 @@ export class TeamFormComponent implements OnInit, OnDestroy {
               currentHackathonId: this.hackathonId,
               currentTeamId: createdTeam.id
             });
-          })).subscribe(() => {
+          })).pipe(finalize(() => this.loadingCreate = false)).subscribe(() => {
 
+          this.loadingCreate = false;
           this.toastr.success("Team " + team.name + " created successfully");
         });
       }

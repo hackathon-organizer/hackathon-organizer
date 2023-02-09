@@ -4,7 +4,7 @@ import {UserResponse} from "../../user/model/User";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
-import {concatMap, debounceTime, switchMap} from "rxjs";
+import {concatMap, debounceTime, finalize, switchMap} from "rxjs";
 import {FormControl} from "@angular/forms";
 
 @Component({
@@ -36,7 +36,7 @@ export class UserListComponent implements OnInit {
 
         this.hackathonId = params['id'];
         return this.hackathonService.getHackathonParticipantsIds(this.hackathonId)
-      })).subscribe(participantsIds => {
+      })).pipe(finalize(() => this.loading = true)).subscribe(participantsIds => {
 
       this.loading = true;
       this.participantsIds = participantsIds;
@@ -48,15 +48,13 @@ export class UserListComponent implements OnInit {
 
         this.loading = true;
         return this.userService.findHackathonUsersByUsername(username, this.hackathonId, this.paginationConfig.currentPage - 1)
-      })).subscribe(usersResponse => {
+      })).pipe(finalize(() => this.loading = false)).subscribe(usersResponse => {
 
       this.hackathonParticipants = usersResponse.content;
 
       this.paginationConfig.currentPage = usersResponse.number + 1;
       this.paginationConfig.totalItems = usersResponse.totalElements;
-
-      this.loading = false;
-    });
+      });
   }
 
   onPageChange(page: number): void {
@@ -69,14 +67,13 @@ export class UserListComponent implements OnInit {
 
   private getHackathonParticipants(pageNumber: number): void {
 
-    this.userService.getParticipants(this.participantsIds, pageNumber - 1).subscribe(participants => {
-      this.hackathonParticipants = participants.content;
+    this.userService.getParticipants(this.participantsIds, pageNumber - 1).pipe(finalize(() => this.loading = false))
+      .subscribe(participants => {
+        this.hackathonParticipants = participants.content;
 
-      this.paginationConfig.currentPage = participants.number + 1;
-      this.paginationConfig.totalItems = participants.totalElements;
-
-      this.loading = false;
-    });
+        this.paginationConfig.currentPage = participants.number + 1;
+        this.paginationConfig.totalItems = participants.totalElements;
+      });
   }
 
   get currentPageNumber(): number {

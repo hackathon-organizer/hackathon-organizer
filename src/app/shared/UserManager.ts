@@ -42,4 +42,9 @@ export class UserManager {
       return false;
     }
   }
+
+  public static set userCurrentTeam(teamId: number) {
+    const user = sessionStorage.getItem("user") as string;
+    JSON.parse(user).teamId = teamId;
+  }
 }

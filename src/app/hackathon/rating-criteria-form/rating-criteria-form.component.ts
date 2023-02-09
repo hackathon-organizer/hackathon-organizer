@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
-import {concatMap, Subscription} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {Criteria} from "../model/Criteria";
 import {ToastrService} from "ngx-toastr";
@@ -18,6 +18,7 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   hackathonId!: number;
   criteriaForm!: FormGroup;
   isUpdateMode = false;
+  loading = false;
 
   constructor(private formBuilder: FormBuilder,
               private hackathonService: HackathonService,
@@ -59,19 +60,22 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   }
 
   saveCriteria() {
+    this.loading = true;
 
     const criteria: Criteria[] = this.criteriaForm.value.criteria;
 
     if (this.isUpdateMode) {
-      this.hackathonService.updateHackathonRatingCriteria(this.hackathonId, criteria).subscribe(() => {
-        this.toastr.success("Criteria updated successfully")
+      this.hackathonService.updateHackathonRatingCriteria(this.hackathonId, criteria).pipe(finalize(() => this.loading = false))
+        .subscribe(() => {
+        this.toastr.success("Criteria updated successfully");
       });
     } else {
-      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).subscribe((criteriaResponse) => {
+      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).pipe(
+        finalize(() => this.loading = false)).subscribe((criteriaResponse) => {
 
-        this.criteria.patchValue(criteriaResponse);
-        this.toastr.success("Criteria created successfully");
-      });
+          this.criteria.patchValue(criteriaResponse);
+          this.toastr.success("Criteria created successfully");
+        });
     }
   }
 

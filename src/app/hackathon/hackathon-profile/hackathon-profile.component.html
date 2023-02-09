@@ -6,13 +6,17 @@
     <img src="https://via.placeholder.com/800x400">
   </div>
 
+  <ng-container *ngIf="loading">
+    <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+  </ng-container>
+
   <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
 
     <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathon/{{ hackathon.id }}/team">
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
-    <button *ngIf="isActive() && !isUserHackathonParticipant()" (click)="joinHackathon()"
+    <button *ngIf="isActive() && !isUserHackathonParticipant()" [disabled]="loading" (click)="joinHackathon()"
             class="btn btn-outline btn-accent">Join hackathon
     </button>
 

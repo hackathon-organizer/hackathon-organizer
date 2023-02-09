@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {concatMap, Subscription} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {UserService} from "../../core/services/user-service/user.service";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
@@ -139,10 +139,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   getUserTeamSuggestions() {
     if (this.user.currentHackathonId) {
       this.loading = true;
-      this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).subscribe(
+      this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).pipe(
+        finalize(() => this.loading = false)).subscribe(
         suggestions => {
           this.teamSuggestions = suggestions;
-          this.loading = false;
         });
     }
   }

@@ -6,15 +6,15 @@ import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
-import {concatMap} from "rxjs";
+import {concatMap, finalize} from "rxjs";
 import {HackathonRequest} from "../model/Hackathon";
 
 @Component({
-  selector: 'ho-new-hackathon-form',
-  templateUrl: './new-hackathon-form.component.html',
+  selector: 'ho-hackathon-form',
+  templateUrl: './hackathon-form.component.html',
   styleUrls: []
 })
-export class NewHackathonFormComponent implements OnInit {
+export class HackathonFormComponent implements OnInit {
 
   newHackathonForm!: FormGroup;
   loading = false;
@@ -45,14 +45,18 @@ export class NewHackathonFormComponent implements OnInit {
 
     this.hackathonService.createHackathon(hackathon).pipe(
       concatMap(hackathonResponse => {
+
+        let user = UserManager.currentUserFromStorage;
+        user.currentHackathonId = hackathonResponse.id;
+        UserManager.updateUserInStorage(user);
+
         this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
-        UserManager.currentUserFromStorage.currentHackathonId = hackathonResponse.id;
 
         return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
-      })).subscribe(() => {
-      this.loading = false;
-      this.toastr.success("Hackathon " + hackathon.name + " created successfully");
-    });
+      })).pipe(finalize(() => this.loading = false))
+      .subscribe(() => {
+        this.toastr.success("Hackathon " + hackathon.name + " created successfully");
+      });
   }
 
 
@@ -68,7 +72,6 @@ export class NewHackathonFormComponent implements OnInit {
     return (control: AbstractControl): { [key: string]: any } | null => {
 
       const today = new Date();
-
       if (!(control && control.value)) {
         return null;
       }

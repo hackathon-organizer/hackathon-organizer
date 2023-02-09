@@ -9,24 +9,23 @@
         <h2 class="mb-6 text-4xl">Team: {{ currentTeam?.name }}</h2>
         <p class="mb-6">Here you can rate each team on given criteria</p>
 
-
         <span class="text-center mb-4">Team {{ teamsNumber + 1}} of {{ teams.length }}</span>
 
         <div *ngIf="criteria.controls.length > 0" class="btn-group btn-group-vertical lg:btn-group-horizontal">
-          <button class="btn btn-secondary" (click)="previousTeam()">
+          <button class="btn btn-secondary" [disabled]="loading" (click)="previousTeam()">
             < Previous team
           </button>
           <button *ngIf="teamsNumber < teams.length - 1" class="btn btn-secondary"
-                  [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+                  [disabled]="criteria.controls.length < 1 || loading" (click)="nextTeam()">
             Save and go to next team >
           </button>
           <button *ngIf="teamsNumber === teams.length - 1" class="btn btn-secondary"
-                  [disabled]="criteria.controls.length < 1" (click)="nextTeam()">
+                  [disabled]="criteria.controls.length < 1 || loading" (click)="nextTeam()">
             Save
           </button>
         </div>
       </div>
-      <div class="mt-12 my-8" id="q-1">
+      <div class="mt-12 my-8">
 
         <div class="text-center my-16">
           <span *ngIf="criteria.controls.length < 1" class="text-3xl">No criteria created yet</span>
@@ -53,6 +52,10 @@
           </div>
         </form>
       </div>
+
+      <ng-container *ngIf="loading">
+        <img class="mx-auto max-h-12 my-4" src="assets/spinner.svg" alt="Loading spinner"/>
+      </ng-container>
     </ng-container>
     <ng-template #noTeams>
       <div class="text-center mt-24">

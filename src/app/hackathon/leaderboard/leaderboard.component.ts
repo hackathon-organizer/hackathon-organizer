@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {TeamResponse} from "../../team/model/Team";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
+import {finalize} from "rxjs";
 
 @Component({
   selector: 'ho-leaderboard',
@@ -25,10 +26,9 @@ export class LeaderboardComponent implements OnInit {
 
       this.hackathonId = prams["id"];
 
-      this.hackathonService.getLeaderboard(this.hackathonId).subscribe(teamsResponse => {
+      this.hackathonService.getLeaderboard(this.hackathonId).pipe(finalize(() => this.loading = false))
+        .subscribe(teamsResponse => {
         this.teams = teamsResponse;
-        console.log(teamsResponse)
-        this.loading = false;
       });
     });
   }

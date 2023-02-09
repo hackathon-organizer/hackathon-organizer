@@ -82,11 +82,11 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
           <div class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary"
                *ngFor="let team of teamSuggestions; index as i">
 
-            <span>{{(i + 1)}}</span>
-            <span>{{ team.name }}</span>
-            <div class="flex flex-wrap items-center">
+            <span class="mr-2">{{(i + 1)}}</span>
+            <span class="max-w-10 truncate">{{ team.name }}</span>
+            <div class="flex flex-wrap">
               <div *ngFor="let tag of team.tags | slice:0:3">
-                <div class="pill-small">{{ tag.name }}</div>
+                <div class="pill-small justify-self-end">{{ tag.name }}</div>
               </div>
               <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
             </div>

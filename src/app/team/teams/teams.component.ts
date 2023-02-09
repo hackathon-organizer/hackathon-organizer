@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {TeamService} from "../../core/services/team-service/team.service";
-import {debounceTime, Subscription, switchMap} from "rxjs";
+import {debounceTime, finalize, Subscription, switchMap} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {PaginationInstance} from "ngx-pagination";
 import {TeamResponse} from "../model/Team";
@@ -41,27 +41,23 @@ export class TeamsComponent implements OnInit {
 
         this.loading = true;
         return this.teamsService.searchTeamByName(teamName, this.hackathonId, this.paginationConfig.currentPage - 1)
-      }))
+      })).pipe(finalize(() => this.loading = false))
       .subscribe(teamsResponse => {
         this.teams = teamsResponse.content;
 
         this.paginationConfig.currentPage = teamsResponse.number + 1;
         this.paginationConfig.totalItems = teamsResponse.totalElements;
-
-        this.loading = false;
       });
   }
 
   getHackathonTeams(hackathonId: number, pageNumber: number) {
 
-    this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).subscribe(
-      teamsResponse => {
+    this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).pipe(
+      finalize(() => this.loading = false)).subscribe(teamsResponse => {
         this.teams = teamsResponse.content;
 
         this.paginationConfig.currentPage = teamsResponse.number + 1;
         this.paginationConfig.totalItems = teamsResponse.totalElements;
-
-        this.loading = false;
       });
   }
 

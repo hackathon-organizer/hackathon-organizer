@@ -1,7 +1,7 @@
 import {RouterModule, Routes} from "@angular/router";
 import {NgModule} from "@angular/core";
 import {HackathonsComponent} from "./hackathons/hackathons.component";
-import {NewHackathonFormComponent} from "./new-hackathon-form/new-hackathon-form.component";
+import {HackathonFormComponent} from "./hackathon-form/hackathon-form.component";
 import {HackathonProfileComponent} from "./hackathon-profile/hackathon-profile.component";
 import {TeamFormComponent} from "../team/team-form/team-form.component";
 import {TeamsComponent} from "../team/teams/teams.component";
@@ -20,7 +20,7 @@ import {JuryRoleGuard} from "../guard/jury-role.guard";
 
 const routes: Routes = [
   {path: '', component: HackathonsComponent},
-  {path: 'new', component: NewHackathonFormComponent, canActivate: [AuthGuard]},
+  {path: 'new', component: HackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
   {path: ':id/participants', component: UserListComponent, canActivate: [AuthGuard]},
   {path: ':id/team', component: TeamFormComponent},
@@ -42,7 +42,7 @@ const routes: Routes = [
 })
 export class HackathonRoutingModule {
   static components = [
-    HackathonsComponent, NewHackathonFormComponent, HackathonProfileComponent, UserListComponent,
+    HackathonsComponent, HackathonFormComponent, HackathonProfileComponent, UserListComponent,
     HackathonRatingFormComponent, RatingCriteriaFormComponent, LeaderboardComponent
   ];
 }

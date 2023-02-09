@@ -50,7 +50,10 @@
             </div>
           </div>
 
-          <input [disabled]="!newTeamForm.valid" type="submit" class="btn btn-primary"
+          <ng-container *ngIf="loadingCreate">
+            <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+          </ng-container>
+          <input [disabled]="!newTeamForm.valid || loadingCreate" type="submit" class="btn btn-primary"
                  [value]="editMode ? 'Save' : 'Create'">
         </form>
       </ng-container>

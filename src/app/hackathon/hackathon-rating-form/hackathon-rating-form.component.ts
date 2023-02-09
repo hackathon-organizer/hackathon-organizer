@@ -3,7 +3,7 @@ import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {Criteria, CriteriaAnswer} from "../model/Criteria";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
-import {forkJoin, map, Observable, Subscription} from "rxjs";
+import {finalize, forkJoin, map, Observable, Subscription} from "rxjs";
 import {TeamResponse} from "../../team/model/Team";
 import {NGXLogger} from "ngx-logger";
 import {ToastrService} from "ngx-toastr";
@@ -28,6 +28,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   currentTeamId?: number;
   hackathonId!: number;
   userId = UserManager.currentUserFromStorage.id;
+  loading = false;
 
   constructor(private formBuilder: FormBuilder,
               private hackathonService: HackathonService,
@@ -109,8 +110,9 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   }
 
   nextTeam() {
+    this.loading = true;
 
-    this.rateTeam().subscribe((answersResponse: CriteriaAnswer[]) => {
+    this.rateTeam().pipe(finalize(() => this.loading = false)).subscribe((answersResponse: CriteriaAnswer[]) => {
 
       answersResponse.forEach(answer => {
         const index = this.answers.findIndex(ans => ans.id === answer.id);

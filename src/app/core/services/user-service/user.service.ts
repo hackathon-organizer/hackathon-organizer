@@ -348,7 +348,6 @@ export class UserService {
   }
 
   isUserHackathonOwner(hackathonId: number): boolean {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
       Number(this.user.currentHackathonId) ===  Number(hackathonId);
   }

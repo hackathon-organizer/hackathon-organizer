@@ -24,7 +24,7 @@
           criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.dirty) &&
           !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }"/>
 
-                <button (click)="removeCriteria(i)" class="ml-4 btn btn-error">Remove</button>
+                <button (click)="removeCriteria(i)" [disabled]="loading" class="ml-4 btn btn-error">Remove</button>
               </div>
 
               <div id="error" class="mt-2 flex justify-center w-full">
@@ -37,8 +37,12 @@
             </div>
           </div>
         </div>
-        <input type="submit" class="btn btn-success" value="Save">
+        <input type="submit" [disabled]="loading" class="btn btn-success" value="Save">
       </form>
+
+      <ng-container *ngIf="loading">
+        <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+      </ng-container>
     </div>
   </div>
 </section>
