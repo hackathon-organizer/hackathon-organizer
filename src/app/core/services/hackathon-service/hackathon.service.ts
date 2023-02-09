@@ -37,7 +37,7 @@ export class HackathonService {
 
   getAllHackathons(pageNumber: number): Observable<HackathonResponsePage> {
 
-    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ,
+    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ.slice(0,-1),
       {
         params: {
           page: pageNumber,
@@ -48,13 +48,11 @@ export class HackathonService {
 
   addUserToHackathon(hackathonId: number, userId: number): Observable<void> {
 
-    return this.http.patch<void>(this.BASE_URL_UPDATE + hackathonId + '/participants/' + userId, null)
-      ;
+    return this.http.patch<void>(this.BASE_URL_UPDATE + hackathonId + '/participants/' + userId, null);
   }
 
   getHackathonParticipantsIds(hackathonId: number): Observable<number[]> {
-    return this.http.get<number[]>(this.BASE_URL_READ + hackathonId + "/participants")
-      ;
+    return this.http.get<number[]>(this.BASE_URL_READ + hackathonId + "/participants");
   }
 
   private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {

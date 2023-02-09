@@ -71,7 +71,11 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
         </div>
         <div class="collapse-content">
 
-          <div *ngIf="teamSuggestions.length < 1" class="w-full text-center mt-4">
+          <ng-container *ngIf="loading">
+            <img class="mx-auto mt-24" src="assets/spinner.svg" alt="Loading spinner"/>
+          </ng-container>
+
+          <div *ngIf="teamSuggestions.length < 1 && !loading" class="w-full text-center mt-4">
             <span class="text-2xl">Nothing found :(</span>
           </div>
 
@@ -137,8 +141,8 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
           <h3 class="font-bold text-lg text-center">Profile edit</h3>
           <form novalidate (ngSubmit)="save()" [formGroup]="userEditForm">
             <span class="font-bold text-lg">About: </span>
-            <textarea formControlName="description" class="ho-textarea-primary"
-                      placeholder="Tell something about yourself" rows="5"></textarea>
+            <textarea formControlName="description" class="ho-textarea-primary mt-2"
+                      placeholder="User description" rows="5"></textarea>
 
             <span class="font-bold text-lg">Select tags: </span>
             <div class="flex flex-wrap my-2">

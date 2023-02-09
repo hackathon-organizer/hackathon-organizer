@@ -42,7 +42,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   events: ScheduleEntryEvent[] = [];
   userEvents: ScheduleEntryEvent[] = [];
   activeDayIsOpen: boolean = true;
-  currentUser = UserManager.currentUserFromLocalStorage;
+  currentUser = UserManager.currentUserFromStorage;
   modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
   currentTime: Observable<Date> = timer(0, 1000).pipe(map(() => new Date()));
   loading = false;

@@ -19,9 +19,16 @@ export class ApiInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>{
     return next.handle(req).pipe(
       catchError((error) => {
+
+        let errorMessage = "Unknown error. Please try again later."
+
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+
         this.logger.error(error);
-        this.toastr.error(error.message, "Error");
-        return throwError(error.message);
+        this.toastr.error(errorMessage, "Error");
+        return throwError(errorMessage);
       })
     )
   }

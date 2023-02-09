@@ -36,7 +36,7 @@ export class HackathonProfileComponent implements OnInit {
 
   joinHackathon(): void {
 
-    const user = UserManager.currentUserFromLocalStorage;
+    const user = UserManager.currentUserFromStorage;
 
     this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
       this.userService.updateUserMembership({currentHackathonId: this.hackathon.id, currentTeamId: null})

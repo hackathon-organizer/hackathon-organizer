@@ -105,9 +105,9 @@ export class UserService {
     this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
       this.user = userData;
 
-      UserManager.updateUserInLocalStorage(userData);
+      UserManager.updateUserInStorage(userData);
 
-      this.fetchAndUpdateTeamInLocalStorage(userData);
+      this.fetchAndUpdateTeamInStorage(userData);
       this.sendNoTagsNotification(userData);
       this.getUserTeamInvitations(userData);
       this.sendUserScheduleNotification();
@@ -115,10 +115,10 @@ export class UserService {
     });
   }
 
-  fetchAndUpdateTeamInLocalStorage(userData: UserResponse): void {
+  fetchAndUpdateTeamInStorage(userData: UserResponse): void {
     if (userData.currentTeamId) {
       this.teamService.getTeamById(userData.currentTeamId as number).subscribe(teamResponse => {
-        UserManager.updateTeamInLocalStorage(teamResponse)
+        UserManager.updateTeamInStorage(teamResponse)
       });
     }
   }
@@ -146,22 +146,8 @@ export class UserService {
     }
   }
 
-  isUserMentorOrOrganizer(hackathonId: number): boolean {
-
-    const userRoles = this.keycloakService.getKeycloakInstance().realmAccess?.roles;
-
-    return userRoles!.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
-      Number(this.user?.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserHackathonOwner(hackathonId: number): boolean {
-
-    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
-      Number(this.user.currentHackathonId) ===  Number(hackathonId);
-  }
-
   private getUserId(): number {
-    return UserManager.currentUserFromLocalStorage.id;
+    return UserManager.currentUserFromStorage.id;
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
@@ -278,7 +264,7 @@ export class UserService {
 
   getParticipants(participantsIds: number[], pageNumber: number): Observable<UserResponsePage> {
 
-    this.logger.info("Requesting participants");
+    this.logger.info("Requesting participants", participantsIds);
     return this.http.post<UserResponsePage>(this.BASE_URL_READ + "hackathon-participants", participantsIds, {
         params: {
          page: pageNumber,
@@ -325,27 +311,45 @@ export class UserService {
   isUserJury(hackathonId: number): boolean {
 
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.JURY) &&
-      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserOrganizer(hackathonId: number): boolean {
 
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.ORGANIZER) &&
-      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserMentor(hackathonId: number) {
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.MENTOR) &&
-      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserTeamOwner(teamId: number) {
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
-      Number(UserManager.currentUserFromLocalStorage.currentTeamId) === Number(teamId);
+      Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
   }
 
   isUserTeamOwnerInHackathon(hackathonId: number) {
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
-      Number(UserManager.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
+  }
+
+  isUserMentorOrOrganizer(hackathonId: number): boolean {
+
+    const userRoles = this.keycloakService.getKeycloakInstance().realmAccess?.roles;
+
+    if (userRoles) {
+      return userRoles.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
+        Number(this.user?.currentHackathonId) === Number(hackathonId);
+    } else {
+      return false;
+    }
+  }
+
+  isUserHackathonOwner(hackathonId: number): boolean {
+
+    return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
+      Number(this.user.currentHackathonId) ===  Number(hackathonId);
   }
 }

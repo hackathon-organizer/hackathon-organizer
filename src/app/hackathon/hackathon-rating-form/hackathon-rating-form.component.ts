@@ -27,7 +27,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   currentTeam?: TeamResponse;
   currentTeamId?: number;
   hackathonId!: number;
-  userId = UserManager.currentUserFromLocalStorage.id;
+  userId = UserManager.currentUserFromStorage.id;
 
   constructor(private formBuilder: FormBuilder,
               private hackathonService: HackathonService,

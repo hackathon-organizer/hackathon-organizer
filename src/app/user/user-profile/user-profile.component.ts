@@ -36,6 +36,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   tags: Tag[] = [];
   currentTeamName?: string;
   teamSuggestions: TeamResponse[] = [];
+  loading = false;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -60,13 +61,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       })
     ).subscribe(userResponse => {
       this.user = userResponse;
-      this.currentUser = UserManager.currentUserFromLocalStorage;
+      this.currentUser = UserManager.currentUserFromStorage;
       this.isThisMyProfile = this.checkIfThisMyProfile();
       this.isUserOrganizer = this.userService.isUserOrganizer(this.user.currentHackathonId as number);
       this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
-      if (this.currentUser?.id === this.user.id && UserManager.currentUserTeamFromLocalStorage) {
-        this.currentTeamName = UserManager.currentUserTeamFromLocalStorage.name;
+      if (this.currentUser?.id === this.user.id && UserManager.currentUserTeamFromStorage) {
+        this.currentTeamName = UserManager.currentUserTeamFromStorage.name;
       } else if (this.user.currentTeamId) {
         this.teamService.getTeamById(this.user.currentTeamId).subscribe((team) => this.currentTeamName = team.name);
       }
@@ -101,24 +102,22 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const invitation: TeamInvitationNotification = this.notificationsArray[invitationIndex] as TeamInvitationNotification;
 
-    this.teamService.updateInvitationStatus(invitation, accepted).subscribe(() => {
-      if (accepted) {
+    if (accepted) {
+      this.teamService.updateInvitationStatus(invitation, accepted).pipe(concatMap(() =>
         this.userService.updateUserMembership({
           currentHackathonId: this.currentUser?.currentHackathonId,
           currentTeamId: invitation.teamId
         })
-          .subscribe(() => {
-
-            this.currentUser!.currentTeamId = invitation.teamId;
-            this.userService.fetchAndUpdateTeamInLocalStorage(this.currentUser!);
-            this.currentTeamName = invitation.teamName;
-            this.toastr.success("You are now member of team " + invitation.teamName);
-          });
-      } else {
-        this.toastr.success("Invitation rejected");
-      }
-      this.notificationsArray.splice(invitationIndex, 1);
-    });
+      )).subscribe(() => {
+        this.currentUser!.currentTeamId = invitation.teamId;
+        this.userService.fetchAndUpdateTeamInStorage(this.currentUser!);
+        this.currentTeamName = invitation.teamName;
+        this.toastr.success("You are now member of team " + invitation.teamName);
+      });
+    } else {
+      this.toastr.success("Invitation rejected");
+    }
+    this.notificationsArray.splice(invitationIndex, 1);
   }
 
   editProfile() {
@@ -139,9 +138,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   getUserTeamSuggestions() {
     if (this.user.currentHackathonId) {
+      this.loading = true;
       this.teamService.getTeamSuggestions(this.user.tags, this.user.currentHackathonId).subscribe(
         suggestions => {
           this.teamSuggestions = suggestions;
+          this.loading = false;
         });
     }
   }

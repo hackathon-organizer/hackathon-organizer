@@ -22,7 +22,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
   tags: Tag[] = [];
   hackathonId?: number;
   editMode = false;
-  user = UserManager.currentUserFromLocalStorage;
+  user = UserManager.currentUserFromStorage;
   loading = true;
 
   constructor(
@@ -96,7 +96,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
         this.teamService.updateTeam(team, this.teamId).subscribe(updatedTeam => {
 
           this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + updatedTeam.id);
-          UserManager.updateTeamInLocalStorage(updatedTeam);
+          UserManager.updateTeamInStorage(updatedTeam);
           this.toastr.success("Team " + team.name + " updated successfully");
         });
       } else {
@@ -104,8 +104,8 @@ export class TeamFormComponent implements OnInit, OnDestroy {
         this.teamService.createTeam(team).pipe(
           concatMap((createdTeam: TeamResponse) => {
 
-            UserManager.currentUserFromLocalStorage.currentTeamId = createdTeam.id;
-            UserManager.updateTeamInLocalStorage(createdTeam);
+            UserManager.currentUserFromStorage.currentTeamId = createdTeam.id;
+            UserManager.updateTeamInStorage(createdTeam);
 
             this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
 

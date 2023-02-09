@@ -94,7 +94,7 @@ export class TeamService {
   }
 
   public fetchUserInvites(hackathonId: number) {
-    const userId = UserManager.currentUserFromLocalStorage.id;
+    const userId = UserManager.currentUserFromStorage.id;
 
     return this.http.get<TeamInvitationNotification[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId, {
       params: {

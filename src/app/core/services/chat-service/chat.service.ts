@@ -43,7 +43,7 @@ export class ChatService {
   private getNewWebSocket(chatId: number): WebSocketSubject<any> {
 
     this.logger.info("Creating new websocket connection");
-    const username = UserManager.currentUserFromLocalStorage.username;
+    const username = UserManager.currentUserFromStorage.username;
 
     return webSocket({
       url: 'ws://localhost:9090/messages-websocket?username=' + username + '&chatId=' + chatId,

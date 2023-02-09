@@ -46,7 +46,7 @@ export class NewHackathonFormComponent implements OnInit {
     this.hackathonService.createHackathon(hackathon).pipe(
       concatMap(hackathonResponse => {
         this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
-        UserManager.currentUserFromLocalStorage.currentHackathonId = hackathonResponse.id;
+        UserManager.currentUserFromStorage.currentHackathonId = hackathonResponse.id;
 
         return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
       })).subscribe(() => {
@@ -82,7 +82,7 @@ export class NewHackathonFormComponent implements OnInit {
       name: this.newHackathonForm.get('hackathonName')?.value,
       description: this.newHackathonForm.get('description')?.value,
       organizerInfo: this.newHackathonForm.get('organizerInfo')?.value,
-      ownerId: UserManager.currentUserFromLocalStorage.id,
+      ownerId: UserManager.currentUserFromStorage.id,
       eventStartDate: this.newHackathonForm.get('startDate')?.value,
       eventEndDate: this.newHackathonForm.get('endDate')?.value
     };

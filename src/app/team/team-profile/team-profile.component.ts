@@ -21,7 +21,7 @@ export class TeamProfileComponent implements OnInit {
   teamId: number = 0;
   team?: TeamResponse;
   teamMembers: UserResponse[] = [];
-  user = UserManager.currentUserFromLocalStorage;
+  user = UserManager.currentUserFromStorage;
 
   editMode = false;
 
@@ -52,15 +52,15 @@ export class TeamProfileComponent implements OnInit {
 
   joinToTeam() {
 
-    this.teamService.addUserToTeam(this.teamId, UserManager.currentUserFromLocalStorage.id).pipe(
+    this.teamService.addUserToTeam(this.teamId, UserManager.currentUserFromStorage.id).pipe(
       concatMap(() => this.userService.updateUserMembership({
         currentHackathonId: this.hackathonId,
         currentTeamId: this.teamId
       }))).subscribe(() => {
 
-      UserManager.currentUserFromLocalStorage.currentTeamId = this.teamId;
+      UserManager.currentUserFromStorage.currentTeamId = this.teamId;
       this.user.currentTeamId = this.teamId;
-      this.userService.fetchAndUpdateTeamInLocalStorage(this.user);
+      this.userService.fetchAndUpdateTeamInStorage(this.user);
 
       this.toastr.success("Successfully joined to team");
       this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
@@ -89,6 +89,10 @@ export class TeamProfileComponent implements OnInit {
 
   get isUserTeamMember() {
     return UserManager.isUserTeamMember(this.teamId);
+  }
+
+  get isUserHackathonMember() {
+    return UserManager.isUserHackathonMember(this.hackathonId);
   }
 
   get isOwner() {

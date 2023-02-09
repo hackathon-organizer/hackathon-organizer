@@ -3,32 +3,32 @@ import {UserResponse} from "../user/model/User";
 
 export class UserManager {
 
-  public static get currentUserFromLocalStorage(): UserResponse {
+  public static get currentUserFromStorage(): UserResponse {
 
-    const user = localStorage.getItem("user") as string;
+    const user = sessionStorage.getItem("user") as string;
 
     return JSON.parse(user) as UserResponse;
   }
 
-  public static get currentUserTeamFromLocalStorage(): TeamResponse {
+  public static get currentUserTeamFromStorage(): TeamResponse {
 
-    const team = localStorage.getItem("team") as string;
+    const team = sessionStorage.getItem("team") as string;
 
     return JSON.parse(team) as TeamResponse;
   }
 
-  public static updateUserInLocalStorage(user: UserResponse): void {
-    localStorage.setItem("user", JSON.stringify(user));
+  public static updateUserInStorage(user: UserResponse): void {
+    sessionStorage.setItem("user", JSON.stringify(user));
   }
 
-  public static updateTeamInLocalStorage(team: TeamResponse): void {
-    localStorage.setItem("team", JSON.stringify(team));
+  public static updateTeamInStorage(team: TeamResponse): void {
+    sessionStorage.setItem("team", JSON.stringify(team));
   }
 
   public static isUserTeamMember(teamId: number) {
 
-    if (this.currentUserFromLocalStorage && teamId) {
-      return Number(this.currentUserFromLocalStorage.currentTeamId) === Number(teamId);
+    if (this.currentUserFromStorage && teamId) {
+      return Number(this.currentUserFromStorage.currentTeamId) === Number(teamId);
     } else {
       return false;
     }
@@ -36,8 +36,8 @@ export class UserManager {
 
   public static isUserHackathonMember(hackathonId: number) {
 
-    if (this.currentUserFromLocalStorage) {
-      return Number(this.currentUserFromLocalStorage.currentHackathonId) === Number(hackathonId);
+    if (this.currentUserFromStorage) {
+      return Number(this.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
     } else {
       return false;
     }

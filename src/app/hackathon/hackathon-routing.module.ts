@@ -22,7 +22,7 @@ const routes: Routes = [
   {path: '', component: HackathonsComponent},
   {path: 'new', component: NewHackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
-  {path: ':id/participants', component: UserListComponent},
+  {path: ':id/participants', component: UserListComponent, canActivate: [AuthGuard]},
   {path: ':id/team', component: TeamFormComponent},
   {path: ':id/team/:teamId/edit', component: TeamFormComponent, canActivate: [AuthGuard, TeamOwnerRoleGuard]},
   {path: ':id/teams', component: TeamsComponent},

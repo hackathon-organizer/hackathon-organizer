@@ -17,7 +17,7 @@ export class MenuComponent implements OnInit {
   avatarUrl = "";
   notifications: Notification[] = [];
   isLoggedIn = false;
-  user = UserManager.currentUserFromLocalStorage;
+  user = UserManager.currentUserFromStorage;
 
   constructor(private userService: UserService) {
   }

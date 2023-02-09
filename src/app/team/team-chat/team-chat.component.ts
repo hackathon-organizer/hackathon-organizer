@@ -301,8 +301,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
 
     if (this.chatRoomId) {
       const chatMessage: ChatMessage = {
-        username: UserManager.currentUserFromLocalStorage.username,
-        userId: UserManager.currentUserFromLocalStorage.id,
+        username: UserManager.currentUserFromStorage.username,
+        userId: UserManager.currentUserFromStorage.id,
         entryText: this.chatEntry,
         teamId: this.chatRoomId
       };
