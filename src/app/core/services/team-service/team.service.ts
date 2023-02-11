@@ -84,7 +84,7 @@ export class TeamService {
 
   getTeamsByHackathonId(hackathonId: number, pageNumber: number): Observable<TeamResponsePage> {
 
-    return this.http.get<TeamResponsePage>(this.BASE_URL_READ, {
+    return this.http.get<TeamResponsePage>(this.BASE_URL_READ.slice(0,-1), {
       params: {
         hackathonId: hackathonId,
         page: pageNumber,

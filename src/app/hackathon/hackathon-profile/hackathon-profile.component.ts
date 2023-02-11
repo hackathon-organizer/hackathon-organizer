@@ -19,6 +19,7 @@ export class HackathonProfileComponent implements OnInit {
 
   hackathon!: HackathonResponse;
   loading = false;
+  isLoggedIn = false;
 
   constructor(private hackathonService: HackathonService,
               private userService: UserService,
@@ -33,6 +34,13 @@ export class HackathonProfileComponent implements OnInit {
     ).subscribe(hackathon => {
       this.hackathon = hackathon;
     });
+
+    this.userService.isLoggedIn().then((isLoggedIn) => {
+      this.isLoggedIn = isLoggedIn
+
+      console.log(this.isLoggedIn)
+    });
+
   }
 
   joinHackathon(): void {

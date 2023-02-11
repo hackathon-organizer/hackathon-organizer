@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 import {UserManager} from "../../shared/UserManager";
 import {Notification} from "../../team/model/Notifications";
+import {concatMap} from "rxjs";
 
 @Component({
   selector: 'ho-menu',
@@ -24,20 +25,23 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
 
-    if (this.user) {
+    this.userService.userLoadedObservable.subscribe(userLoaded => {
 
-      this.currentUserId = this.user.id;
-      this.userHackathonId = this.user.currentHackathonId;
-      this.userTeamId = this.user.currentTeamId;
+      if (userLoaded) {
+        this.isLoggedIn = true;
 
-      this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${this.user.username}&length=1`;
-    }
+        const user = UserManager.currentUserFromStorage;
+        this.currentUserId = user.id;
+        this.userHackathonId = user.currentHackathonId;
+        this.userTeamId = user.currentTeamId;
 
-    this.userService.userNotificationsObservable.subscribe(notifications => {
-      this.notifications = notifications
+        this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${user.username}&length=1`;
+
+        this.userService.userNotificationsObservable.subscribe(notifications => {
+            this.notifications = notifications
+          });
+      }
     });
-
-    this.userService.isLoggedIn().then(isLogged => this.isLoggedIn = isLogged);
   }
 
   logout() {

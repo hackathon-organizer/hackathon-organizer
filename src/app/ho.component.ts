@@ -1,11 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 
 @Component({
   selector: 'ho-root',
   templateUrl: './ho.component.html',
   styleUrls: []
 })
-export class HoComponent implements OnInit {
+export class HoComponent implements OnInit, OnDestroy {
 
   constructor() {
   }
@@ -13,4 +13,7 @@ export class HoComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  ngOnDestroy(): void {
+    sessionStorage.clear();
+  }
 }

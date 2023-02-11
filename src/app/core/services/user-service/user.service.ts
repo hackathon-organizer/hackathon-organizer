@@ -31,6 +31,9 @@ export class UserService {
   userNotificationsObservable = this.userNotifications.asObservable();
   user!: UserResponse;
 
+  private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  userLoadedObservable = this.userLoaded.asObservable();
+
   BASE_URL_UPDATE = "http://localhost:9090/api/v1/write/users/";
   BASE_URL_READ = "http://localhost:9090/api/v1/read/users/";
 
@@ -42,9 +45,8 @@ export class UserService {
 
     dayjs.extend(isBetween);
 
-    this.getKeycloakUserId().then((keycloakId) => {
-      this.fetchUserData(keycloakId);
-    });
+
+    this.fetchUserData();
   }
 
   findHackathonUsersByUsername(username: string, hackathonId: number, pageNumber: number): Observable<UserResponsePage> {
@@ -100,19 +102,24 @@ export class UserService {
     return this.http.get<UserResponse>(this.BASE_URL_READ + userId);
   }
 
-  private fetchUserData(keycloakId?: string): void {
+  private fetchUserData(): void {
 
-    this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
-      this.user = userData;
+    this.getKeycloakUserId().then((keycloakId) => {
 
-      UserManager.updateUserInStorage(userData);
+      this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
+        this.user = userData;
 
-      this.fetchAndUpdateTeamInStorage(userData);
-      this.sendNoTagsNotification(userData);
-      this.getUserTeamInvitations(userData);
-      this.sendUserScheduleNotification();
-      this.openNotificationWebSocketConnection();
-    });
+        UserManager.updateUserInStorage(userData);
+        this.userLoaded.next(true);
+
+        this.fetchAndUpdateTeamInStorage(userData);
+        this.sendNoTagsNotification(userData);
+        this.getUserTeamInvitations(userData);
+        this.sendUserScheduleNotification();
+        this.openNotificationWebSocketConnection();
+      });
+
+    }).catch((error) => new Error("Can't get user keycloakId " + error));
   }
 
   fetchAndUpdateTeamInStorage(userData: UserResponse): void {
@@ -188,15 +195,6 @@ export class UserService {
     return this.http.patch<boolean>(this.BASE_URL_UPDATE + "schedule/" + entryId + "/meeting", scheduleEntry);
   }
 
-  logout() {
-
-    this.keycloakService.logout('http://localhost:4200').then((success) => {
-      this.logger.info("logout success ", success);
-    }).catch((error) => {
-      this.logger.info("logout error ", error);
-    });
-  }
-
   private sendUserScheduleNotification(index = 0) {
 
     if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
@@ -266,10 +264,10 @@ export class UserService {
 
     this.logger.info("Requesting participants", participantsIds);
     return this.http.post<UserResponsePage>(this.BASE_URL_READ + "hackathon-participants", participantsIds, {
-        params: {
-         page: pageNumber,
-         size: 10
-        }
+      params: {
+        page: pageNumber,
+        size: 10
+      }
     });
   }
 
@@ -301,7 +299,20 @@ export class UserService {
   }
 
   login(): void {
-    this.keycloakService.login().then(() =>this.toastr.success("Login successful"));
+    this.keycloakService.login().then(() => {
+      this.fetchUserData();
+      this.toastr.success("Login successful")
+    });
+  }
+
+  logout() {
+
+    this.keycloakService.logout('http://localhost:4200').then((success) => {
+      this.logger.info("logout success ", success);
+      sessionStorage.clear();
+    }).catch((error) => {
+      this.logger.info("logout error ", error);
+    });
   }
 
   isLoggedIn(): Promise<boolean> {
@@ -349,6 +360,6 @@ export class UserService {
 
   isUserHackathonOwner(hackathonId: number): boolean {
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
-      Number(this.user.currentHackathonId) ===  Number(hackathonId);
+      Number(this.user.currentHackathonId) === Number(hackathonId);
   }
 }

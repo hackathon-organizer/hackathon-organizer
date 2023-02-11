@@ -45,7 +45,9 @@ export class TeamProfileComponent implements OnInit {
     ).subscribe(teamResponse => {
       this.team = teamResponse;
 
-      this.getTeamMembers();
+      if (this.isHackathonMember) {
+        this.getTeamMembers();
+      }
     });
   }
 

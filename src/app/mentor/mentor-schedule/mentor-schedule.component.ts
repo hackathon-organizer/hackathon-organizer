@@ -69,8 +69,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
       this.logger.info("Hackathon schedule received ", schedule);
       this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
-      this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
-        .map(entry => this.mapToCalendarEvent(entry));
+
+      if (this.currentUser) {
+        this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
+          .map(entry => this.mapToCalendarEvent(entry));
+      }
 
       this.refresh.next();
     });
@@ -123,7 +126,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         start: dayjs(entryResponse.sessionStart).toDate(),
         end: dayjs(entryResponse.sessionEnd).toDate(),
         color: colors.main,
-        draggable: this.currentUser.id === entryResponse.userId,
+        draggable: this.currentUser?.id === entryResponse.userId,
         resizable: {
           beforeStart: true,
           afterEnd: true,
@@ -193,7 +196,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       start: new Date(entry.sessionStart),
       end: new Date(entry.sessionEnd),
       color: colors.main,
-      draggable: this.currentUser.id === entry.userId,
+      draggable: this.currentUser?.id === entry.userId,
       resizable: {
         beforeStart: true,
         afterEnd: true,
