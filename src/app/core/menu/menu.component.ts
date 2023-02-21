@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 import {UserManager} from "../../shared/UserManager";
 import {Notification} from "../../team/model/Notifications";
-import {concatMap} from "rxjs";
 
 @Component({
   selector: 'ho-menu',
@@ -17,7 +16,8 @@ export class MenuComponent implements OnInit {
   username = "";
   avatarUrl = "";
   notifications: Notification[] = [];
-  isLoggedIn = false;
+  userLoaded: boolean = false;
+  loading = true;
   user = UserManager.currentUserFromStorage;
 
   constructor(private userService: UserService) {
@@ -25,30 +25,42 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.userService.userLoadedObservable.subscribe(userLoaded => {
+    this.userService.isLoggedIn().then(isLoggedIn => {
 
-      if (userLoaded) {
-        this.isLoggedIn = true;
+      if (isLoggedIn) {
 
-        const user = UserManager.currentUserFromStorage;
-        this.currentUserId = user.id;
-        this.userHackathonId = user.currentHackathonId;
-        this.userTeamId = user.currentTeamId;
+        this.userService.userLoadedObservable.subscribe(userLoaded => {
+          if (userLoaded) {
+            this.userLoaded = true;
 
-        this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${user.username}&length=1`;
+            const user = UserManager.currentUserFromStorage;
+            this.currentUserId = user.id;
+            this.userHackathonId = user.currentHackathonId;
+            this.userTeamId = user.currentTeamId;
 
-        this.userService.userNotificationsObservable.subscribe(notifications => {
-            this.notifications = notifications
-          });
+            this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${user.username}&length=1`;
+            this.loading = false;
+          }
+        });
+      } else {
+        this.loading = false;
       }
+
+      this.loadNotifications();
     });
   }
 
-  logout() {
+  private loadNotifications(): void {
+    this.userService.userNotificationsObservable.subscribe(notifications => {
+      this.notifications = notifications
+    });
+  }
+
+  logout(): void {
     this.userService.logout();
   }
 
-  login() {
+  login(): void {
     this.userService.login();
   }
 }

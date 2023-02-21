@@ -22,28 +22,37 @@
     </div>
   </div>
 
+  <ng-container *ngIf="loading">
+    <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+  </ng-container>
+
   <div class="flex-none gap-2">
 
-    <a *ngIf="userTeamId" routerLink="/hackathon/{{ userHackathonId }}/team/{{ userTeamId }}">
-      <button class="btn mr-3">Go to my team</button>
-    </a>
-    <a routerLink="/hackathon/new">
-      <button class="btn mr-3">Create hackathon</button>
-    </a>
+    <button *ngIf="!userLoaded" [disabled]="userLoaded || loading" class="btn btn-info p-3" (click)="login()">
+      Login
+    </button>
 
-    <button *ngIf="!isLoggedIn" class="btn btn-info p-3" (click)="login()">Login</button>
-    <div *ngIf="isLoggedIn" class="dropdown dropdown-end">
-      <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-        <div class="avatar" [ngClass]="notifications.length > 0 ? 'notification' : ''">
-          <div class="w-10 rounded-full">
-            <img src="{{ avatarUrl }}"/>
+    <ng-container *ngIf="userLoaded">
+      <a *ngIf="userTeamId" routerLink="/hackathon/{{ userHackathonId }}/team/{{ userTeamId }}">
+        <button class="btn mr-3">Go to my team</button>
+      </a>
+      <a routerLink="/hackathon/new">
+        <button class="btn mr-3">Create hackathon</button>
+      </a>
+
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <div class="avatar" [ngClass]="notifications.length > 0 ? 'notification' : ''">
+            <div class="w-10 rounded-full">
+              <img src="{{ avatarUrl }}"/>
+            </div>
           </div>
-        </div>
-      </label>
-      <ul tabindex="0" class="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
-        <li><a routerLink="/user/{{ currentUserId }}">Profile</a></li>
-        <li><a (click)="logout()">Logout</a></li>
-      </ul>
-    </div>
+        </label>
+        <ul tabindex="0" class="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
+          <li><a routerLink="/user/{{ currentUserId }}">Profile</a></li>
+          <li><a (click)="logout()">Logout</a></li>
+        </ul>
+      </div>
+    </ng-container>
   </div>
 </div>

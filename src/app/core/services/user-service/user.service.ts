@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {KeycloakService} from "keycloak-angular";
+import {KeycloakEventType, KeycloakService} from "keycloak-angular";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
@@ -44,7 +44,6 @@ export class UserService {
               private teamService: TeamService) {
 
     dayjs.extend(isBetween);
-
 
     this.fetchUserData();
   }
@@ -111,6 +110,7 @@ export class UserService {
 
         UserManager.updateUserInStorage(userData);
         this.userLoaded.next(true);
+
 
         this.fetchAndUpdateTeamInStorage(userData);
         this.sendNoTagsNotification(userData);
@@ -195,7 +195,7 @@ export class UserService {
     return this.http.patch<boolean>(this.BASE_URL_UPDATE + "schedule/" + entryId + "/meeting", scheduleEntry);
   }
 
-  private sendUserScheduleNotification(index = 0) {
+  private sendUserScheduleNotification(index = 0): void {
 
     if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
       this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
@@ -299,20 +299,19 @@ export class UserService {
   }
 
   login(): void {
-    this.keycloakService.login().then(() => {
-      this.fetchUserData();
-      this.toastr.success("Login successful")
-    });
+
+    this.keycloakService.login()
+      .then(success => this.logger.info("Login successful", success))
+      .catch(error => this.logger.info("Login error", error));
   }
 
-  logout() {
+  logout(): void {
 
-    this.keycloakService.logout('http://localhost:4200').then((success) => {
-      this.logger.info("logout success ", success);
-      sessionStorage.clear();
-    }).catch((error) => {
-      this.logger.info("logout error ", error);
-    });
+    this.keycloakService.logout('http://localhost:4200')
+      .then(success => this.logger.info("Logout successful", success))
+      .catch(error => this.logger.info("Logout error", error));
+
+    sessionStorage.clear();
   }
 
   isLoggedIn(): Promise<boolean> {

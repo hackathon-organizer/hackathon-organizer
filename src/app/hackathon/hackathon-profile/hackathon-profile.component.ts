@@ -37,10 +37,7 @@ export class HackathonProfileComponent implements OnInit {
 
     this.userService.isLoggedIn().then((isLoggedIn) => {
       this.isLoggedIn = isLoggedIn
-
-      console.log(this.isLoggedIn)
     });
-
   }
 
   joinHackathon(): void {
