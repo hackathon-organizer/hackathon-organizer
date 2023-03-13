@@ -2,25 +2,25 @@
   <div class="flex justify-center">
     <div class="btn-group">
       <div
+        [(viewDate)]="viewDate"
+        [view]="view"
         class="btn btn-primary"
         mwlCalendarPreviousView
-        [view]="view"
-        [(viewDate)]="viewDate"
       >
         Previous
       </div>
       <div
+        [(viewDate)]="viewDate"
         class="btn btn-info"
         mwlCalendarToday
-        [(viewDate)]="viewDate"
       >
         Today
       </div>
       <div
+        [(viewDate)]="viewDate"
+        [view]="view"
         class="btn btn-primary"
         mwlCalendarNextView
-        [view]="view"
-        [(viewDate)]="viewDate"
       >
         Next
       </div>
@@ -34,29 +34,29 @@
 <br/>
 
 <div *ngIf="canEditSchedule()" class="flex justify-center">
-  <label for="update-event-modal" class="btn btn-secondary mb-5">Update schedule</label>
+  <label class="btn btn-secondary mb-5" for="update-event-modal">Update schedule</label>
 </div>
 
 <mwl-calendar-day-view
-  [viewDate]="viewDate"
-  [events]="events"
-  [refresh]="refresh"
-  [eventTemplate]="hoDayCell"
-  [minimumEventHeight]="60"
-  (eventTimesChanged)="eventTimesChanged($event)"
   (eventClicked)="handleEvent($event.event)"
+  (eventTimesChanged)="eventTimesChanged($event)"
   [dayStartHour]="8"
+  [eventTemplate]="hoDayCell"
+  [events]="events"
+  [minimumEventHeight]="60"
+  [refresh]="refresh"
+  [viewDate]="viewDate"
 >
 </mwl-calendar-day-view>
 
-<input type="checkbox" id="update-event-modal" class="modal-toggle"/>
+<input class="modal-toggle" id="update-event-modal" type="checkbox"/>
 <div class="modal">
   <div class="modal-box w-11/12 max-w-6xl">
 
-    <label for="update-event-modal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+    <label class="btn btn-sm btn-circle absolute right-2 top-2" for="update-event-modal">✕</label>
 
     <div class="m-5 flex justify-center">
-      <button [disabled]="loading" class="btn btn-info" (click)="addEvent()">Add new event</button>
+      <button (click)="addEvent()" [disabled]="loading" class="btn btn-info">Add new event</button>
     </div>
 
     <div class="table-responsive">
@@ -75,49 +75,49 @@
         <tr *ngFor="let event of userEvents">
           <td>
             <input
-              type="color"
-              [(ngModel)]="event.color!.secondary"
               (change)="refresh.next()"
+              [(ngModel)]="event.color!.secondary"
+              type="color"
             />
           </td>
           <td>
-            <input class="ho-input-primary"
-                   type="text"
-                   mwlFlatpickr
+            <input (ngModelChange)="refresh.next()"
                    [(ngModel)]="event.start"
-                   (ngModelChange)="refresh.next()"
                    [altInput]="true"
                    [convertModelValue]="true"
                    [enableTime]="true"
-                   minDate="today"
-                   dateFormat="Y-m-dTH:i"
-                   altFormat="F j, Y H:i"
-                   placeholder="Not set"
                    [time24hr]="true"
+                   altFormat="F j, Y H:i"
+                   class="ho-input-primary"
+                   dateFormat="Y-m-dTH:i"
+                   minDate="today"
+                   mwlFlatpickr
+                   placeholder="Not set"
+                   type="text"
             />
           </td>
           <td>
-            <input class="ho-input-primary"
-                   type="text"
-                   mwlFlatpickr
+            <input (ngModelChange)="refresh.next()"
                    [(ngModel)]="event.end"
-                   (ngModelChange)="refresh.next()"
                    [altInput]="true"
                    [convertModelValue]="true"
                    [enableTime]="true"
-                   dateFormat="Y-m-dTH:i"
-                   altFormat="F j, Y H:i"
-                   placeholder="Not set"
                    [minDate]="event.start"
                    [time24hr]="true"
+                   altFormat="F j, Y H:i"
+                   class="ho-input-primary"
+                   dateFormat="Y-m-dTH:i"
+                   mwlFlatpickr
+                   placeholder="Not set"
+                   type="text"
             />
           </td>
           <td>
-            <textarea class="ho-textarea-primary resize-none" [(ngModel)]="event.info"
-                      placeholder="Additional information" rows="5" resize="false"></textarea>
+            <textarea [(ngModel)]="event.info" class="ho-textarea-primary resize-none"
+                      placeholder="Additional information" resize="false" rows="5"></textarea>
           </td>
           <td>
-            <button [disabled]="loading" class="btn btn-error" (click)="deleteEvent(event)">
+            <button (click)="deleteEvent(event)" [disabled]="loading" class="btn btn-error">
               Delete
             </button>
           </td>
@@ -127,46 +127,46 @@
     </div>
 
     <div class="modal-action">
-      <label [class.btn-disabled]="loading" (click)="updateEvents()" for="update-event-modal" class="btn btn-success">Save</label>
+      <label (click)="updateEvents()" [class.btn-disabled]="loading" class="btn btn-success" for="update-event-modal">Save</label>
     </div>
 
     <ng-container *ngIf="loading">
-      <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+      <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
     </ng-container>
 
   </div>
 </div>
 
-<input type="checkbox" id="event-modal" class="modal-toggle"/>
+<input class="modal-toggle" id="event-modal" type="checkbox"/>
 <div class="modal">
   <div class="modal-box w-11/12 max-w-6xl flex flex-col justify-center items-center">
 
-    <label for="event-modal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+    <label class="btn btn-sm btn-circle absolute right-2 top-2" for="event-modal">✕</label>
 
     <h5 class="text-3xl text-primary">{{ modalData.title }}</h5>
 
-    <div id="event-dates" class="flex mt-2">
+    <div class="flex mt-2" id="event-dates">
       <span>{{ modalData.start | date: 'dd-MM-yyyy HH:mm' }}</span>&nbsp;&nbsp;-&nbsp;&nbsp;
       <span>{{ modalData.end | date: 'dd-MM-yyyy HH:mm' }}</span>
     </div>
 
-    <div class="text-2xl my-6 font-bold" [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'">
+    <div [ngClass]="modalData.isAvailable ? 'text-success' : 'text-error'" class="text-2xl my-6 font-bold">
       <span *ngIf="modalData.isAvailable; else notAvailable">AVAILABLE</span>
       <ng-template #notAvailable>NOT AVAILABLE</ng-template>
     </div>
 
-    <div id="about" class="w-11/12 max-h-56 overflow-y-auto">
+    <div class="w-11/12 max-h-56 overflow-y-auto" id="about">
       <p class="text-md p-1 text-ellipsis overflow-hidden">{{ modalData.info }}</p>
     </div>
 
 
-    <button [disabled]="!canJoinToMeeting(modalData.teamId)" class="btn btn-primary w-2/5 mt-3"
-            (click)="joinMeeting(modalData.teamId)">Join meeting
+    <button (click)="joinMeeting(modalData.teamId)" [disabled]="!canJoinToMeeting(modalData.teamId)"
+            class="btn btn-primary w-2/5 mt-3">Join meeting
     </button>
 
     <ng-container *ngIf="!showEvent">
-      <button [disabled]="!canAssignTeam()" class="btn btn-primary w-2/5 mt-3"
-              (click)="assignTeam(modalData)">{{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
+      <button (click)="assignTeam(modalData)" [disabled]="!canAssignTeam()"
+              class="btn btn-primary w-2/5 mt-3">{{ modalData.isAvailable ? 'Assign' : 'Unassign' }} my team
       </button>
     </ng-container>
 
@@ -174,20 +174,17 @@
 </div>
 
 
-<ng-template #hoDayCell let-weekEvent="weekEvent"
-             let-tooltipPlacement="tooltipPlacement"
+<ng-template #hoDayCell let-daysInWeek="daysInWeek"
              let-eventClicked="eventClicked"
-             let-tooltipTemplate="tooltipTemplate"
              let-tooltipAppendToBody="tooltipAppendToBody"
-             let-tooltipDisabled="tooltipDisabled"
              let-tooltipDelay="tooltipDelay"
-             let-daysInWeek="daysInWeek">
+             let-tooltipDisabled="tooltipDisabled"
+             let-tooltipPlacement="tooltipPlacement"
+             let-tooltipTemplate="tooltipTemplate"
+             let-weekEvent="weekEvent">
 
-  <div class="cal-event" [ngStyle]="{
-          color: weekEvent.event.color?.secondaryText,
-          backgroundColor: weekEvent.event.color?.secondary,
-          borderColor: weekEvent.event.color?.primary
-        }"
+  <div (mwlClick)="eventClicked.emit({ sourceEvent: $event })" (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
+       [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'"
        [mwlCalendarTooltip]="
           !tooltipDisabled
             ? (weekEvent.event.title
@@ -195,25 +192,28 @@
                 : (daysInWeek === 1 ? 'dayTooltip' : 'weekTooltip')
                 : weekEvent.tempEvent || weekEvent.event)
             : '' "
-       [tooltipPlacement]="tooltipPlacement"
-       [tooltipEvent]="weekEvent.tempEvent || weekEvent.event"
-       [tooltipTemplate]="tooltipTemplate"
+       [ngStyle]="{
+          color: weekEvent.event.color?.secondaryText,
+          backgroundColor: weekEvent.event.color?.secondary,
+          borderColor: weekEvent.event.color?.primary
+        }"
        [tooltipAppendToBody]="tooltipAppendToBody"
        [tooltipDelay]="tooltipDelay"
-       (mwlClick)="eventClicked.emit({ sourceEvent: $event })"
-       (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
-       tabindex="0"
+       [tooltipEvent]="weekEvent.tempEvent || weekEvent.event"
+       [tooltipPlacement]="tooltipPlacement"
+       [tooltipTemplate]="tooltipTemplate"
+       class="cal-event"
        role="application"
-       [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'">
+       tabindex="0">
 
     <div class="flex items-center justify-center md:justify-around">
       <h5 class="text-3xl mr-5 text-primary hidden sm:block">{{ weekEvent.event.title }}</h5>
-      <div class="text-2xl mr-5 hidden sm:block font-bold"
-           [ngClass]="weekEvent.event.isAvailable ? 'text-success' : 'text-error'">
+      <div [ngClass]="weekEvent.event.isAvailable ? 'text-success' : 'text-error'"
+           class="text-2xl mr-5 hidden sm:block font-bold">
         <span *ngIf="weekEvent.event.isAvailable; else notAvailable">AVAILABLE</span>
         <ng-template #notAvailable>NOT AVAILABLE</ng-template>
       </div>
-      <label (click)="handleEvent(weekEvent)" for="event-modal" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1">Show
+      <label (click)="handleEvent(weekEvent)" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1" for="event-modal">Show
         details</label>
     </div>
   </div>

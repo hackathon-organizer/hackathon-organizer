@@ -10,7 +10,7 @@ import {NGXLogger} from "ngx-logger";
 export class GlobalErrorHandler extends ErrorHandler {
 
   constructor(@Inject(Injector) private injector: Injector,
-              private logger: NGXLogger) {
+    private logger: NGXLogger) {
     super();
   }
 

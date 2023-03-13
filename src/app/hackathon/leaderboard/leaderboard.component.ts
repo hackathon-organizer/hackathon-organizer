@@ -17,7 +17,7 @@ export class LeaderboardComponent implements OnInit {
   loading = true;
 
   constructor(private hackathonService: HackathonService,
-              private route: ActivatedRoute) {
+    private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
@@ -28,8 +28,8 @@ export class LeaderboardComponent implements OnInit {
 
       this.hackathonService.getLeaderboard(this.hackathonId).pipe(finalize(() => this.loading = false))
         .subscribe(teamsResponse => {
-        this.teams = teamsResponse;
-      });
+          this.teams = teamsResponse;
+        });
     });
   }
 }

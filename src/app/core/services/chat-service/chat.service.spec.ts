@@ -1,16 +1,62 @@
 import {TestBed} from '@angular/core/testing';
 
 import {ChatService} from './chat.service';
+import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
+import {NGXLogger} from "ngx-logger";
+import {LoggerTestingModule} from "ngx-logger/testing";
+import {UserManager} from "../../../shared/UserManager";
+import {UserResponse} from "../../../user/model/User";
+import {ChatMessage} from "../../../team/model/Chat";
+import {error} from "@angular/compiler-cli/src/transformers/util";
 
 describe('ChatService', () => {
   let service: ChatService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule, LoggerTestingModule],
+    });
     service = TestBed.inject(ChatService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
+
+  const msg = {
+    entryText: "text",
+    username: "name",
+    userId: 1,
+    teamId: 1,
+    createdAt: new Date(),
+  } as ChatMessage;
+
+  const msg2 = {
+    entryText: "text",
+    username: "name",
+    userId: 1,
+    teamId: 1,
+    createdAt: new Date(),
+  } as ChatMessage;
+
+  const messages: ChatMessage[] = [msg, msg2];
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should return chat messages', () => {
+
+    service
+      .getChatRoomMessages(1)
+      .subscribe((response) => {
+        expect(response.length).toEqual(messages.length);
+        expect(response[0].username).toEqual(messages[0].username);
+      });
+
+    const req = httpMock.expectOne(
+      'http://localhost:9090/api/v1/messages/rooms/1'
+    );
+
+    req.flush(messages);
+    expect(req.request.method).toEqual('GET');
+  })
 });

@@ -6,20 +6,20 @@
 
       <div class="avatar">
         <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img src="{{ avatarUrl }}" alt="profile image"/>
+          <img alt="profile image" src="{{ avatarUrl }}"/>
         </div>
       </div>
 
     </div>
 
 
-    <div id="user-data" class="flex flex-col text-2xl">
+    <div class="flex flex-col text-2xl" id="user-data">
 
       <div *ngIf="user" class="flex justify-between mt-6">
         <h4>Username: {{ user.username }}</h4>
 
-        <label *ngIf="isThisMyProfile" for="edit-modal" (click)="editProfile()"
-               class="btn btn-outline btn-success">Edit</label>
+        <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success"
+               for="edit-modal">Edit</label>
       </div>
 
       <div class="mt-4">
@@ -33,15 +33,18 @@
         <p *ngIf="!user?.description">No description</p>
       </div>
 
-      <div class="flex justify-around" *ngIf="isUserIsHackathonParticipant">
-        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.MENTOR)"
-                class="btn btn-info my-5">Set as mentor</button>
-        <button *ngIf="isUserOrganizer && !isThisMyProfile" (click)="setUserRole(Role.JURY)"
-                class="btn btn-info my-5">Set as jury</button>
+      <div *ngIf="isUserIsHackathonParticipant" class="flex justify-around">
+        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile"
+                class="btn btn-info my-5">Set as mentor
+        </button>
+        <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile"
+                class="btn btn-info my-5">Set as jury
+        </button>
 
-        <button [disabled]="isThisMyProfile || isUserNotInMyHackathon || !currentUser?.currentTeamId ||
-currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
-                class="btn btn-info my-5">Invite to team</button>
+        <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon || !currentUser?.currentTeamId ||
+currentUser?.currentTeamId===user.currentTeamId"
+                class="btn btn-info my-5">Invite to team
+        </button>
       </div>
 
       <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn"
@@ -56,7 +59,7 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
         <div *ngIf="user" class="flex flex-wrap my-5">
           <div *ngFor="let tag of user.tags;">
             <label class="pill">
-              <span type="checkbox" class="appearance-none">{{ tag.name }}</span>
+              <span class="appearance-none" type="checkbox">{{ tag.name }}</span>
             </label>
           </div>
         </div>
@@ -72,15 +75,15 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
         <div class="collapse-content">
 
           <ng-container *ngIf="loading">
-            <img class="mx-auto mt-24" src="assets/spinner.svg" alt="Loading spinner"/>
+            <img alt="Loading spinner" class="mx-auto mt-24" src="assets/spinner.svg"/>
           </ng-container>
 
           <div *ngIf="teamSuggestions.length < 1 && !loading" class="w-full text-center mt-4">
             <span class="text-2xl">Nothing found :(</span>
           </div>
 
-          <div class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary"
-               *ngFor="let team of teamSuggestions; index as i">
+          <div *ngFor="let team of teamSuggestions; index as i"
+               class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary">
 
             <span class="mr-2">{{(i + 1)}}</span>
             <span class="max-w-10 truncate">{{ team.name }}</span>
@@ -102,28 +105,28 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
 
       <span class="text-xl font-medium">Notifications:</span>
 
-      <div class="mt-4" *ngFor="let notification of notificationsArray; let i = index;">
+      <div *ngFor="let notification of notificationsArray; let i = index;" class="mt-4">
 
         <div class="alert alert-info shadow-lg mb-2 space-y-4 w-full">
           <div class="flex justify-between w-full">
 
             <div class="flex">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   class="stroke-current flex-shrink-0 w-6 h-6 mr-2">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <svg class="stroke-current flex-shrink-0 w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"></path>
               </svg>
               <span>{{ notification.message }}</span>
             </div>
 
-            <div class="flex items-center justify-center"
-                 *ngIf="notification.notificationType === NotificationType.INVITATION">
-              <button class="m-3 p-2 bg-success rounded-lg shadow" (click)="updateInvitation(i, true)">Accept</button>
-              <button class="m-3 p-2 bg-error rounded-lg shadow" (click)="updateInvitation(i,false)">Reject</button>
+            <div *ngIf="notification.notificationType === NotificationType.INVITATION"
+                 class="flex items-center justify-center">
+              <button (click)="updateInvitation(i, true)" class="m-3 p-2 bg-success rounded-lg shadow">Accept</button>
+              <button (click)="updateInvitation(i,false)" class="m-3 p-2 bg-error rounded-lg shadow">Reject</button>
             </div>
 
             <div *ngIf="notification.notificationType === NotificationType.MEETING">
-              <button class="btn btn-sm btn-success" (click)="navigateToMeeting(i)">JOIN</button>
+              <button (click)="navigateToMeeting(i)" class="btn btn-sm btn-success">JOIN</button>
             </div>
           </div>
         </div>
@@ -131,32 +134,32 @@ currentUser?.currentTeamId===user.currentTeamId" (click)="inviteToTeam()"
     </div>
     <div>
 
-      <input type="checkbox" [checked]="editMode" id="edit-modal" class="modal-toggle"/>
+      <input [checked]="editMode" class="modal-toggle" id="edit-modal" type="checkbox"/>
       <div *ngIf="editMode" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box flex flex-col">
 
-          <label for="edit-modal" (click)="editMode = false"
-                 class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+          <label (click)="editMode = false" class="btn btn-sm btn-circle absolute right-2 top-2"
+                 for="edit-modal">✕</label>
 
           <h3 class="font-bold text-lg text-center">Profile edit</h3>
-          <form novalidate (ngSubmit)="save()" [formGroup]="userEditForm">
+          <form (ngSubmit)="save()" [formGroup]="userEditForm" novalidate>
             <span class="font-bold text-lg">About: </span>
-            <textarea formControlName="description" class="ho-textarea-primary mt-2"
+            <textarea class="ho-textarea-primary mt-2" formControlName="description"
                       placeholder="User description" rows="5"></textarea>
 
             <span class="font-bold text-lg">Select tags: </span>
             <div class="flex flex-wrap my-2">
-              <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
-                <label class="flex items-center btn rounded-full m-2"
-                       [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
-                  <input type="checkbox" class="appearance-none" (change)="markTag(i)"
-                         [formControlName]="tag.id"/>{{ tags[i].name }}
+              <div *ngFor="let tag of tags; let i = index" formGroupName="tags">
+                <label [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'"
+                       class="flex items-center btn rounded-full m-2">
+                  <input (change)="markTag(i)" [formControlName]="tag.id" class="appearance-none"
+                         type="checkbox"/>{{ tags[i].name }}
                 </label>
               </div>
             </div>
 
             <div class="text-center mt-5">
-              <input type="submit" for="my-modal" class="btn btn-success" value="Save">
+              <input class="btn btn-success" for="my-modal" type="submit" value="Save">
             </div>
           </form>
         </div>

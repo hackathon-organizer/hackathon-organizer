@@ -16,6 +16,6 @@ export class OrganizerRoleGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      return !!this.keycloak.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER");
+    return !!this.keycloak.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER");
   }
 }

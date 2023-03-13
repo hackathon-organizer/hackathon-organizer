@@ -13,17 +13,20 @@ import {ToastrService} from "ngx-toastr";
 })
 export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
 
-  private subscription: Subscription = new Subscription();
-
   hackathonId!: number;
   criteriaForm!: FormGroup;
   isUpdateMode = false;
   loading = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(private formBuilder: FormBuilder,
-              private hackathonService: HackathonService,
-              private toastr: ToastrService,
-              private route: ActivatedRoute) {
+    private hackathonService: HackathonService,
+    private toastr: ToastrService,
+    private route: ActivatedRoute) {
+  }
+
+  get criteria(): FormArray {
+    return this.criteriaForm.get("criteria") as FormArray
   }
 
   ngOnInit(): void {
@@ -47,14 +50,6 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  private createCriteria(id?: number, name?: string): FormGroup {
-    return this.formBuilder.group({
-      id: id,
-      hackathonId: this.hackathonId,
-      name: new FormControl(name ? name : "", [Validators.required, Validators.minLength(5)])
-    });
-  }
-
   addCriteria() {
     this.criteria.push(this.createCriteria());
   }
@@ -67,15 +62,15 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     if (this.isUpdateMode) {
       this.hackathonService.updateHackathonRatingCriteria(this.hackathonId, criteria).pipe(finalize(() => this.loading = false))
         .subscribe(() => {
-        this.toastr.success("Criteria updated successfully");
-      });
+          this.toastr.success("Criteria updated successfully");
+        });
     } else {
       this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).pipe(
         finalize(() => this.loading = false)).subscribe((criteriaResponse) => {
 
-          this.criteria.patchValue(criteriaResponse);
-          this.toastr.success("Criteria created successfully");
-        });
+        this.criteria.patchValue(criteriaResponse);
+        this.toastr.success("Criteria created successfully");
+      });
     }
   }
 
@@ -91,11 +86,15 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     this.toastr.success("Criteria deleted successfully");
   }
 
-  get criteria(): FormArray {
-    return this.criteriaForm.get("criteria") as FormArray
-  }
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private createCriteria(id?: number, name?: string): FormGroup {
+    return this.formBuilder.group({
+      id: id,
+      hackathonId: this.hackathonId,
+      name: new FormControl(name ? name : "", [Validators.required, Validators.minLength(5)])
+    });
   }
 }

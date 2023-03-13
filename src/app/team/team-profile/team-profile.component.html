@@ -6,12 +6,13 @@
 
       <div class="avatar">
         <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name={{team?.name}}&length=1" alt="profile image"/>
+          <img alt="profile image"
+               src="https://ui-avatars.com/api/?background=0D8ABC&color=fff&name={{team?.name}}&length=1"/>
         </div>
       </div>
     </div>
 
-    <div id="user-data" class="flex flex-col">
+    <div class="flex flex-col" id="user-data">
 
       <span class="mt-8 text-3xl">Team: <span *ngIf="team?.name">{{ team?.name }}</span></span>
 
@@ -26,18 +27,20 @@
           <button class="btn btn-accent">Join team chat</button>
         </a>
 
-        <button class="btn btn-accent m-3" *ngIf="isOwner" (click)="redirectToTeamEdit()">Edit team</button>
+        <button (click)="redirectToTeamEdit()" *ngIf="isOwner" class="btn btn-accent m-3">Edit team</button>
 
         <a class="m-3" routerLink="/hackathon/{{ hackathonId }}/participants">
           <button class="btn btn-success">Invite users</button>
         </a>
 
-        <button *ngIf="isOwner && team" class="btn btn-info m-3" (click)="openOrCloseTeamForMembers()">
+        <button (click)="openOrCloseTeamForMembers()" *ngIf="isOwner && team" class="btn btn-info m-3">
           {{ team.isOpen ? 'Close for members' : 'Open for members' }}</button>
 
       </div>
 
-      <button *ngIf="!isOwner && isUserHackathonMember" (click)="joinToTeam()" class="btn btn-success m-4 w-3/5 mx-auto">Join to team</button>
+      <button (click)="joinToTeam()" *ngIf="!isOwner && isUserHackathonMember"
+              class="btn btn-success m-4 w-3/5 mx-auto">Join to team
+      </button>
 
     </div>
 
@@ -46,8 +49,8 @@
         <span class="text-3xl font-bold mb-5">Tags:</span>
 
         <div *ngIf="team?.tags" class="flex flex-wrap">
-          <div id="pill" *ngFor="let tag of team?.tags"
-               class="pill">
+          <div *ngFor="let tag of team?.tags" class="pill"
+               id="pill">
             {{ tag.name }}
           </div>
 
@@ -60,7 +63,7 @@
       <span class="text-3xl font-bold mb-5">Members:</span>
 
       <ul class="mt-4 list-disc">
-        <li class="ml-8 text-xl" *ngFor="let member of teamMembers">{{ member.username }}</li>
+        <li *ngFor="let member of teamMembers" class="ml-8 text-xl">{{ member.username }}</li>
       </ul>
 
     </div>

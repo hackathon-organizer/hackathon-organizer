@@ -30,7 +30,11 @@ const routes: Routes = [
   {path: ':id/team/:teamId/chat', component: TeamChatComponent, canActivate: [AuthGuard]},
   {path: ':id/team/:teamId/invite', component: UserListComponent, canActivate: [AuthGuard]},
   {path: ':id/schedule', component: MentorScheduleComponent},
-  {path: ':id/rating', component: HackathonRatingFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard, JuryRoleGuard]},
+  {
+    path: ':id/rating',
+    component: HackathonRatingFormComponent,
+    canActivate: [AuthGuard, OrganizerRoleGuard, JuryRoleGuard]
+  },
   {path: ':id/rating-criteria', component: RatingCriteriaFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard]},
   {path: ':id/leaderboard', component: LeaderboardComponent, canActivate: [AuthGuard]}
 

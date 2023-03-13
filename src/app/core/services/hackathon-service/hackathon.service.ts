@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, Observable} from "rxjs";
+import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
 import {HackathonRequest, HackathonResponse, HackathonResponsePage} from "../../../hackathon/model/Hackathon";
@@ -14,14 +14,14 @@ import {TeamResponse} from "../../../team/model/Team";
 })
 export class HackathonService {
 
-  constructor(private http: HttpClient,
-              private logger: NGXLogger,
-              private userService: UserService,
-              private errorHandler: GlobalErrorHandler) {
-  }
-
   BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/hackathons/';
   BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons/';
+
+  constructor(private http: HttpClient,
+    private logger: NGXLogger,
+    private userService: UserService,
+    private errorHandler: GlobalErrorHandler) {
+  }
 
   createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
@@ -37,7 +37,7 @@ export class HackathonService {
 
   getAllHackathons(pageNumber: number): Observable<HackathonResponsePage> {
 
-    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ.slice(0,-1),
+    return this.http.get<HackathonResponsePage>(this.BASE_URL_READ.slice(0, -1),
       {
         params: {
           page: pageNumber,
@@ -55,25 +55,11 @@ export class HackathonService {
     return this.http.get<number[]>(this.BASE_URL_READ + hackathonId + "/participants");
   }
 
-  private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {
-
-    const startDate = dayjs(hackathon.eventStartDate);
-    const endDate = dayjs(hackathon.eventEndDate);
-
-    if (endDate.isBefore(startDate)) {
-      this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
-    }
-
-    hackathon.eventStartDate = dayjs(hackathon.eventStartDate).format("HH:mm:ss DD-MM-YYYY");
-    hackathon.eventEndDate = dayjs(hackathon.eventEndDate).format("HH:mm:ss DD-MM-YYYY");
-
-    return hackathon;
-  }
-
   getHackathonTeamsById(hackathonId: number): Observable<TeamResponse[]> {
 
     this.logger.info("Returning hackathon id: " + hackathonId + " teams");
-    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/teams');;
+    return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/teams');
+
   }
 
   getHackathonRatingCriteriaAnswers(hackathonId: number, userId: number): Observable<CriteriaAnswer[]> {
@@ -117,5 +103,20 @@ export class HackathonService {
   getLeaderboard(hackathonId: number): Observable<TeamResponse[]> {
     this.logger.info("Returning hackathon id: " + hackathonId + " leaderboard");
     return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/leaderboard');
+  }
+
+  private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {
+
+    const startDate = dayjs(hackathon.eventStartDate);
+    const endDate = dayjs(hackathon.eventEndDate);
+
+    if (endDate.isBefore(startDate)) {
+      this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
+    }
+
+    hackathon.eventStartDate = dayjs(hackathon.eventStartDate).format("HH:mm:ss DD-MM-YYYY");
+    hackathon.eventEndDate = dayjs(hackathon.eventEndDate).format("HH:mm:ss DD-MM-YYYY");
+
+    return hackathon;
   }
 }

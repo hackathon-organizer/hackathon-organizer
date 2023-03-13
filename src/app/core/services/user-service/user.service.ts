@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {KeycloakEventType, KeycloakService} from "keycloak-angular";
+import {KeycloakService} from "keycloak-angular";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
@@ -27,15 +27,13 @@ import {ToastrService} from "ngx-toastr";
 })
 export class UserService {
 
-  private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
-  userNotificationsObservable = this.userNotifications.asObservable();
   user!: UserResponse;
-
-  private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  userLoadedObservable = this.userLoaded.asObservable();
-
   BASE_URL_UPDATE = "http://localhost:9090/api/v1/write/users/";
   BASE_URL_READ = "http://localhost:9090/api/v1/read/users/";
+  private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
+  userNotificationsObservable = this.userNotifications.asObservable();
+  private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  userLoadedObservable = this.userLoaded.asObservable();
 
   constructor(private http: HttpClient,
               private keycloakService: KeycloakService,
@@ -49,7 +47,7 @@ export class UserService {
   }
 
   findHackathonUsersByUsername(username: string, hackathonId: number, pageNumber: number): Observable<UserResponsePage> {
-    return this.http.get<UserResponsePage>(this.BASE_URL_READ, {
+    return this.http.get<UserResponsePage>(this.BASE_URL_READ.slice(0, this.BASE_URL_READ.length - 1), {
       params: {
         username: username,
         hackathonId: hackathonId,
@@ -59,67 +57,8 @@ export class UserService {
     });
   }
 
-  private async getKeycloakUserId(): Promise<string | undefined> {
-    let userDetails = await this.keycloakService.loadUserProfile();
-    return userDetails.id;
-  }
-
-  private openNotificationWebSocketConnection(): void {
-
-    const client = new Client({
-      brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
-      debug: (message) => {
-        this.logger.info(message);
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-    });
-
-    client.onConnect = (frame) => {
-
-      this.logger.info("Connecting to invitations service");
-      client.subscribe('/user/topic/invitations', (message: IMessage) => {
-
-        const invite: TeamInvitationNotification = JSON.parse(message.body);
-        invite.message = `User ${invite.fromUserName} invited you to team ${invite.teamName}`;
-        invite.notificationType = NotificationType.INVITATION;
-        this.userNotifications.next(this.userNotifications.value.concat(invite));
-
-        this.logger.info("Invitation fetched: ", invite)
-      });
-    }
-
-    client.onStompError = (frame) => {
-      this.logger.error('Broker reported error: ' + frame.headers['message'] + "\n Additional details: " + frame.body);
-    };
-
-    client.activate();
-  }
-
   getUserById(userId: number): Observable<UserResponse> {
     return this.http.get<UserResponse>(this.BASE_URL_READ + userId);
-  }
-
-  private fetchUserData(): void {
-
-    this.getKeycloakUserId().then((keycloakId) => {
-
-      this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
-        this.user = userData;
-
-        UserManager.updateUserInStorage(userData);
-        this.userLoaded.next(true);
-
-
-        this.fetchAndUpdateTeamInStorage(userData);
-        this.sendNoTagsNotification(userData);
-        this.getUserTeamInvitations(userData);
-        this.sendUserScheduleNotification();
-        this.openNotificationWebSocketConnection();
-      });
-
-    }).catch((error) => new Error("Can't get user keycloakId " + error));
   }
 
   fetchAndUpdateTeamInStorage(userData: UserResponse): void {
@@ -128,33 +67,6 @@ export class UserService {
         UserManager.updateTeamInStorage(teamResponse)
       });
     }
-  }
-
-  private sendNoTagsNotification(userData: UserResponse): void {
-
-    if (userData.tags.length < 1) {
-      this.userNotifications.next(this.userNotifications.value.concat({
-        notificationType: NotificationType.TAGS,
-        message: "Add some tags to get better team suggestions."
-      } as Notification));
-    }
-  }
-
-  private getUserTeamInvitations(userData: UserResponse): void {
-
-    if (userData.currentHackathonId) {
-      this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
-        userInvites.map(invitation => {
-          invitation.message = `User ${invitation.fromUserName} invited you to team ${invitation.teamName}`;
-          invitation.notificationType = NotificationType.INVITATION
-        });
-        this.userNotifications.next(this.userNotifications.value.concat(userInvites));
-      });
-    }
-  }
-
-  private getUserId(): number {
-    return UserManager.currentUserFromStorage.id;
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
@@ -193,42 +105,6 @@ export class UserService {
 
     this.logger.info("Saving team meeting with mentor ", scheduleEntry);
     return this.http.patch<boolean>(this.BASE_URL_UPDATE + "schedule/" + entryId + "/meeting", scheduleEntry);
-  }
-
-  private sendUserScheduleNotification(index = 0): void {
-
-    if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
-      this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
-
-        let meeting = schedule[index];
-
-        if (meeting && meeting.teamId) {
-
-          this.teamService.getTeamById(meeting.teamId).subscribe(teamResponse => {
-
-            const meetingNotification: MeetingNotification = {
-              chatId: teamResponse.teamChatRoomId,
-              message: `Meeting with team ${teamResponse.name}`,
-              notificationType: NotificationType.MEETING
-            } as MeetingNotification;
-
-            let meetingStart = dayjs(meeting.sessionStart).subtract(10, "minutes");
-            let meetingEnd = dayjs(meeting.sessionEnd);
-
-            if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
-
-              this.userNotifications.next(this.userNotifications.value.concat(meetingNotification));
-
-              meeting = schedule[++index];
-
-              if (meeting) {
-                this.sendUserScheduleNotification(index);
-              }
-            }
-          });
-        }
-      });
-    }
   }
 
   updateUserRole(userId: number, role: Role): Observable<void> {
@@ -292,6 +168,7 @@ export class UserService {
   }
 
   removeTagsNotification(): void {
+
     const toRemoveIdx = this.userNotifications.value.indexOf(
       <Notification>this.userNotifications.value.find(notification => notification.notificationType === NotificationType.TAGS));
 
@@ -331,16 +208,19 @@ export class UserService {
   }
 
   isUserMentor(hackathonId: number) {
+
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.MENTOR) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserTeamOwner(teamId: number) {
+
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
       Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
   }
 
   isUserTeamOwnerInHackathon(hackathonId: number) {
+
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
@@ -358,7 +238,130 @@ export class UserService {
   }
 
   isUserHackathonOwner(hackathonId: number): boolean {
+
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
       Number(this.user.currentHackathonId) === Number(hackathonId);
+  }
+
+  private async getKeycloakUserId(): Promise<string | undefined> {
+    let userDetails = await this.keycloakService.loadUserProfile();
+    return userDetails.id;
+  }
+
+  private openNotificationWebSocketConnection(): void {
+
+    const client = new Client({
+      brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
+      debug: (message) => {
+        this.logger.info(message);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    client.onConnect = (frame) => {
+
+      this.logger.info("Connecting to invitations service");
+      client.subscribe('/user/topic/invitations', (message: IMessage) => {
+
+        const invite: TeamInvitationNotification = JSON.parse(message.body);
+        invite.message = `User ${invite.fromUserName} invited you to team ${invite.teamName}`;
+        invite.notificationType = NotificationType.INVITATION;
+        this.userNotifications.next(this.userNotifications.value.concat(invite));
+
+        this.logger.info("Invitation fetched: ", invite)
+      });
+    }
+
+    client.onStompError = (frame) => {
+      this.logger.error('Broker reported error: ' + frame.headers['message'] + "\n Additional details: " + frame.body);
+    };
+
+    client.activate();
+  }
+
+  private fetchUserData(): void {
+
+    this.getKeycloakUserId().then((keycloakId) => {
+
+      this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
+        this.user = userData;
+
+        UserManager.updateUserInStorage(userData);
+        this.userLoaded.next(true);
+
+
+        this.fetchAndUpdateTeamInStorage(userData);
+        this.sendNoTagsNotification(userData);
+        this.getUserTeamInvitations(userData);
+        this.sendUserScheduleNotification();
+        this.openNotificationWebSocketConnection();
+      });
+
+    }).catch((error) => new Error("Can't get user keycloakId " + error));
+  }
+
+  private sendNoTagsNotification(userData: UserResponse): void {
+
+    if (userData.tags.length < 1) {
+      this.userNotifications.next(this.userNotifications.value.concat({
+        notificationType: NotificationType.TAGS,
+        message: "Add some tags to get better team suggestions."
+      } as Notification));
+    }
+  }
+
+  private getUserTeamInvitations(userData: UserResponse): void {
+
+    if (userData.currentHackathonId) {
+      this.teamService.fetchUserInvites(userData.currentHackathonId).subscribe(userInvites => {
+        userInvites.map(invitation => {
+          invitation.message = `User ${invitation.fromUserName} invited you to team ${invitation.teamName}`;
+          invitation.notificationType = NotificationType.INVITATION
+        });
+        this.userNotifications.next(this.userNotifications.value.concat(userInvites));
+      });
+    }
+  }
+
+  private getUserId(): number {
+    return UserManager.currentUserFromStorage.id;
+  }
+
+  private sendUserScheduleNotification(index = 0): void {
+
+    if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
+      this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
+
+        let meeting = schedule[index];
+
+        if (meeting && meeting.teamId) {
+
+          this.teamService.getTeamById(meeting.teamId).subscribe(teamResponse => {
+
+            const meetingNotification: MeetingNotification = {
+              chatId: teamResponse.teamChatRoomId,
+              message: `Meeting with team ${teamResponse.name}`,
+              notificationType: NotificationType.MEETING
+            } as MeetingNotification;
+
+            let meetingStart = dayjs(meeting.sessionStart).subtract(10, "minutes");
+            let meetingEnd = dayjs(meeting.sessionEnd);
+
+            if (dayjs().isBetween(meetingStart, meetingEnd, 'minutes')) {
+
+              this.userNotifications.next(this.userNotifications.value.concat(meetingNotification));
+
+              meeting = schedule[++index];
+
+              if (meeting) {
+                this.sendUserScheduleNotification(index);
+              }
+            }
+          });
+        }
+      });
+    }
   }
 }

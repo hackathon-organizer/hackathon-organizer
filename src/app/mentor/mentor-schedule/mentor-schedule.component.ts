@@ -33,7 +33,6 @@ let colors: Record<string, EventColor> = {
 })
 export class MentorScheduleComponent implements OnInit, OnDestroy {
 
-  private subscription: Subscription = new Subscription();
   view: CalendarView = CalendarView.Day;
   hackathonId?: number;
   CalendarView = CalendarView;
@@ -46,13 +45,18 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
   currentTime: Observable<Date> = timer(0, 1000).pipe(map(() => new Date()));
   loading = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(private userService: UserService,
-              private teamService: TeamService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private logger: NGXLogger,
-              private toastr: ToastrService) {
+    private teamService: TeamService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private logger: NGXLogger,
+    private toastr: ToastrService) {
+  }
+
+  get showEvent(): boolean {
+    return dayjs(this.modalData.start).isBefore(dayjs());
   }
 
   ngOnInit(): void {
@@ -60,22 +64,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     this.subscription = this.route.params.subscribe(params => {
       this.hackathonId = params["id"];
       this.getHackathonSchedule(this.hackathonId!)
-    });
-  }
-
-  private getHackathonSchedule(hackathonId: number) {
-
-    this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
-
-      this.logger.info("Hackathon schedule received ", schedule);
-      this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
-
-      if (this.currentUser) {
-        this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
-          .map(entry => this.mapToCalendarEvent(entry));
-      }
-
-      this.refresh.next();
     });
   }
 
@@ -182,30 +170,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntryEvent {
-
-    colors.main = {
-      primary: colors.main.primary,
-      secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
-    }
-
-    return {
-      id: entry.id,
-      title: entry.username,
-      teamId: entry.teamId,
-      start: new Date(entry.sessionStart),
-      end: new Date(entry.sessionEnd),
-      color: colors.main,
-      draggable: this.currentUser?.id === entry.userId,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true,
-      },
-      isAvailable: entry.isAvailable,
-      info: entry.info,
-    } as ScheduleEntryEvent;
-  }
-
   assignTeam(event: ScheduleEntryEvent) {
 
     const teamId = this.currentUser.currentTeamId;
@@ -227,24 +191,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  private scheduleUpdateSuccessToast() {
-    this.toastr.success("Schedule updated successfully");
-  }
-
   setView(view: CalendarView) {
     this.view = view;
-  }
-
-  private mapToScheduleEntryRequest(entry: ScheduleEntryEvent): ScheduleEntryRequest {
-    return {
-      id: entry.id,
-      sessionStart: entry.start,
-      sessionEnd: entry.end,
-      entryColor: colors.main.secondary,
-      info: entry.info,
-      teamId: entry.teamId,
-      hackathonId: entry.hackathonId,
-    } as ScheduleEntryRequest;
   }
 
   handleEvent(event: ScheduleEntryEvent): void {
@@ -280,12 +228,64 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  get showEvent(): boolean {
-    return dayjs(this.modalData.start).isBefore(dayjs());
-  }
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.refresh.unsubscribe();
+  }
+
+  private getHackathonSchedule(hackathonId: number) {
+
+    this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
+
+      this.logger.info("Hackathon schedule received ", schedule);
+      this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
+
+      if (this.currentUser) {
+        this.userEvents = schedule.filter(entry => entry.userId === this.currentUser.id)
+          .map(entry => this.mapToCalendarEvent(entry));
+      }
+
+      this.refresh.next();
+    });
+  }
+
+  private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntryEvent {
+
+    colors.main = {
+      primary: colors.main.primary,
+      secondary: entry.entryColor ? entry.entryColor : colors.main.secondary
+    }
+
+    return {
+      id: entry.id,
+      title: entry.username,
+      teamId: entry.teamId,
+      start: new Date(entry.sessionStart),
+      end: new Date(entry.sessionEnd),
+      color: colors.main,
+      draggable: this.currentUser?.id === entry.userId,
+      resizable: {
+        beforeStart: true,
+        afterEnd: true,
+      },
+      isAvailable: entry.isAvailable,
+      info: entry.info,
+    } as ScheduleEntryEvent;
+  }
+
+  private scheduleUpdateSuccessToast() {
+    this.toastr.success("Schedule updated successfully");
+  }
+
+  private mapToScheduleEntryRequest(entry: ScheduleEntryEvent): ScheduleEntryRequest {
+    return {
+      id: entry.id,
+      sessionStart: entry.start,
+      sessionEnd: entry.end,
+      entryColor: colors.main.secondary,
+      info: entry.info,
+      teamId: entry.teamId,
+      hackathonId: entry.hackathonId,
+    } as ScheduleEntryRequest;
   }
 }

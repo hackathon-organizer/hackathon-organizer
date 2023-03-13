@@ -4,57 +4,57 @@
     <div class="p-4 lg:p-8">
 
       <ng-container *ngIf="loading">
-        <img class="mx-auto mt-36" src="assets/spinner.svg" alt="Loading spinner"/>
+        <img alt="Loading spinner" class="mx-auto mt-36" src="assets/spinner.svg"/>
       </ng-container>
 
       <ng-container *ngIf="!loading">
         <h2 class="text-center mb-6 text-4xl">{{ editMode ? 'Update ' : 'Create new ' }}team</h2>
 
-        <form id="create-team-form" novalidate (ngSubmit)="saveTeam()" [formGroup]="newTeamForm"
-              class="flex flex-col items-center justify-center space-y-4">
-          <input id="teamNameId" formControlName="teamName" type="text" class="ho-input-primary"
-                 placeholder="Team name (required)" [ngClass]="{'is-invalid': (newTeamForm.get('teamName')?.touched
+        <form (ngSubmit)="saveTeam()" [formGroup]="newTeamForm" class="flex flex-col items-center justify-center space-y-4" id="create-team-form"
+              novalidate>
+          <input [ngClass]="{'is-invalid': (newTeamForm.get('teamName')?.touched
           ||
           newTeamForm.get('teamName')?.dirty) &&
-          !newTeamForm.get('teamName')?.valid }"/>
+          !newTeamForm.get('teamName')?.valid }" class="ho-input-primary" formControlName="teamName" id="teamNameId"
+                 placeholder="Team name (required)" type="text"/>
 
-          <span class="error-message"
-                *ngIf="newTeamForm.get('teamName')?.errors?.required && newTeamForm.get('teamName')?.touched">
+          <span *ngIf="newTeamForm.get('teamName')?.errors?.required && newTeamForm.get('teamName')?.touched"
+                class="error-message">
           Please enter hackathon name.</span>
-          <span class="error-message"
-                *ngIf="newTeamForm.get('teamName')?.errors?.minlength && newTeamForm.get('teamName')?.touched">
+          <span *ngIf="newTeamForm.get('teamName')?.errors?.minlength && newTeamForm.get('teamName')?.touched"
+                class="error-message">
           The team name must be longer than 5 characters.</span>
 
-          <textarea id="descriptionId" formControlName="description" type="text" class="ho-textarea-primary" rows="8"
-                    placeholder="Description (required)" [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
+          <textarea [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
           ||
           newTeamForm.get('description')?.dirty) &&
-          !newTeamForm.get('description')?.valid }"></textarea>
+          !newTeamForm.get('description')?.valid }" class="ho-textarea-primary" formControlName="description" id="descriptionId" placeholder="Description (required)"
+                    rows="8" type="text"></textarea>
 
-          <span class="error-message"
-                *ngIf="newTeamForm.get('description')?.errors?.minlength && newTeamForm.get('description')?.touched">
+          <span *ngIf="newTeamForm.get('description')?.errors?.minlength && newTeamForm.get('description')?.touched"
+                class="error-message">
           The description must be longer than 15 characters.</span>
-          <span class="error-message"
-                *ngIf="newTeamForm.get('description')?.errors?.required && newTeamForm.get('description')?.touched">
+          <span *ngIf="newTeamForm.get('description')?.errors?.required && newTeamForm.get('description')?.touched"
+                class="error-message">
           Please enter team description.</span>
 
           <span class="text-center mt-4">Select tags that will help find new team members:</span>
 
           <div class="flex flex-wrap my-5">
-            <div formGroupName="tags" *ngFor="let tag of tags; let i = index">
-              <label class="flex items-center btn rounded-full m-2"
-                     [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'">
-                <input type="checkbox" class="appearance-none" (change)="markTag(i)"
-                       [formControlName]="tag.id"/>{{ tags[i].name }}
+            <div *ngFor="let tag of tags; let i = index" formGroupName="tags">
+              <label [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'"
+                     class="flex items-center btn rounded-full m-2">
+                <input (change)="markTag(i)" [formControlName]="tag.id" class="appearance-none"
+                       type="checkbox"/>{{ tags[i].name }}
               </label>
             </div>
           </div>
 
           <ng-container *ngIf="loadingCreate">
-            <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+            <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
           </ng-container>
-          <input [disabled]="!newTeamForm.valid || loadingCreate" type="submit" class="btn btn-primary"
-                 [value]="editMode ? 'Save' : 'Create'">
+          <input [disabled]="!newTeamForm.valid || loadingCreate" [value]="editMode ? 'Save' : 'Create'" class="btn btn-primary"
+                 type="submit">
         </form>
       </ng-container>
     </div>

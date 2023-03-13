@@ -8,40 +8,40 @@
 
       <button (click)="addCriteria()" class="btn btn-info m-4">Add new</button>
 
-      <form id="create-hackathon-form" novalidate [formGroup]="criteriaForm" (ngSubmit)="saveCriteria()"
-            class="flex flex-col items-center justify-center w-full space-y-4">
+      <form (ngSubmit)="saveCriteria()" [formGroup]="criteriaForm" class="flex flex-col items-center justify-center w-full space-y-4" id="create-hackathon-form"
+            novalidate>
 
-        <div class="w-full" *ngFor="let c of criteria.controls; let i=index">
+        <div *ngFor="let c of criteria.controls; let i=index" class="w-full">
 
           <div formArrayName="criteria">
 
-            <div class="" [formGroupName]="i">
+            <div [formGroupName]="i" class="">
 
               <div class="flex justify-center w-full">
-                <input id="nameId" formControlName="name" type="text" class="ho-input-primary"
-                       placeholder="Type criteria here"
-                       [ngClass]="{'is-invalid': (criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched ||
+                <input [ngClass]="{'is-invalid': (criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched ||
           criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.dirty) &&
-          !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }"/>
+          !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }" class="ho-input-primary" formControlName="name" id="nameId"
+                       placeholder="Type criteria here"
+                       type="text"/>
 
                 <button (click)="removeCriteria(i)" [disabled]="loading" class="ml-4 btn btn-error">Remove</button>
               </div>
 
-              <div id="error" class="mt-2 flex justify-center w-full">
-              <span class="error-message"
-                    *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.minlength">Criteria name must be longer than 5 characters.</span>
+              <div class="mt-2 flex justify-center w-full" id="error">
+              <span *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.minlength"
+                    class="error-message">Criteria name must be longer than 5 characters.</span>
 
-                <span class="error-message" *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.required &&
-                    criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched">Please enter criteria name.</span>
+                <span *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.required &&
+                    criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched" class="error-message">Please enter criteria name.</span>
               </div>
             </div>
           </div>
         </div>
-        <input type="submit" [disabled]="loading" class="btn btn-success" value="Save">
+        <input [disabled]="loading" class="btn btn-success" type="submit" value="Save">
       </form>
 
       <ng-container *ngIf="loading">
-        <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+        <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
       </ng-container>
     </div>
   </div>

@@ -17,6 +17,11 @@ export class UserManager {
     return JSON.parse(team) as TeamResponse;
   }
 
+  public static set userCurrentTeam(teamId: number) {
+    const user = sessionStorage.getItem("user") as string;
+    JSON.parse(user).teamId = teamId;
+  }
+
   public static updateUserInStorage(user: UserResponse): void {
     sessionStorage.setItem("user", JSON.stringify(user));
   }
@@ -41,10 +46,5 @@ export class UserManager {
     } else {
       return false;
     }
-  }
-
-  public static set userCurrentTeam(teamId: number) {
-    const user = sessionStorage.getItem("user") as string;
-    JSON.parse(user).teamId = teamId;
   }
 }

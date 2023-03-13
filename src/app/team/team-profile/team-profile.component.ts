@@ -15,21 +15,35 @@ import {UserResponse} from "../../user/model/User";
 })
 export class TeamProfileComponent implements OnInit {
 
-  private routeSubscription: Subscription = new Subscription();
-
   hackathonId: number = 0;
   teamId: number = 0;
   team?: TeamResponse;
   teamMembers: UserResponse[] = [];
   user = UserManager.currentUserFromStorage;
-
   editMode = false;
+  private routeSubscription: Subscription = new Subscription();
 
   constructor(private userService: UserService,
-              private teamService: TeamService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private toastr: ToastrService) {
+    private teamService: TeamService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toastr: ToastrService) {
+  }
+
+  get isUserTeamMember() {
+    return UserManager.isUserTeamMember(this.teamId);
+  }
+
+  get isUserHackathonMember() {
+    return UserManager.isUserHackathonMember(this.hackathonId);
+  }
+
+  get isOwner() {
+    return this.userService.isUserTeamOwner(this.teamId);
+  }
+
+  get isHackathonMember() {
+    return UserManager.isUserHackathonMember(this.hackathonId);
   }
 
   ngOnInit(): void {
@@ -50,7 +64,6 @@ export class TeamProfileComponent implements OnInit {
       }
     });
   }
-
 
   joinToTeam() {
 
@@ -87,22 +100,6 @@ export class TeamProfileComponent implements OnInit {
 
   getTeamMembers() {
     return this.userService.getMembersByTeamId(this.teamId).subscribe(members => this.teamMembers = members);
-  }
-
-  get isUserTeamMember() {
-    return UserManager.isUserTeamMember(this.teamId);
-  }
-
-  get isUserHackathonMember() {
-    return UserManager.isUserHackathonMember(this.hackathonId);
-  }
-
-  get isOwner() {
-    return this.userService.isUserTeamOwner(this.teamId);
-  }
-
-  get isHackathonMember() {
-    return UserManager.isUserHackathonMember(this.hackathonId);
   }
 
   redirectToTeamEdit() {

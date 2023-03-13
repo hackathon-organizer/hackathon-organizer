@@ -50,17 +50,17 @@ export class MenuComponent implements OnInit {
     });
   }
 
-  private loadNotifications(): void {
-    this.userService.userNotificationsObservable.subscribe(notifications => {
-      this.notifications = notifications
-    });
-  }
-
   logout(): void {
     this.userService.logout();
   }
 
   login(): void {
     this.userService.login();
+  }
+
+  private loadNotifications(): void {
+    this.userService.userNotificationsObservable.subscribe(notifications => {
+      this.notifications = notifications
+    });
   }
 }

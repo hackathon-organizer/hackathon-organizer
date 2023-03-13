@@ -1,62 +1,62 @@
 <section id="team-chat">
 
   <div *ngIf="inCall" class="w-full relative block">
-    <video class="z-10 rounded-lg mx-auto w-full bg-white" poster="assets/poster-no-video.svg" #remoteVideo
-           id="remote-view"></video>
+    <video #remoteVideo class="z-10 rounded-lg mx-auto w-full bg-white" id="remote-view"
+           poster="assets/poster-no-video.svg"></video>
 
     <video
-      class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block"
-      poster="assets/poster-person.svg" #localVideo id="self-view" muted autoplay></video>
+      #localVideo
+      autoplay class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block" id="self-view" muted poster="assets/poster-person.svg"></video>
 
     <div
       class="absolute right-0 bottom-0 h-14 bg-gray-600 w-3/5 z-10 rounded-t-lg flex justify-center bg-opacity-40 space-x-14">
-      <button [disabled]="locked" (click)="toggleVideoSharing()" class="video-button"
-              [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
-        <img src="assets/icons/camera.svg" alt="Camera">
+      <button (click)="toggleVideoSharing()" [disabled]="locked" [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
+              class="video-button">
+        <img alt="Camera" src="assets/icons/camera.svg">
       </button>
 
-      <button [disabled]="locked" (click)="startSharingScreen()" class="video-button"
-              [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''">
-        <img src="assets/icons/screen-share.svg" alt="Screen share">
+      <button (click)="startSharingScreen()" [disabled]="locked" [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
+              class="video-button">
+        <img alt="Screen share" src="assets/icons/screen-share.svg">
       </button>
 
-      <button (click)="toggleAudiSharing()" class="video-button" [ngClass]="audioActive ? 'btn-success' : ''">
-        <img *ngIf="!audioActive" src="assets/icons/micro.svg" alt="Microphone">
-        <img *ngIf="audioActive" src="assets/icons/mute.svg" alt="Mute microphone">
+      <button (click)="toggleAudiSharing()" [ngClass]="audioActive ? 'btn-success' : ''" class="video-button">
+        <img *ngIf="!audioActive" alt="Microphone" src="assets/icons/micro.svg">
+        <img *ngIf="audioActive" alt="Mute microphone" src="assets/icons/mute.svg">
       </button>
 
       <button (click)="leaveSession()" class="bg-error video-button hover:scale-110">
-        <img src="assets/icons/disconnect.svg" alt="Disconnect">
+        <img alt="Disconnect" src="assets/icons/disconnect.svg">
       </button>
 
       <button (click)="toggleFullscreen()" class="video-button">
-        <img src="assets/icons/fullscreen.svg" alt="Fullscreen">
+        <img alt="Fullscreen" src="assets/icons/fullscreen.svg">
       </button>
 
-      <div class="invisible" #subscribersAudio></div>
+      <div #subscribersAudio class="invisible"></div>
     </div>
   </div>
 
 
-  <div id="chat" class="w-4/5 mx-auto flex mt-8 justify-center">
+  <div class="w-4/5 mx-auto flex mt-8 justify-center" id="chat">
     <div class="mx-8 flex flex-col w-4/5">
-      <textarea readonly class="textarea textarea-primary resize-none w-full" rows="15" [(ngModel)]="chatMessages"
-                id="chat-window"></textarea>
+      <textarea [(ngModel)]="chatMessages" class="textarea textarea-primary resize-none w-full" id="chat-window" readonly
+                rows="15"></textarea>
       <div class="flex items-center mt-4">
-        <input class="mr-5 w-full input input-primary w-full" type="text" [(ngModel)]="chatEntry"
-               placeholder="Type your message here..." (keydown.enter)="sendTextMessage()">
-        <input class="btn btn-primary" (click)="sendTextMessage()" type="submit" value="Send"/>
+        <input (keydown.enter)="sendTextMessage()" [(ngModel)]="chatEntry" class="mr-5 w-full input input-primary w-full"
+               placeholder="Type your message here..." type="text">
+        <input (click)="sendTextMessage()" class="btn btn-primary" type="submit" value="Send"/>
       </div>
     </div>
     <div class="ml-4 bg-gray-800 py-3 px-6 rounded-lg w-1/5 flex flex-col justify-between">
       <div>
         <span class="text-2xl text-success">Online users: </span>
         <ul class="mt-3 space-y-2">
-          <li class="bg-gray-600 p-2 rounded-lg" *ngFor="let user of users">{{ user }}</li>
+          <li *ngFor="let user of users" class="bg-gray-600 p-2 rounded-lg">{{ user }}</li>
         </ul>
       </div>
 
-      <button id="session-join-button" [disabled]="session" (click)="joinSession()" class="btn btn-info mt-4">Join voice
+      <button (click)="joinSession()" [disabled]="session" class="btn btn-info mt-4" id="session-join-button">Join voice
         chat
       </button>
 

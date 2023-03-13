@@ -21,15 +21,10 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
   @ViewChild('subscribersAudio') subscribersAudio!: ElementRef;
   @ViewChild('videos') videosContainer!: ElementRef;
-
-  private routeSubscription: Subscription = new Subscription();
-
   chatEntry: string = "";
   chatMessages: string = "";
-
   chatRoomId?: number;
   users: any[] = [];
-
   OV!: OpenVidu;
   session!: Session;
   publisher!: StreamManager;
@@ -37,20 +32,18 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   mainStreamManager!: StreamManager;
   sessionToken?: string;
   sessionId?: string;
-
   locked = true;
-
   audioActive = true;
   videoActive = false;
   screenActive = false;
-
   inCall = false;
+  private routeSubscription: Subscription = new Subscription();
 
   constructor(private chatService: ChatService,
-              private logger: NGXLogger,
-              private http: HttpClient,
-              private route: ActivatedRoute,
-              private teamService: TeamService) {
+    private logger: NGXLogger,
+    private http: HttpClient,
+    private route: ActivatedRoute,
+    private teamService: TeamService) {
   }
 
   ngAfterViewInit(): void {
@@ -69,35 +62,6 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
         });
       })
     });
-  }
-
-  private messageHandler(message: BasicMessage) {
-
-    switch (message.messageType) {
-      case MessageType.SESSION: {
-
-        this.sessionId = message.data.videoSessionId;
-        this.sessionToken = message.data.videoSessionToken;
-
-        this.locked = false;
-        break;
-      }
-      case MessageType.JOIN: {
-        this.updateChatParticipants(message.data);
-        break;
-      }
-      case MessageType.MESSAGE: {
-        this.updateChat(message.data);
-        break;
-      }
-      case MessageType.VIDEO_IN_PROGRESS: {
-
-        if (!this.videoActive && !this.screenActive) {
-          this.locked = message.data.sharing;
-        }
-        break;
-      }
-    }
   }
 
   joinSession() {
@@ -155,30 +119,6 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       .catch(error => {
         this.logger.info('There was an error connecting to the session:', error.code, error.message);
       });
-  }
-
-  private updatePublisher() {
-    if (this.publisher instanceof Publisher) {
-      this.session.unpublish(this.publisher);
-    }
-
-    let newPublisher: Publisher = this.OV.initPublisher(undefined, {
-      audioSource: undefined,
-      videoSource: this.videoActive,
-      publishAudio: this.audioActive,
-      publishVideo: this.videoActive,
-      resolution: '1920x1080',
-      frameRate: 30,
-      insertMode: 'APPEND',
-      mirror: false
-    });
-
-    this.session.publish(newPublisher);
-
-    this.mainStreamManager = newPublisher;
-    this.publisher = newPublisher;
-
-    this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
   }
 
   toggleAudiSharing() {
@@ -249,7 +189,6 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.mainStreamManager.addVideoElement(this.remoteVideo.nativeElement);
   }
 
-
   getToken(): string {
 
     if (this.sessionToken) {
@@ -286,17 +225,6 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.inCall = false;
   }
 
-  private deleteSubscriber(streamManager: StreamManager): void {
-    let index = this.subscribers.indexOf(streamManager, 0);
-    if (index > -1) {
-      this.subscribers.splice(index, 1);
-    }
-  }
-
-  private updateChatParticipants(users: any[]) {
-    this.users = users;
-  }
-
   sendTextMessage() {
 
     if (this.chatRoomId) {
@@ -318,11 +246,6 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.chatEntry = "";
   }
 
-  private updateChat(message: ChatMessage) {
-
-    this.chatMessages += message.username + ": " + message.entryText + '\n';
-  }
-
   toggleFullscreen() {
     const remoteVideo = this.remoteVideo.nativeElement;
 
@@ -341,5 +264,74 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
 
     this.leaveSession();
     this.routeSubscription.unsubscribe();
+  }
+
+  private messageHandler(message: BasicMessage) {
+
+    switch (message.messageType) {
+      case MessageType.SESSION: {
+
+        this.sessionId = message.data.videoSessionId;
+        this.sessionToken = message.data.videoSessionToken;
+
+        this.locked = false;
+        break;
+      }
+      case MessageType.JOIN: {
+        this.updateChatParticipants(message.data);
+        break;
+      }
+      case MessageType.MESSAGE: {
+        this.updateChat(message.data);
+        break;
+      }
+      case MessageType.VIDEO_IN_PROGRESS: {
+
+        if (!this.videoActive && !this.screenActive) {
+          this.locked = message.data.sharing;
+        }
+        break;
+      }
+    }
+  }
+
+  private updatePublisher() {
+    if (this.publisher instanceof Publisher) {
+      this.session.unpublish(this.publisher);
+    }
+
+    let newPublisher: Publisher = this.OV.initPublisher(undefined, {
+      audioSource: undefined,
+      videoSource: this.videoActive,
+      publishAudio: this.audioActive,
+      publishVideo: this.videoActive,
+      resolution: '1920x1080',
+      frameRate: 30,
+      insertMode: 'APPEND',
+      mirror: false
+    });
+
+    this.session.publish(newPublisher);
+
+    this.mainStreamManager = newPublisher;
+    this.publisher = newPublisher;
+
+    this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
+  }
+
+  private deleteSubscriber(streamManager: StreamManager): void {
+    let index = this.subscribers.indexOf(streamManager, 0);
+    if (index > -1) {
+      this.subscribers.splice(index, 1);
+    }
+  }
+
+  private updateChatParticipants(users: any[]) {
+    this.users = users;
+  }
+
+  private updateChat(message: ChatMessage) {
+
+    this.chatMessages += message.username + ": " + message.entryText + '\n';
   }
 }

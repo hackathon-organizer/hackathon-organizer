@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
-import {Criteria, CriteriaAnswer} from "../model/Criteria";
+import {CriteriaAnswer} from "../model/Criteria";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {ActivatedRoute} from "@angular/router";
 import {finalize, forkJoin, map, Observable, Subscription} from "rxjs";
@@ -17,8 +17,6 @@ import {UserManager} from "../../shared/UserManager";
 })
 export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
-  private subscription: Subscription = new Subscription();
-
   criteriaForm!: FormGroup;
   teams: TeamResponse[] = [];
   teamsNumber: number = 0;
@@ -29,12 +27,17 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   hackathonId!: number;
   userId = UserManager.currentUserFromStorage.id;
   loading = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(private formBuilder: FormBuilder,
-              private hackathonService: HackathonService,
-              private route: ActivatedRoute,
-              private logger: NGXLogger,
-              private toastr: ToastrService) {
+    private hackathonService: HackathonService,
+    private route: ActivatedRoute,
+    private logger: NGXLogger,
+    private toastr: ToastrService) {
+  }
+
+  get criteria(): FormArray {
+    return this.criteriaForm.get("criteria") as FormArray;
   }
 
   ngOnInit(): void {
@@ -61,6 +64,57 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
         }
       )).subscribe(() => this.logger.info("Criteria and teams for hackathon fetched", this.criteria.value, this.teams));
     });
+  }
+
+  nextTeam() {
+    this.loading = true;
+
+    this.rateTeam().pipe(finalize(() => this.loading = false)).subscribe((answersResponse: CriteriaAnswer[]) => {
+
+      answersResponse.forEach(answer => {
+        const index = this.answers.findIndex(ans => ans.id === answer.id);
+
+        if (index != -1) {
+          this.answers[index] = answer;
+        } else {
+          this.answers.push(answer);
+        }
+      });
+
+      if (this.teamsNumber < this.teams.length - 1) {
+        this.currentTeam = this.teams[++this.teamsNumber];
+        this.currentTeamId = this.currentTeam.id;
+      }
+
+      this.updateFormValues();
+      this.toastr.success("Rating saved for team " + this.currentTeam?.name);
+    });
+  }
+
+  previousTeam() {
+
+    if (this.teamsNumber < 1) {
+      return;
+    } else {
+      this.currentTeam = this.teams[--this.teamsNumber];
+      this.currentTeamId = this.currentTeam.id;
+    }
+
+    this.updateFormValues();
+  }
+
+  changeValue($event: any, index: number) {
+
+    const criteria = this.criteria.at(index);
+
+    criteria.get("answer")?.patchValue({
+      teamId: this.currentTeamId,
+      value: $event.target.value
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   private setCurrentTeam() {
@@ -109,43 +163,6 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     return this.hackathonService.saveTeamRating(this.hackathonId, answers);
   }
 
-  nextTeam() {
-    this.loading = true;
-
-    this.rateTeam().pipe(finalize(() => this.loading = false)).subscribe((answersResponse: CriteriaAnswer[]) => {
-
-      answersResponse.forEach(answer => {
-        const index = this.answers.findIndex(ans => ans.id === answer.id);
-
-        if (index != -1) {
-          this.answers[index] = answer;
-        } else {
-          this.answers.push(answer);
-        }
-      });
-
-      if (this.teamsNumber < this.teams.length - 1) {
-        this.currentTeam = this.teams[++this.teamsNumber];
-        this.currentTeamId = this.currentTeam.id;
-      }
-
-      this.updateFormValues();
-      this.toastr.success("Rating saved for team " + this.currentTeam?.name);
-    });
-  }
-
-  previousTeam() {
-
-    if (this.teamsNumber < 1) {
-      return;
-    } else {
-      this.currentTeam = this.teams[--this.teamsNumber];
-      this.currentTeamId = this.currentTeam.id;
-    }
-
-    this.updateFormValues();
-  }
-
   private updateFormValues(): void {
 
     this.criteria.controls.forEach(criteriaControl => {
@@ -162,25 +179,7 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  get criteria(): FormArray {
-    return this.criteriaForm.get("criteria") as FormArray;
-  }
-
   private findAnswerForCriteria(criteriaId: number): CriteriaAnswer | undefined {
     return this.answers.find(answer => answer.criteriaId === criteriaId && answer.teamId === this.currentTeamId);
-  }
-
-  changeValue($event: any, index: number) {
-
-    const criteria = this.criteria.at(index);
-
-    criteria.get("answer")?.patchValue({
-      teamId: this.currentTeamId,
-      value: $event.target.value
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

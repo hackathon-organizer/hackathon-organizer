@@ -13,21 +13,26 @@ import {FormControl} from "@angular/forms";
 })
 export class TeamsComponent implements OnInit {
 
-  private routeSubscription: Subscription = new Subscription();
   hackathonId: number = 0;
-
   teams: TeamResponse[] = [];
-
   loading = true;
   teamNameControl: FormControl = new FormControl();
-
   paginationConfig: PaginationInstance = {
     itemsPerPage: 10,
     currentPage: 1,
     totalItems: 0
   };
+  private routeSubscription: Subscription = new Subscription();
 
   constructor(private teamsService: TeamService, private route: ActivatedRoute) {
+  }
+
+  get currentPageNumber() {
+    return this.paginationConfig.currentPage;
+  }
+
+  get teamsCount() {
+    return this.paginationConfig.totalItems;
   }
 
   ngOnInit(): void {
@@ -54,11 +59,11 @@ export class TeamsComponent implements OnInit {
 
     this.teamsService.getTeamsByHackathonId(hackathonId, pageNumber - 1).pipe(
       finalize(() => this.loading = false)).subscribe(teamsResponse => {
-        this.teams = teamsResponse.content;
+      this.teams = teamsResponse.content;
 
-        this.paginationConfig.currentPage = teamsResponse.number + 1;
-        this.paginationConfig.totalItems = teamsResponse.totalElements;
-      });
+      this.paginationConfig.currentPage = teamsResponse.number + 1;
+      this.paginationConfig.totalItems = teamsResponse.totalElements;
+    });
   }
 
   onPageChange(page: number): void {
@@ -66,13 +71,5 @@ export class TeamsComponent implements OnInit {
     this.loading = true;
     this.paginationConfig.currentPage = page;
     this.getHackathonTeams(this.hackathonId, page);
-  }
-
-  get currentPageNumber() {
-    return this.paginationConfig.currentPage;
-  }
-
-  get teamsCount() {
-    return this.paginationConfig.totalItems;
   }
 }

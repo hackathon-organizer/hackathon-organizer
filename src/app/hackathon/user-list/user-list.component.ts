@@ -29,6 +29,10 @@ export class UserListComponent implements OnInit {
   constructor(private hackathonService: HackathonService, private route: ActivatedRoute, private userService: UserService) {
   }
 
+  get currentPageNumber(): number {
+    return this.paginationConfig.currentPage;
+  }
+
   ngOnInit(): void {
 
     this.route.params.pipe(
@@ -54,7 +58,7 @@ export class UserListComponent implements OnInit {
 
       this.paginationConfig.currentPage = usersResponse.number + 1;
       this.paginationConfig.totalItems = usersResponse.totalElements;
-      });
+    });
   }
 
   onPageChange(page: number): void {
@@ -74,9 +78,5 @@ export class UserListComponent implements OnInit {
         this.paginationConfig.currentPage = participants.number + 1;
         this.paginationConfig.totalItems = participants.totalElements;
       });
-  }
-
-  get currentPageNumber(): number {
-    return this.paginationConfig.currentPage;
   }
 }

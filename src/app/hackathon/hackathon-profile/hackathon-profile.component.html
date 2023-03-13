@@ -7,7 +7,7 @@
   </div>
 
   <ng-container *ngIf="loading">
-    <img class="mx-auto max-h-12" src="assets/spinner.svg" alt="Loading spinner"/>
+    <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
   </ng-container>
 
   <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
@@ -16,7 +16,7 @@
       <button class="btn btn-outline btn-success">Create team</button>
     </a>
 
-    <button *ngIf="isActive() && !isUserHackathonParticipant()" [disabled]="loading" (click)="joinHackathon()"
+    <button (click)="joinHackathon()" *ngIf="isActive() && !isUserHackathonParticipant()" [disabled]="loading"
             class="btn btn-outline btn-accent">Join hackathon
     </button>
 
@@ -24,7 +24,7 @@
       <button class="btn btn-outline btn-info">Show teams</button>
     </a>
 
-    <a routerLink="/hackathon/{{ hackathon.id }}/participants" [class.pointer-events-none]="!isLoggedIn">
+    <a [class.pointer-events-none]="!isLoggedIn" routerLink="/hackathon/{{ hackathon.id }}/participants">
       <button [disabled]="!isLoggedIn" class="btn btn-outline btn-info">Show participants</button>
     </a>
 
@@ -46,7 +46,7 @@
 
   </div>
 
-  <div id="hackathon-description" class="mt-4">
+  <div class="mt-4" id="hackathon-description">
 
     <h4 class="text-3xl">Description:</h4>
 

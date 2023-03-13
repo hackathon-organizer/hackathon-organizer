@@ -20,10 +20,7 @@ import {Role} from "../model/Role";
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
 
-  private routeSubscription: Subscription = new Subscription();
-
   notificationsArray: Notification[] = [];
-
   currentUser?: UserResponse;
   user!: UserResponse;
   userProfileId?: number;
@@ -37,14 +34,33 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   currentTeamName?: string;
   teamSuggestions: TeamResponse[] = [];
   loading = false;
+  private routeSubscription: Subscription = new Subscription();
 
   constructor(private route: ActivatedRoute,
-              private router: Router,
-              private userService: UserService,
-              private keycloakService: KeycloakService,
-              private teamService: TeamService,
-              private formBuilder: FormBuilder,
-              private toastr: ToastrService) {
+    private router: Router,
+    private userService: UserService,
+    private keycloakService: KeycloakService,
+    private teamService: TeamService,
+    private formBuilder: FormBuilder,
+    private toastr: ToastrService) {
+  }
+
+  get NotificationType() {
+    return NotificationType;
+  }
+
+  get Role() {
+    return Role;
+  }
+
+  get isUserIsHackathonParticipant() {
+
+    return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId);
+  }
+
+  get isUserNotInMyHackathon() {
+
+    return Number(this.currentUser?.currentHackathonId) !== Number(this.user.currentHackathonId);
   }
 
   ngOnInit(): void {
@@ -82,7 +98,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       return false;
     }
   }
-
 
   inviteToTeam() {
 
@@ -147,6 +162,54 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  markTag(index: number): void {
+    this.tags[index].isSelected = !this.tags[index].isSelected;
+  }
+
+  save(): void {
+    const updatedUser = {
+      description: this.userEditForm.get("description")?.value,
+      tags: this.getSelectedTags()
+    };
+
+    this.userService.updateUserProfile(updatedUser).subscribe(() => {
+
+      this.toastr.success("Profile updated successfully")
+      this.user.description = this.userEditForm.get("description")?.value;
+      this.user.tags = this.getSelectedTags();
+      this.userService.removeTagsNotification();
+    });
+
+    this.editMode = false;
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription.unsubscribe();
+  }
+
+  getTeamUrl(teamId: number): string {
+    if (this.user.currentTeamId && teamId) {
+      return `/hackathon/${this.user.currentHackathonId}/team/${teamId}`;
+    } else {
+      return "/";
+    }
+  }
+
+  setUserRole(role: Role) {
+
+    if (this.currentUser?.currentHackathonId && this.userService.isUserOrganizer(this.currentUser.currentHackathonId)) {
+      this.userService.updateUserRole(this.user.id, role)
+        .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
+    }
+  }
+
+  navigateToMeeting(invitationIndex: number) {
+
+    const inv = this.notificationsArray[invitationIndex] as MeetingNotification;
+
+    this.router.navigate(["hackathon", this.user.currentHackathonId, "team", inv.chatId, "chat"]);
+  }
+
   private buildTagsFormGroup(tags: Tag[]): FormGroup {
     let group = this.formBuilder.group({});
 
@@ -163,77 +226,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return group;
   }
 
-  markTag(index: number): void {
-    this.tags[index].isSelected = !this.tags[index].isSelected;
-  }
-
   private getSelectedTags(): Tag[] {
     return this.tags.filter(tag => tag.isSelected);
   }
 
-  save(): void {
-    const updatedUser = {
-      description: this.userEditForm.get("description")?.value,
-      tags: this.getSelectedTags()
-    };
-
-    this.userService.updateUserProfile(updatedUser).subscribe(() => {
-
-        this.toastr.success("Profile updated successfully")
-        this.user.description = this.userEditForm.get("description")?.value;
-        this.user.tags = this.getSelectedTags();
-        this.userService.removeTagsNotification();
-      });
-
-    this.editMode = false;
-  }
-
   private checkIfThisMyProfile(): boolean {
     return Number(this.currentUser?.id) === Number(this.userProfileId);
-  }
-
-  ngOnDestroy(): void {
-    this.routeSubscription.unsubscribe();
-  }
-
-  getTeamUrl(teamId: number): string {
-    if (this.user.currentTeamId && teamId) {
-      return `/hackathon/${this.user.currentHackathonId}/team/${teamId}`;
-    } else {
-      return "/";
-    }
-  }
-
-  get NotificationType() {
-    return NotificationType;
-  }
-
-  get Role() {
-    return Role;
-  }
-
-  get isUserIsHackathonParticipant() {
-
-    return Number(this.currentUser?.currentHackathonId) === Number(this.user?.currentHackathonId);
-  }
-
-  get isUserNotInMyHackathon() {
-
-    return Number(this.currentUser?.currentHackathonId) !== Number(this.user.currentHackathonId);
-  }
-
-  setUserRole(role: Role) {
-
-    if (this.currentUser?.currentHackathonId && this.userService.isUserOrganizer(this.currentUser.currentHackathonId)) {
-      this.userService.updateUserRole(this.user.id, role)
-        .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
-    }
-  }
-
-  navigateToMeeting(invitationIndex: number) {
-
-    const inv = this.notificationsArray[invitationIndex] as MeetingNotification;
-
-    this.router.navigate(["hackathon", this.user.currentHackathonId, "team", inv.chatId, "chat"]);
   }
 }

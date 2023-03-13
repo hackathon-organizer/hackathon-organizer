@@ -11,13 +11,12 @@ import {BasicMessage, ChatMessage} from "../../../team/model/Chat";
 })
 export class ChatService {
 
-  constructor(private http: HttpClient, private logger: NGXLogger) {
-  }
-
   private socket$!: WebSocketSubject<any>;
-
   private messagesSubject = new Subject<BasicMessage>();
   public messages$ = this.messagesSubject.asObservable();
+
+  constructor(private http: HttpClient, private logger: NGXLogger) {
+  }
 
   public connect(chatId: number): void {
 
@@ -38,6 +37,10 @@ export class ChatService {
   sendMessage(msg: BasicMessage): void {
     this.logger.info("Sending message of type: ", msg.messageType);
     this.socket$.next(msg);
+  }
+
+  getChatRoomMessages(teamChatRoomId: number): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>('http://localhost:9090/api/v1/messages/rooms/' + teamChatRoomId);
   }
 
   private getNewWebSocket(chatId: number): WebSocketSubject<any> {
@@ -62,9 +65,5 @@ export class ChatService {
         }
       }
     });
-  }
-
-  getChatRoomMessages(teamChatRoomId: number): Observable<ChatMessage[]> {
-    return this.http.get<ChatMessage[]>('http://localhost:9090/api/v1/messages/rooms/' + teamChatRoomId);
   }
 }
