@@ -8,8 +8,7 @@
       <form (ngSubmit)="createHackathon()" [formGroup]="newHackathonForm"
             class="flex flex-col items-center justify-center space-y-4" id="create-hackathon-form"
             novalidate>
-        <input [ngClass]="{'is-invalid': (newHackathonForm.get('hackathonName')?.touched
-          ||
+        <input [ngClass]="{'is-invalid': (newHackathonForm.get('hackathonName')?.touched ||
           newHackathonForm.get('hackathonName')?.dirty) &&
           !newHackathonForm.get('hackathonName')?.valid }" class="ho-input-primary" formControlName="hackathonName"
                id="hackathonNameId"
@@ -17,11 +16,9 @@
 
         <span *ngIf="newHackathonForm.get('hackathonName')?.errors?.required &&
           newHackathonForm.get('hackathonName')?.touched" class="error-message">Please enter hackathon name.</span>
-        <span *ngIf="newHackathonForm.get('hackathonName')?.errors?.minlength" class="error-message">Hackathon name must be longer
-          than 10 characters.</span>
-
-        <textarea [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('description')?.touched
-          ||
+        <span *ngIf="newHackathonForm.get('hackathonName')?.errors?.minlength" class="error-message">
+          Hackathon name must be longerthan 10 characters.</span>
+        <textarea [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('description')?.touched ||
           newHackathonForm.get('description')?.dirty) &&
           !newHackathonForm.get('description')?.valid }" class="ho-textarea-primary resize-none"
                   formControlName="description" id="descriptionId"
@@ -34,8 +31,7 @@
         <span *ngIf="newHackathonForm.get('description')?.errors?.required &&
         newHackathonForm.get('description')?.touched" class="error-message">Please enter hackathon description.</span>
 
-        <textarea [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('organizerInfo')?.touched
-          ||
+        <textarea [ngClass]="{'is-invalid-textarea': (newHackathonForm.get('organizerInfo')?.touched ||
           newHackathonForm.get('organizerInfo')?.dirty) &&
           !newHackathonForm.get('organizerInfo')?.valid }" class="ho-textarea-primary resize-none"
                   formControlName="organizerInfo"
@@ -48,7 +44,8 @@
         <span *ngIf="newHackathonForm.get('organizerInfo')?.errors?.required &&
         newHackathonForm.get('organizerInfo')?.touched" class="error-message">Please enter organizer information.</span>
 
-        <input [convertModelValue]="true" [enableTime]="true" [ngClass]="{'is-invalid': (newHackathonForm.errors?.dateErrorMessage &&
+        <input [convertModelValue]="true" [enableTime]="true"
+               [ngClass]="{'is-invalid': (newHackathonForm.errors?.dateErrorMessage &&
                newHackathonForm.get('startDate')?.touched &&
                newHackathonForm.get('startDate')?.dirty ||
           (newHackathonForm.get('startDate')?.errors?.required && newHackathonForm.get('startDate')?.touched))}"
@@ -64,8 +61,9 @@
         <span *ngIf="newHackathonForm.get('startDate')?.errors?.required &&
         newHackathonForm.get('startDate')?.touched" class="error-message">Please enter event date.</span>
 
-        <input [convertModelValue]="true" [enableTime]="true" [ngClass]="{'is-invalid': (newHackathonForm.errors?.dateErrorMessage
-               && newHackathonForm.get('endDate')?.touched &&
+        <input [convertModelValue]="true" [enableTime]="true"
+               [ngClass]="{'is-invalid': (newHackathonForm.errors?.dateErrorMessage &&
+               newHackathonForm.get('endDate')?.touched &&
           newHackathonForm.get('endDate')?.dirty ||
           (newHackathonForm.get('endDate')?.errors?.required && newHackathonForm.get('endDate')?.touched))}"
                class="ho-input-primary cursor-pointer" dateFormat="d-m-Y H:i"

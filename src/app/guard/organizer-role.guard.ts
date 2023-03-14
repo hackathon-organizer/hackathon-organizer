@@ -9,7 +9,6 @@ import {KeycloakService} from "keycloak-angular";
 export class OrganizerRoleGuard implements CanActivate {
 
   constructor(
-    router: Router,
     protected readonly keycloak: KeycloakService
   ) {
   }

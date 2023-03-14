@@ -26,11 +26,9 @@ export class UserListComponent implements OnInit {
     totalItems: 0
   };
 
-  constructor(private hackathonService: HackathonService, private route: ActivatedRoute, private userService: UserService) {
-  }
-
-  get currentPageNumber(): number {
-    return this.paginationConfig.currentPage;
+  constructor(private hackathonService: HackathonService,
+              private route: ActivatedRoute,
+              private userService: UserService) {
   }
 
   ngOnInit(): void {
@@ -55,17 +53,15 @@ export class UserListComponent implements OnInit {
       })).pipe(finalize(() => this.loading = false)).subscribe(usersResponse => {
 
       this.hackathonParticipants = usersResponse.content;
-
       this.paginationConfig.currentPage = usersResponse.number + 1;
       this.paginationConfig.totalItems = usersResponse.totalElements;
     });
   }
 
   onPageChange(page: number): void {
+
     this.loading = true;
-
     this.paginationConfig.currentPage = page;
-
     this.getHackathonParticipants(page);
   }
 
@@ -73,10 +69,14 @@ export class UserListComponent implements OnInit {
 
     this.userService.getParticipants(this.participantsIds, pageNumber - 1).pipe(finalize(() => this.loading = false))
       .subscribe(participants => {
-        this.hackathonParticipants = participants.content;
 
+        this.hackathonParticipants = participants.content;
         this.paginationConfig.currentPage = participants.number + 1;
         this.paginationConfig.totalItems = participants.totalElements;
       });
+  }
+
+  get currentPageNumber(): number {
+    return this.paginationConfig.currentPage;
   }
 }

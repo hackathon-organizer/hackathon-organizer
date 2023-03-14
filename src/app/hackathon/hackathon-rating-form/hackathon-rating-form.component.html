@@ -35,7 +35,7 @@
 
           <div *ngFor="let criteria of criteria.controls; let i = index" class="mx-12" formArrayName="criteria">
 
-            <div [formGroupName]="i" class="">
+            <div [formGroupName]="i">
               <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>
 
               <div class="p-2" formGroupName="answer">

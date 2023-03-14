@@ -13,7 +13,6 @@ export class LeaderboardComponent implements OnInit {
 
   teams: TeamResponse[] = [];
   hackathonId!: number;
-
   loading = true;
 
   constructor(private hackathonService: HackathonService,
@@ -26,7 +25,8 @@ export class LeaderboardComponent implements OnInit {
 
       this.hackathonId = prams["id"];
 
-      this.hackathonService.getLeaderboard(this.hackathonId).pipe(finalize(() => this.loading = false))
+      this.hackathonService.getLeaderboard(this.hackathonId)
+        .pipe(finalize(() => this.loading = false))
         .subscribe(teamsResponse => {
           this.teams = teamsResponse;
         });

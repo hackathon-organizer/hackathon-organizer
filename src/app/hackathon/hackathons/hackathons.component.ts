@@ -12,7 +12,6 @@ import {finalize} from "rxjs";
 export class HackathonsComponent implements OnInit {
 
   hackathons: HackathonResponse[] = [];
-
   loading = true;
 
   paginationConfig: PaginationInstance = {
@@ -37,7 +36,9 @@ export class HackathonsComponent implements OnInit {
   }
 
   getHackathons(pageNumber: number) {
-    this.hackathonService.getAllHackathons(pageNumber - 1).pipe(finalize(() => this.loading = false))
+
+    this.hackathonService.getAllHackathons(pageNumber - 1)
+      .pipe(finalize(() => this.loading = false))
       .subscribe(hackathonsResponse => {
         this.hackathons = hackathonsResponse.content;
         this.paginationConfig.currentPage = hackathonsResponse.number + 1;

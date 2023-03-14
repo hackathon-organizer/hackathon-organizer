@@ -25,10 +25,6 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
               private route: ActivatedRoute) {
   }
 
-  get criteria(): FormArray {
-    return this.criteriaForm.get("criteria") as FormArray
-  }
-
   ngOnInit(): void {
 
     this.criteriaForm = this.formBuilder.group({
@@ -37,8 +33,8 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
 
     this.subscription = this.route.params.pipe(
       concatMap(params => {
-        this.hackathonId = params["id"];
 
+        this.hackathonId = params["id"];
         return this.hackathonService.getHackathonRatingCriteria(this.hackathonId);
       })).subscribe(criteria => {
 
@@ -55,18 +51,20 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   }
 
   saveCriteria() {
-    this.loading = true;
 
+    this.loading = true;
     const criteria: Criteria[] = this.criteriaForm.value.criteria;
 
     if (this.isUpdateMode) {
-      this.hackathonService.updateHackathonRatingCriteria(this.hackathonId, criteria).pipe(finalize(() => this.loading = false))
+      this.hackathonService.updateHackathonRatingCriteria(this.hackathonId, criteria)
+        .pipe(finalize(() => this.loading = false))
         .subscribe(() => {
           this.toastr.success("Criteria updated successfully");
         });
     } else {
-      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria).pipe(
-        finalize(() => this.loading = false)).subscribe((criteriaResponse) => {
+      this.hackathonService.saveHackathonRatingCriteria(this.hackathonId, criteria)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe((criteriaResponse) => {
 
         this.criteria.patchValue(criteriaResponse);
         this.toastr.success("Criteria created successfully");
@@ -86,15 +84,19 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
     this.toastr.success("Criteria deleted successfully");
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
   private createCriteria(id?: number, name?: string): FormGroup {
     return this.formBuilder.group({
       id: id,
       hackathonId: this.hackathonId,
       name: new FormControl(name ? name : "", [Validators.required, Validators.minLength(5)])
     });
+  }
+
+  get criteria(): FormArray {
+    return this.criteriaForm.get("criteria") as FormArray
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

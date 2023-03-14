@@ -58,7 +58,6 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
           this.teams = teams;
           this.setCurrentTeam();
-
           this.answers = answers;
           criteria.forEach(c => this.criteria.push(this.createCriteria(c.name, c.id)));
         }
@@ -67,9 +66,12 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   }
 
   nextTeam() {
+
     this.loading = true;
 
-    this.rateTeam().pipe(finalize(() => this.loading = false)).subscribe((answersResponse: CriteriaAnswer[]) => {
+    this.rateTeam()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe((answersResponse: CriteriaAnswer[]) => {
 
       answersResponse.forEach(answer => {
         const index = this.answers.findIndex(ans => ans.id === answer.id);
@@ -111,10 +113,6 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
       teamId: this.currentTeamId,
       value: $event.target.value
     });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   private setCurrentTeam() {
@@ -181,5 +179,9 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
 
   private findAnswerForCriteria(criteriaId: number): CriteriaAnswer | undefined {
     return this.answers.find(answer => answer.criteriaId === criteriaId && answer.teamId === this.currentTeamId);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

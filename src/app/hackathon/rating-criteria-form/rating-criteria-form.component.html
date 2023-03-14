@@ -34,7 +34,9 @@
                     class="error-message">Criteria name must be longer than 5 characters.</span>
 
                 <span *ngIf="criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.errors?.required &&
-                    criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched" class="error-message">Please enter criteria name.</span>
+                    criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched" class="error-message">
+                  Please enter criteria name.
+                </span>
               </div>
             </div>
           </div>

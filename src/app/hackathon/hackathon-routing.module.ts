@@ -16,6 +16,7 @@ import {AuthGuard} from "../guard/auth.guard";
 import {TeamOwnerRoleGuard} from "../guard/team-owner-role.guard";
 import {OrganizerRoleGuard} from "../guard/organizer-role.guard";
 import {JuryRoleGuard} from "../guard/jury-role.guard";
+import {TeamModule} from "../team/team.module";
 
 
 const routes: Routes = [
@@ -23,12 +24,15 @@ const routes: Routes = [
   {path: 'new', component: HackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
   {path: ':id/participants', component: UserListComponent, canActivate: [AuthGuard]},
-  {path: ':id/team', component: TeamFormComponent},
-  {path: ':id/team/:teamId/edit', component: TeamFormComponent, canActivate: [AuthGuard, TeamOwnerRoleGuard]},
-  {path: ':id/teams', component: TeamsComponent},
-  {path: ':id/team/:teamId', component: TeamProfileComponent},
-  {path: ':id/team/:teamId/chat', component: TeamChatComponent, canActivate: [AuthGuard]},
-  {path: ':id/team/:teamId/invite', component: UserListComponent, canActivate: [AuthGuard]},
+  {path: ':id/team', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
+  {path: ':id/team/:teamId/edit', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      canActivate: [AuthGuard, TeamOwnerRoleGuard]},
+  {path: ':id/teams', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
+  {path: ':id/team/:teamId', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
+  {path: ':id/team/:teamId/chat', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      canActivate: [AuthGuard]},
+  {path: ':id/team/:teamId/invite', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      canActivate: [AuthGuard]},
   {path: ':id/schedule', component: MentorScheduleComponent},
   {
     path: ':id/rating',
@@ -37,7 +41,6 @@ const routes: Routes = [
   },
   {path: ':id/rating-criteria', component: RatingCriteriaFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard]},
   {path: ':id/leaderboard', component: LeaderboardComponent, canActivate: [AuthGuard]}
-
 ];
 
 @NgModule({

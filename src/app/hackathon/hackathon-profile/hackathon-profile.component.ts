@@ -40,14 +40,18 @@ export class HackathonProfileComponent implements OnInit {
   }
 
   joinHackathon(): void {
-    this.loading = true;
 
+    this.loading = true;
     const user = UserManager.currentUserFromStorage;
 
-    this.hackathonService.addUserToHackathon(this.hackathon.id, user.id).pipe(concatMap(() =>
-      this.userService.updateUserMembership({currentHackathonId: this.hackathon.id, currentTeamId: null})
-    )).pipe(finalize(() => this.loading = false)).subscribe(() => {
-
+    this.hackathonService.addUserToHackathon(this.hackathon.id, user.id)
+      .pipe(concatMap(
+        () => this.userService.updateUserMembership({
+          currentHackathonId: this.hackathon.id,
+          currentTeamId: null
+        })
+    )).pipe(finalize(() => this.loading = false))
+      .subscribe(() => {
       user.currentHackathonId = this.hackathon.id;
       this.toastr.success("You are now member of hackathon " + this.hackathon.name);
     });
