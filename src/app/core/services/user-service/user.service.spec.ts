@@ -2,16 +2,14 @@ import {TestBed} from '@angular/core/testing';
 
 import {UserService} from './user.service';
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
-import {TeamService} from "../team-service/team.service";
-import {User, UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
+import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {KeycloakService} from "keycloak-angular";
 import {ToastrModule, ToastrService} from "ngx-toastr";
 import {LoggerTestingModule} from "ngx-logger/testing";
 import {UserManager} from "../../../shared/UserManager";
-import {of} from "rxjs";
-import {Role} from "../../../user/model/Role";
 import {Tag} from "../../../team/model/Team";
 import {ScheduleEntryRequest, ScheduleEntryResponse} from "../../../mentor/model/ScheduleEntryEvent";
+import {environment} from "../../../../environments/environment";
 
 describe('UserService', () => {
   let service: UserService;
@@ -25,6 +23,9 @@ describe('UserService', () => {
     service = TestBed.inject(UserService);
     httpMock = TestBed.inject(HttpTestingController);
   });
+
+  let BASE_URL_UPDATE = environment.API_URL + "/api/v1/write/users/";
+  let BASE_URL_READ = environment.API_URL + "/api/v1/read/users/";
 
   it('should be created', () => {
     expect(service).toBeTruthy();
@@ -78,9 +79,7 @@ describe('UserService', () => {
         expect(response).toEqual(mockUserResponsePage);
       });
 
-    const url = service.BASE_URL_READ;
-
-    const req = httpMock.expectOne(url.slice(0, url.length - 1) + "?username=john.doe&hackathonId=1&page=0&size=10");
+    const req = httpMock.expectOne(BASE_URL_READ.slice(0, -1) + "?username=john.doe&hackathonId=1&page=0&size=10");
     expect(req.request.method).toBe('GET');
     req.flush(mockUserResponsePage);
   });
@@ -93,7 +92,7 @@ describe('UserService', () => {
         expect(response).toEqual(mockUserResponse);
       });
 
-    const request = httpMock.expectOne(`${service.BASE_URL_READ}${userId}`);
+    const request = httpMock.expectOne(BASE_URL_READ + "1");
     expect(request.request.method).toBe('GET');
     request.flush(mockUserResponse);
   });
@@ -109,9 +108,7 @@ describe('UserService', () => {
         expect(userResponsePage).toEqual(mockUserResponsePage);
       });
 
-    const url = service.BASE_URL_READ;
-
-    const req = httpMock.expectOne(url.slice(0, url.length - 1) + `?username=${username}&hackathonId=${hackathonId}&page=${pageNumber}&size=10`);
+    const req = httpMock.expectOne(BASE_URL_READ.slice(0, -1) + '?username=testuser&hackathonId=1&page=0&size=10');
     expect(req.request.method).toBe('GET');
     req.flush(mockUserResponsePage);
   });
@@ -125,7 +122,7 @@ describe('UserService', () => {
         expect(userResponse).toEqual(mockUserResponse);
       });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_READ}${userId}`);
+    const req = httpMock.expectOne(BASE_URL_READ + "1");
     expect(req.request.method).toBe('GET');
     req.flush(mockUserResponse);
   });
@@ -137,7 +134,7 @@ describe('UserService', () => {
       expect(response).toEqual(mockUserResponsePage);
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_UPDATE}1`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1');
     expect(req.request.method).toBe('PATCH');
     req.flush(mockUserResponsePage);
   });
@@ -148,7 +145,7 @@ describe('UserService', () => {
       expect(response).toEqual(expectedResponse);
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_READ}tags`);
+    const req = httpMock.expectOne(BASE_URL_READ + 'tags');
     expect(req.request.method).toBe('GET');
     req.flush(expectedResponse);
   });
@@ -164,7 +161,7 @@ describe('UserService', () => {
 
     service.updateUserMembership(updatedUserMembership).subscribe();
 
-    const req = httpMock.expectOne(`${service.BASE_URL_UPDATE}1/membership`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/membership');
     expect(req.request.method).toBe('PATCH');
   });
 
@@ -176,7 +173,7 @@ describe('UserService', () => {
       expect(response).toEqual(expectedScheduleEntryResponse[0]);
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_UPDATE}1/schedule`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/schedule');
     expect(req.request.method).toEqual('POST');
     req.flush(expectedScheduleEntryResponse[0]);
   });
@@ -189,7 +186,7 @@ describe('UserService', () => {
       expect().nothing();
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_UPDATE}1/schedule`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/schedule');
     expect(req.request.method).toEqual('PUT');
     expect(req.request.body).toEqual(mockScheduleRequests);
 
@@ -198,13 +195,13 @@ describe('UserService', () => {
 
 
   it('should make a GET request to the correct URL with the given hackathon ID', () => {
-    const hackathonId = 123;
+    const hackathonId = 1;
 
     service.getUserSchedule(hackathonId).subscribe((response) => {
       expect(response).toEqual(expectedScheduleEntryResponse);
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_READ}1/schedule?hackathonId=${hackathonId}`);
+    const req = httpMock.expectOne(BASE_URL_READ + '1/schedule?hackathonId=1');
     expect(req.request.method).toEqual('GET');
 
     req.flush(expectedScheduleEntryResponse);
@@ -212,16 +209,15 @@ describe('UserService', () => {
 
 
   it('should make a  hackathon mockScheduleRequests request to the correct URL with the given hackathon ID', () => {
-    const hackathonId = 123;
+    const hackathonId = 1;
 
     service.getHackathonSchedule(hackathonId).subscribe((response) => {
       expect(response).toEqual(expectedScheduleEntryResponse);
     });
 
-    const req = httpMock.expectOne(`${service.BASE_URL_READ}/schedule?hackathonId=${hackathonId}`);
+    const req = httpMock.expectOne(BASE_URL_READ + '/schedule?hackathonId=1');
     expect(req.request.method).toEqual('GET');
 
     req.flush(expectedScheduleEntryResponse);
   });
-
 });

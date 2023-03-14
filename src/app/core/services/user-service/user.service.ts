@@ -20,6 +20,7 @@ import {UserManager} from "../../../shared/UserManager";
 import {MeetingNotification, Notification, TeamInvitationNotification} from "../../../team/model/Notifications";
 import {Role} from "../../../user/model/Role";
 import {ToastrService} from "ngx-toastr";
+import {environment} from "../../../../environments/environment";
 
 
 @Injectable({
@@ -27,9 +28,10 @@ import {ToastrService} from "ngx-toastr";
 })
 export class UserService {
 
+  private BASE_URL_UPDATE = environment.API_URL + "/api/v1/write/users/";
+  private BASE_URL_READ = environment.API_URL + "/api/v1/read/users/";
+
   user!: UserResponse;
-  BASE_URL_UPDATE = "http://localhost:9090/api/v1/write/users/";
-  BASE_URL_READ = "http://localhost:9090/api/v1/read/users/";
   private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
   private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -42,12 +44,12 @@ export class UserService {
               private teamService: TeamService) {
 
     dayjs.extend(isBetween);
-
-    this.fetchUserData();
+    this.getUserData();
   }
 
   findHackathonUsersByUsername(username: string, hackathonId: number, pageNumber: number): Observable<UserResponsePage> {
-    return this.http.get<UserResponsePage>(this.BASE_URL_READ.slice(0, this.BASE_URL_READ.length - 1), {
+
+    return this.http.get<UserResponsePage>(this.BASE_URL_READ.slice(0, -1), {
       params: {
         username: username,
         hackathonId: hackathonId,
@@ -62,6 +64,7 @@ export class UserService {
   }
 
   fetchAndUpdateTeamInStorage(userData: UserResponse): void {
+
     if (userData.currentTeamId) {
       this.teamService.getTeamById(userData.currentTeamId as number).subscribe(teamResponse => {
         UserManager.updateTeamInStorage(teamResponse)
@@ -70,20 +73,14 @@ export class UserService {
   }
 
   createEntryEvent(entryEvent: ScheduleEntryRequest): Observable<ScheduleEntryResponse> {
-
-    this.logger.info("Saving user " + this.getUserId() + " schedule: ", entryEvent);
     return this.http.post<ScheduleEntryResponse>(this.BASE_URL_UPDATE + this.getUserId() + "/schedule", entryEvent);
   }
 
   updateEntryEvents(schedule: ScheduleEntryRequest[]): Observable<void> {
-
-    this.logger.info("Saving user " + this.getUserId() + " schedule: ", schedule);
     return this.http.put<void>(this.BASE_URL_UPDATE + this.getUserId() + "/schedule", schedule);
   }
 
   getUserSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
-
-    this.logger.info("Requesting user " + this.getUserId() + " schedule");
     return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + this.getUserId() + "/schedule", {
       params: {
         hackathonId: hackathonId
@@ -92,8 +89,6 @@ export class UserService {
   }
 
   getHackathonSchedule(hackathonId: number): Observable<ScheduleEntryResponse[]> {
-
-    this.logger.info("Requesting hackathon " + hackathonId + " schedule");
     return this.http.get<ScheduleEntryResponse[]>(this.BASE_URL_READ + "/schedule", {
       params: {
         hackathonId: hackathonId
@@ -102,33 +97,25 @@ export class UserService {
   }
 
   assignTeamToMeetingWithMentor(entryId: number, scheduleEntry: TeamMeetingRequest): Observable<boolean> {
-
-    this.logger.info("Saving team meeting with mentor ", scheduleEntry);
     return this.http.patch<boolean>(this.BASE_URL_UPDATE + "schedule/" + entryId + "/meeting", scheduleEntry);
   }
 
   updateUserRole(userId: number, role: Role): Observable<void> {
 
     const newRole = {role: role}
-    this.logger.info("Updating user " + userId + " role: ", newRole);
     return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/roles", newRole);
   }
 
   removeScheduleEntry(userId: number, entryId: number): Observable<void> {
-
-    this.logger.info("Removing user " + userId + " schedule entry: ", entryId);
     return this.http.delete<void>(this.BASE_URL_UPDATE + userId + "/schedule/" + entryId);
   }
 
   updateUserScheduleEntryTime(userId: number, entryId: number, entrySession: ScheduleEntrySession): Observable<void> {
-
-    this.logger.info("Updating user " + userId + " schedule entry: ", entryId, entrySession);
     return this.http.patch<void>(this.BASE_URL_UPDATE + userId + "/schedule/" + entryId, entrySession)
   }
 
   getMembersByTeamId(teamId: number): Observable<UserResponse[]> {
 
-    this.logger.info("Requesting members of team " + teamId);
     return this.http.get<UserResponse[]>(this.BASE_URL_READ + "membership", {
       params: {
         teamId: teamId
@@ -138,7 +125,6 @@ export class UserService {
 
   getParticipants(participantsIds: number[], pageNumber: number): Observable<UserResponsePage> {
 
-    this.logger.info("Requesting participants", participantsIds);
     return this.http.post<UserResponsePage>(this.BASE_URL_READ + "hackathon-participants", participantsIds, {
       params: {
         page: pageNumber,
@@ -148,22 +134,16 @@ export class UserService {
   }
 
   updateUserProfile(updatedUser: UserDetails): Observable<UserResponsePage> {
-
-    this.logger.info("Updating user " + this.getUserId() + " profile: ", updatedUser);
     return this.http.patch<UserResponsePage>(this.BASE_URL_UPDATE + this.getUserId(), updatedUser);
   }
 
   getTags(): Observable<Tag[]> {
-
-    this.logger.info("Requesting tags ");
     return this.http.get<Tag[]>(this.BASE_URL_READ + "tags");
   }
 
   updateUserMembership(updatedUserMembership: UserMembershipRequest): Observable<void> {
 
-    this.logger.info("Updating user " + this.getUserId() + " membership", updatedUserMembership);
     updatedUserMembership.userId = this.getUserId();
-
     return this.http.patch<void>(this.BASE_URL_UPDATE + this.getUserId() + "/membership", updatedUserMembership);
   }
 
@@ -196,31 +176,26 @@ export class UserService {
   }
 
   isUserJury(hackathonId: number): boolean {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.JURY) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserOrganizer(hackathonId: number): boolean {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.ORGANIZER) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserMentor(hackathonId: number) {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.MENTOR) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserTeamOwner(teamId: number) {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
       Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
   }
 
   isUserTeamOwnerInHackathon(hackathonId: number) {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes(Role.TEAM_OWNER) &&
       Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
@@ -238,7 +213,6 @@ export class UserService {
   }
 
   isUserHackathonOwner(hackathonId: number): boolean {
-
     return !!this.keycloakService.getKeycloakInstance().realmAccess?.roles.includes("ORGANIZER") &&
       Number(this.user.currentHackathonId) === Number(hackathonId);
   }
@@ -250,8 +224,10 @@ export class UserService {
 
   private openNotificationWebSocketConnection(): void {
 
+    const WS_API_URL = environment.API_URL.replace(new RegExp("(http|https)?:\\/\\/(\\S+)"), "ws://");
+
     const client = new Client({
-      brokerURL: 'ws://localhost:9090/hackathon-websocket?sessionId=' + this.user.id,
+      brokerURL: WS_API_URL + '/hackathon-websocket?sessionId=' + this.user.id,
       debug: (message) => {
         this.logger.info(message);
       },
@@ -281,7 +257,7 @@ export class UserService {
     client.activate();
   }
 
-  private fetchUserData(): void {
+  private getUserData(): void {
 
     this.getKeycloakUserId().then((keycloakId) => {
 
@@ -291,7 +267,6 @@ export class UserService {
         UserManager.updateUserInStorage(userData);
         this.userLoaded.next(true);
 
-
         this.fetchAndUpdateTeamInStorage(userData);
         this.sendNoTagsNotification(userData);
         this.getUserTeamInvitations(userData);
@@ -299,7 +274,7 @@ export class UserService {
         this.openNotificationWebSocketConnection();
       });
 
-    }).catch((error) => new Error("Can't get user keycloakId " + error));
+    }).catch((error) => new Error("Can't get user keycloak id: " + error));
   }
 
   private sendNoTagsNotification(userData: UserResponse): void {
@@ -323,10 +298,6 @@ export class UserService {
         this.userNotifications.next(this.userNotifications.value.concat(userInvites));
       });
     }
-  }
-
-  private getUserId(): number {
-    return UserManager.currentUserFromStorage.id;
   }
 
   private sendUserScheduleNotification(index = 0): void {
@@ -363,5 +334,9 @@ export class UserService {
         }
       });
     }
+  }
+
+  private getUserId(): number {
+    return UserManager.currentUserFromStorage.id;
   }
 }

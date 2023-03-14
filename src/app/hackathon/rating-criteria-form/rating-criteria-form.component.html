@@ -8,7 +8,8 @@
 
       <button (click)="addCriteria()" class="btn btn-info m-4">Add new</button>
 
-      <form (ngSubmit)="saveCriteria()" [formGroup]="criteriaForm" class="flex flex-col items-center justify-center w-full space-y-4" id="create-hackathon-form"
+      <form (ngSubmit)="saveCriteria()" [formGroup]="criteriaForm"
+            class="flex flex-col items-center justify-center w-full space-y-4" id="create-hackathon-form"
             novalidate>
 
         <div *ngFor="let c of criteria.controls; let i=index" class="w-full">
@@ -20,7 +21,8 @@
               <div class="flex justify-center w-full">
                 <input [ngClass]="{'is-invalid': (criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.touched ||
           criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.dirty) &&
-          !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }" class="ho-input-primary" formControlName="name" id="nameId"
+          !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }" class="ho-input-primary"
+                       formControlName="name" id="nameId"
                        placeholder="Type criteria here"
                        type="text"/>
 

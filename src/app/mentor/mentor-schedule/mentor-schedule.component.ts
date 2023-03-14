@@ -48,11 +48,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
 
   constructor(private userService: UserService,
-    private teamService: TeamService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private logger: NGXLogger,
-    private toastr: ToastrService) {
+              private teamService: TeamService,
+              private route: ActivatedRoute,
+              private router: Router,
+              private logger: NGXLogger,
+              private toastr: ToastrService) {
   }
 
   get showEvent(): boolean {

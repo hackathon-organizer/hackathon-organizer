@@ -20,9 +20,9 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
 
   constructor(private formBuilder: FormBuilder,
-    private hackathonService: HackathonService,
-    private toastr: ToastrService,
-    private route: ActivatedRoute) {
+              private hackathonService: HackathonService,
+              private toastr: ToastrService,
+              private route: ActivatedRoute) {
   }
 
   get criteria(): FormArray {

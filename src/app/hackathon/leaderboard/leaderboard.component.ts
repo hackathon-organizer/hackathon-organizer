@@ -17,7 +17,7 @@ export class LeaderboardComponent implements OnInit {
   loading = true;
 
   constructor(private hackathonService: HackathonService,
-    private route: ActivatedRoute) {
+              private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {

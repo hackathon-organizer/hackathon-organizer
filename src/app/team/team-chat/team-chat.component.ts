@@ -40,10 +40,10 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   private routeSubscription: Subscription = new Subscription();
 
   constructor(private chatService: ChatService,
-    private logger: NGXLogger,
-    private http: HttpClient,
-    private route: ActivatedRoute,
-    private teamService: TeamService) {
+              private logger: NGXLogger,
+              private http: HttpClient,
+              private route: ActivatedRoute,
+              private teamService: TeamService) {
   }
 
   ngAfterViewInit(): void {
@@ -54,7 +54,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
         this.chatRoomId = team.teamChatRoomId;
 
         this.chatService.connect(this.chatRoomId);
-        this.chatService.messages$.subscribe(message => this.messageHandler(message));
+        this.chatService.messages.subscribe(message => this.messageHandler(message));
 
         this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
 

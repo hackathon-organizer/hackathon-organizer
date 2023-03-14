@@ -10,7 +10,8 @@
       <ng-container *ngIf="!loading">
         <h2 class="text-center mb-6 text-4xl">{{ editMode ? 'Update ' : 'Create new ' }}team</h2>
 
-        <form (ngSubmit)="saveTeam()" [formGroup]="newTeamForm" class="flex flex-col items-center justify-center space-y-4" id="create-team-form"
+        <form (ngSubmit)="saveTeam()" [formGroup]="newTeamForm"
+              class="flex flex-col items-center justify-center space-y-4" id="create-team-form"
               novalidate>
           <input [ngClass]="{'is-invalid': (newTeamForm.get('teamName')?.touched
           ||
@@ -28,7 +29,8 @@
           <textarea [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
           ||
           newTeamForm.get('description')?.dirty) &&
-          !newTeamForm.get('description')?.valid }" class="ho-textarea-primary" formControlName="description" id="descriptionId" placeholder="Description (required)"
+          !newTeamForm.get('description')?.valid }" class="ho-textarea-primary" formControlName="description"
+                    id="descriptionId" placeholder="Description (required)"
                     rows="8" type="text"></textarea>
 
           <span *ngIf="newTeamForm.get('description')?.errors?.minlength && newTeamForm.get('description')?.touched"
@@ -53,7 +55,8 @@
           <ng-container *ngIf="loadingCreate">
             <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
           </ng-container>
-          <input [disabled]="!newTeamForm.valid || loadingCreate" [value]="editMode ? 'Save' : 'Create'" class="btn btn-primary"
+          <input [disabled]="!newTeamForm.valid || loadingCreate" [value]="editMode ? 'Save' : 'Create'"
+                 class="btn btn-primary"
                  type="submit">
         </form>
       </ng-container>

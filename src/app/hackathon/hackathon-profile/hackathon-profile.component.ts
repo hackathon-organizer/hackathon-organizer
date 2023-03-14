@@ -21,9 +21,9 @@ export class HackathonProfileComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   constructor(private hackathonService: HackathonService,
-    private userService: UserService,
-    private route: ActivatedRoute,
-    private toastr: ToastrService) {
+              private userService: UserService,
+              private route: ActivatedRoute,
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {

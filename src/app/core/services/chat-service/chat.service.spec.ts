@@ -2,16 +2,14 @@ import {TestBed} from '@angular/core/testing';
 
 import {ChatService} from './chat.service';
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
-import {NGXLogger} from "ngx-logger";
 import {LoggerTestingModule} from "ngx-logger/testing";
-import {UserManager} from "../../../shared/UserManager";
-import {UserResponse} from "../../../user/model/User";
 import {ChatMessage} from "../../../team/model/Chat";
-import {error} from "@angular/compiler-cli/src/transformers/util";
 
 describe('ChatService', () => {
   let service: ChatService;
   let httpMock: HttpTestingController;
+
+  const BASE_URL = "http://localhost:9090";
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -52,9 +50,7 @@ describe('ChatService', () => {
         expect(response[0].username).toEqual(messages[0].username);
       });
 
-    const req = httpMock.expectOne(
-      'http://localhost:9090/api/v1/messages/rooms/1'
-    );
+    const req = httpMock.expectOne(BASE_URL + '/api/v1/messages/rooms/1');
 
     req.flush(messages);
     expect(req.request.method).toEqual('GET');

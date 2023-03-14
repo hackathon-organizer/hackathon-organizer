@@ -4,14 +4,15 @@ import {Observable} from "rxjs";
 import {Tag, TeamInvitationRequest, TeamRequest, TeamResponse, TeamResponsePage} from "../../../team/model/Team";
 import {UserManager} from "../../../shared/UserManager";
 import {TeamInvitationNotification} from "../../../team/model/Notifications";
+import {environment} from "../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService {
 
-  BASE_URL_READ = 'http://localhost:9090/api/v1/read/teams/';
-  BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/teams/';
+  private BASE_URL_READ = environment.API_URL + '/api/v1/read/teams/';
+  private BASE_URL_UPDATE = environment.API_URL + '/api/v1/write/teams/';
 
   constructor(private http: HttpClient) {
   }
@@ -46,34 +47,28 @@ export class TeamService {
   }
 
   createTeam(team: TeamRequest): Observable<TeamResponse> {
-
     return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
   }
 
   getTags(): Observable<Tag[]> {
-
     return this.http.get<Tag[]>(this.BASE_URL_READ + "tags");
   }
 
   getTeamById(teamId: number): Observable<TeamResponse> {
-
     return this.http.get<TeamResponse>(this.BASE_URL_READ + teamId);
   }
 
   addUserToTeam(teamId: number, userId: number): Observable<any> {
-
     return this.http.patch(this.BASE_URL_UPDATE + teamId + '/participants/' + userId, null);
   }
 
   openOrCloseTeamForMembers(teamId: number, teamStatus: any): Observable<boolean> {
-
     return this.http.patch<boolean>(this.BASE_URL_UPDATE + teamId, teamStatus);
   }
 
   getTeamSuggestions(userTags: Tag[], hackathonId: number): Observable<TeamResponse[]> {
 
     const userTagsNames = userTags.map(tag => tag.name);
-
     return this.http.post<TeamResponse[]>(this.BASE_URL_READ + "suggestions", userTagsNames, {
       params: {
         hackathonId: hackathonId
@@ -93,8 +88,8 @@ export class TeamService {
   }
 
   public fetchUserInvites(hackathonId: number) {
-    const userId = UserManager.currentUserFromStorage.id;
 
+    const userId = UserManager.currentUserFromStorage.id;
     return this.http.get<TeamInvitationNotification[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId, {
       params: {
         hackathonId: hackathonId

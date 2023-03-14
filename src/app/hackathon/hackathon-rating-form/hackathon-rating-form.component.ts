@@ -30,10 +30,10 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
 
   constructor(private formBuilder: FormBuilder,
-    private hackathonService: HackathonService,
-    private route: ActivatedRoute,
-    private logger: NGXLogger,
-    private toastr: ToastrService) {
+              private hackathonService: HackathonService,
+              private route: ActivatedRoute,
+              private logger: NGXLogger,
+              private toastr: ToastrService) {
   }
 
   get criteria(): FormArray {

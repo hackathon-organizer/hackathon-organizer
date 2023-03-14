@@ -22,6 +22,9 @@ describe('HackathonService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
+  const BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/hackathons/';
+  const BASE_URL_READ = 'http://localhost:9090/api/v1/read/hackathons/';
+
   const mockHackathonRequest: HackathonRequest = {
     name: 'Test Hackathon',
     eventStartDate: new Date(),
@@ -63,7 +66,7 @@ describe('HackathonService', () => {
       expect(response).toEqual(mockHackathonResponse);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_UPDATE);
+    const request = httpMock.expectOne(BASE_URL_UPDATE);
     expect(request.request.method).toBe('POST');
     request.flush(mockHackathonResponse);
   });
@@ -75,7 +78,7 @@ describe('HackathonService', () => {
       expect(response).toEqual(mockHackathonResponse);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_READ + '1');
+    const request = httpMock.expectOne(BASE_URL_READ + '1');
     expect(request.request.method).toBe('GET');
     request.flush(mockHackathonResponse);
   });
@@ -89,7 +92,7 @@ describe('HackathonService', () => {
       expect(participants).toEqual(mockParticipants);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_READ + '1/participants');
+    const request = httpMock.expectOne(BASE_URL_READ + '1/participants');
     expect(request.request.method).toBe('GET');
     request.flush(mockParticipants);
   });
@@ -101,7 +104,7 @@ describe('HackathonService', () => {
       expect(teams).toEqual(mockTeams);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_READ + '1/teams');
+    const request = httpMock.expectOne(BASE_URL_READ + '1/teams');
     expect(request.request.method).toBe('GET');
     request.flush(mockTeams);
   });
@@ -115,7 +118,7 @@ describe('HackathonService', () => {
       expect(criteriaAnswers).toEqual(mockCriteriaAnswers);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_READ + '1/criteria/answers?userId=1');
+    const request = httpMock.expectOne(BASE_URL_READ + '1/criteria/answers?userId=1');
     expect(request.request.method).toBe('GET');
     request.flush(mockCriteriaAnswers);
   });
@@ -133,7 +136,7 @@ describe('HackathonService', () => {
       expect(criteria).toEqual(mockCriteria);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_READ + '1/criteria');
+    const request = httpMock.expectOne(BASE_URL_READ + '1/criteria');
     expect(request.request.method).toBe('GET');
     request.flush(mockCriteria);
   });
@@ -145,7 +148,7 @@ describe('HackathonService', () => {
       expect(result).toEqual(mockCriteriaAnswers);
     });
 
-    const request = httpMock.expectOne(service.BASE_URL_UPDATE + '1/criteria/answers');
+    const request = httpMock.expectOne(BASE_URL_UPDATE + '1/criteria/answers');
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toEqual(mockCriteriaAnswers);
     request.flush(mockCriteriaAnswers);
@@ -158,7 +161,7 @@ describe('HackathonService', () => {
       expect(result).toBeUndefined();
     });
 
-    const request = httpMock.expectOne(`${service.BASE_URL_UPDATE}${hackathonId}/criteria/${idToDelete}`);
+    const request = httpMock.expectOne(BASE_URL_UPDATE + '1/criteria/1');
     expect(request.request.method).toBe('DELETE');
   });
 
@@ -168,18 +171,18 @@ describe('HackathonService', () => {
       expect(result).toEqual(teamScore);
     });
 
-    const request = httpMock.expectOne(`${service.BASE_URL_READ}${hackathonId}/leaderboard`);
+    const request = httpMock.expectOne(BASE_URL_READ + '1/leaderboard');
     expect(request.request.method).toBe('GET');
     request.flush(teamScore);
   });
 
   it('should add user to the hackathon participants', () => {
-    const hackathonId = 123;
-    const userId = 456;
+    const hackathonId = 1;
+    const userId = 1;
 
     service.addUserToHackathon(hackathonId, userId).subscribe();
 
-    const req = httpMock.expectOne(`${service.BASE_URL_UPDATE}${hackathonId}/participants/${userId}`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/participants/1');
     expect(req.request.method).toEqual('PATCH');
   });
 });

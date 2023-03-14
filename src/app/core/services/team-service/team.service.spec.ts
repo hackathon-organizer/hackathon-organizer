@@ -5,8 +5,6 @@ import {HttpClientTestingModule, HttpTestingController} from "@angular/common/ht
 import {Tag, TeamRequest, TeamResponse} from "../../../team/model/Team";
 import {TeamInvitationNotification} from "../../../team/model/Notifications";
 import {NotificationType} from "../../../user/model/NotificationType";
-import {KeycloakService} from "keycloak-angular";
-import {ToastrService} from "ngx-toastr";
 
 describe('TeamService', () => {
   let service: TeamService;
@@ -19,6 +17,9 @@ describe('TeamService', () => {
     service = TestBed.inject(TeamService);
     httpMock = TestBed.inject(HttpTestingController);
   });
+
+  let BASE_URL_READ = 'http://localhost:9090/api/v1/read/teams/';
+  let BASE_URL_UPDATE = 'http://localhost:9090/api/v1/write/teams/';
 
   const teamInvitationNotification: TeamInvitationNotification = {
     id: 1,
@@ -61,7 +62,7 @@ describe('TeamService', () => {
       expect(result).toBeTruthy();
     });
 
-    const req = httpMock.expectOne(service.BASE_URL_UPDATE + '1/invitations?username=testuser');
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/invitations?username=testuser');
     expect(req.request.method).toBe('POST');
   });
 
@@ -82,7 +83,7 @@ describe('TeamService', () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    const req = httpMock.expectOne(service.BASE_URL_READ + 'suggestions?hackathonId=1');
+    const req = httpMock.expectOne(BASE_URL_READ + 'suggestions?hackathonId=1');
     expect(req.request.method).toBe('POST');
     req.flush(userTags);
   });
@@ -103,7 +104,7 @@ describe('TeamService', () => {
         expect(actual).toEqual(expected);
       });
 
-    const req = httpMock.expectOne(`http://localhost:9090/api/v1/write/teams/${teamInvitationNotification.teamId}/invitations`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/invitations');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(expected);
     req.flush(expected);
@@ -125,7 +126,7 @@ describe('TeamService', () => {
         expect(actual).toEqual(expected);
       });
 
-    const req = httpMock.expectOne(`http://localhost:9090/api/v1/write/teams/${teamInvitationNotification.teamId}/invitations`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/invitations');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(expected);
     req.flush(expected);
@@ -143,7 +144,7 @@ describe('TeamService', () => {
         expect(actual).toEqual(expected);
       });
 
-    const req = httpMock.expectOne(service.BASE_URL_UPDATE + '1/invitations?username=user1');
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1/invitations?username=user1');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(userId);
     req.flush(expected);
@@ -166,7 +167,7 @@ describe('TeamService', () => {
       expect(response).toEqual(expectedResponse);
     });
 
-    const req = httpMock.expectOne(service.BASE_URL_READ + 'search?hackathonId=1&name=team&page=0&size=10');
+    const req = httpMock.expectOne(BASE_URL_READ + 'search?hackathonId=1&name=team&page=0&size=10');
     expect(req.request.method).toEqual('GET');
     req.flush(expectedResponse);
   });
@@ -179,7 +180,7 @@ describe('TeamService', () => {
       expect(response).toEqual(mockTeamResponse);
     });
 
-    const req = httpMock.expectOne(`http://localhost:9090/api/v1/write/teams/${teamId}`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1');
     expect(req.request.method).toEqual('PUT');
     req.flush(mockTeamResponse);
   });
@@ -189,7 +190,7 @@ describe('TeamService', () => {
       expect(team).toEqual(mockTeamResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:9090/api/v1/write/teams');
+    const req = httpMock.expectOne(BASE_URL_UPDATE.slice(0, -1));
     expect(req.request.method).toEqual('POST');
     req.flush(mockTeamResponse);
   });
@@ -206,7 +207,7 @@ describe('TeamService', () => {
       expect(tags).toEqual(mockTags);
     });
 
-    const req = httpMock.expectOne('http://localhost:9090/api/v1/read/teams/tags');
+    const req = httpMock.expectOne(BASE_URL_READ + 'tags');
     expect(req.request.method).toEqual('GET');
     req.flush(mockTags);
   });
@@ -219,7 +220,7 @@ describe('TeamService', () => {
       expect(team).toEqual(mockTeamResponse);
     });
 
-    const req = httpMock.expectOne('http://localhost:9090/api/v1/read/teams/1');
+    const req = httpMock.expectOne(BASE_URL_READ + '1');
     expect(req.request.method).toEqual('GET');
     req.flush(mockTeamResponse);
   });
@@ -233,7 +234,7 @@ describe('TeamService', () => {
       expect(response).toBeTrue();
     });
 
-    const req = httpMock.expectOne(`http://localhost:9090/api/v1/write/teams/${teamId}`);
+    const req = httpMock.expectOne(BASE_URL_UPDATE + '1');
     expect(req.request.method).toEqual('PATCH');
     expect(req.request.body).toEqual(teamStatus);
     req.flush(true);

@@ -8,7 +8,7 @@ import {NGXLogger} from "ngx-logger";
 export class ApiInterceptor implements HttpInterceptor {
 
   constructor(private toastr: ToastrService,
-    private logger: NGXLogger) {
+              private logger: NGXLogger) {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

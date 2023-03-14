@@ -24,10 +24,10 @@ export class TeamProfileComponent implements OnInit {
   private routeSubscription: Subscription = new Subscription();
 
   constructor(private userService: UserService,
-    private teamService: TeamService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private toastr: ToastrService) {
+              private teamService: TeamService,
+              private route: ActivatedRoute,
+              private router: Router,
+              private toastr: ToastrService) {
   }
 
   get isUserTeamMember() {

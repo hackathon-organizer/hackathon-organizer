@@ -37,12 +37,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private routeSubscription: Subscription = new Subscription();
 
   constructor(private route: ActivatedRoute,
-    private router: Router,
-    private userService: UserService,
-    private keycloakService: KeycloakService,
-    private teamService: TeamService,
-    private formBuilder: FormBuilder,
-    private toastr: ToastrService) {
+              private router: Router,
+              private userService: UserService,
+              private keycloakService: KeycloakService,
+              private teamService: TeamService,
+              private formBuilder: FormBuilder,
+              private toastr: ToastrService) {
   }
 
   get NotificationType() {

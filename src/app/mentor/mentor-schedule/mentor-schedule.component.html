@@ -183,7 +183,8 @@
              let-tooltipTemplate="tooltipTemplate"
              let-weekEvent="weekEvent">
 
-  <div (mwlClick)="eventClicked.emit({ sourceEvent: $event })" (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
+  <div (mwlClick)="eventClicked.emit({ sourceEvent: $event })"
+       (mwlKeydownEnter)="eventClicked.emit({ sourceEvent: $event })"
        [attr.aria-label]="{ event: weekEvent.tempEvent || weekEvent.event } | calendarA11y: 'eventDescription'"
        [mwlCalendarTooltip]="
           !tooltipDisabled

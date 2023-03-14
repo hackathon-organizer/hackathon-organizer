@@ -6,16 +6,20 @@
 
     <video
       #localVideo
-      autoplay class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block" id="self-view" muted poster="assets/poster-person.svg"></video>
+      autoplay
+      class="z-20 absolute bottom-0 rounded-tr-lg rounded-bl-lg h-42 w-64 bg-gray-500 bg-opacity-50 hidden md:block"
+      id="self-view" muted poster="assets/poster-person.svg"></video>
 
     <div
       class="absolute right-0 bottom-0 h-14 bg-gray-600 w-3/5 z-10 rounded-t-lg flex justify-center bg-opacity-40 space-x-14">
-      <button (click)="toggleVideoSharing()" [disabled]="locked" [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
+      <button (click)="toggleVideoSharing()" [disabled]="locked"
+              [ngClass]="videoActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
               class="video-button">
         <img alt="Camera" src="assets/icons/camera.svg">
       </button>
 
-      <button (click)="startSharingScreen()" [disabled]="locked" [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
+      <button (click)="startSharingScreen()" [disabled]="locked"
+              [ngClass]="screenActive ? 'btn-success' : '' || locked ? 'bg-base-200 cursor-not-allowed' : ''"
               class="video-button">
         <img alt="Screen share" src="assets/icons/screen-share.svg">
       </button>
@@ -40,10 +44,12 @@
 
   <div class="w-4/5 mx-auto flex mt-8 justify-center" id="chat">
     <div class="mx-8 flex flex-col w-4/5">
-      <textarea [(ngModel)]="chatMessages" class="textarea textarea-primary resize-none w-full" id="chat-window" readonly
+      <textarea [(ngModel)]="chatMessages" class="textarea textarea-primary resize-none w-full" id="chat-window"
+                readonly
                 rows="15"></textarea>
       <div class="flex items-center mt-4">
-        <input (keydown.enter)="sendTextMessage()" [(ngModel)]="chatEntry" class="mr-5 w-full input input-primary w-full"
+        <input (keydown.enter)="sendTextMessage()" [(ngModel)]="chatEntry"
+               class="mr-5 w-full input input-primary w-full"
                placeholder="Type your message here..." type="text">
         <input (click)="sendTextMessage()" class="btn btn-primary" type="submit" value="Send"/>
       </div>
