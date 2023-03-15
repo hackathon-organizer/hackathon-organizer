@@ -11,7 +11,7 @@ import {
   ScheduleEntryResponse,
   ScheduleEntrySession,
   TeamMeetingRequest
-} from "../../../mentor/model/ScheduleEntryEvent";
+} from "../../../mentor/model/ScheduleEntry";
 import * as isBetween from 'dayjs/plugin/isBetween'
 import {NotificationType} from "../../../user/model/NotificationType";
 import {TeamService} from "../team-service/team.service";

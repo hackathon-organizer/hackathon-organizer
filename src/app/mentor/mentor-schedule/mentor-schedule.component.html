@@ -39,7 +39,7 @@
 
 <mwl-calendar-day-view
   (eventClicked)="handleEvent($event.event)"
-  (eventTimesChanged)="eventTimesChanged($event)"
+  (eventTimesChanged)="eventTimeChange($event)"
   [dayStartHour]="8"
   [eventTemplate]="hoDayCell"
   [events]="events"
@@ -160,7 +160,7 @@
     </div>
 
 
-    <button (click)="joinMeeting(modalData.teamId)" [disabled]="!canJoinToMeeting(modalData.teamId)"
+    <button (click)="navigateToMeeting(modalData.teamId)" [disabled]="!canJoinToMeeting(modalData.teamId)"
             class="btn btn-primary w-2/5 mt-3">Join meeting
     </button>
 

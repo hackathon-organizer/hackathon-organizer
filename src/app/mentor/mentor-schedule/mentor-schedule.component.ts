@@ -8,12 +8,12 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {NGXLogger} from "ngx-logger";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {
-  ScheduleEntryEvent,
+  ScheduleEntry,
   ScheduleEntryRequest,
   ScheduleEntryResponse,
   ScheduleEntrySession,
   TeamMeetingRequest
-} from "../model/ScheduleEntryEvent";
+} from "../model/ScheduleEntry";
 import {ToastrService} from "ngx-toastr";
 import {UserManager} from "../../shared/UserManager";
 import dayjs from "dayjs";
@@ -38,11 +38,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   CalendarView = CalendarView;
   viewDate: Date = new Date();
   refresh = new Subject<void>();
-  events: ScheduleEntryEvent[] = [];
-  userEvents: ScheduleEntryEvent[] = [];
+  events: ScheduleEntry[] = [];
+  userEvents: ScheduleEntry[] = [];
   activeDayIsOpen: boolean = true;
   currentUser = UserManager.currentUserFromStorage;
-  modalData: ScheduleEntryEvent = {start: new Date(), isAvailable: false, title: ""};
+  modalData: ScheduleEntry = {start: new Date(), isAvailable: false, title: ""};
   currentTime: Observable<Date> = timer(0, 1000).pipe(map(() => new Date()));
   loading = false;
   private subscription: Subscription = new Subscription();
@@ -55,10 +55,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
               private toastr: ToastrService) {
   }
 
-  get showEvent(): boolean {
-    return dayjs(this.modalData.start).isBefore(dayjs());
-  }
-
   ngOnInit(): void {
 
     this.subscription = this.route.params.subscribe(params => {
@@ -67,27 +63,27 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  eventTimesChanged(timesChangedEvent: CalendarEventTimesChangedEvent): void {
+  eventTimeChange(timeChangeEvent: CalendarEventTimesChangedEvent): void {
 
-    this.events = this.events.map((iEvent) => {
-      if (iEvent === timesChangedEvent.event) {
+    this.events = this.events.map((scheduleEntryEvent) => {
+      if (scheduleEntryEvent === timeChangeEvent.event) {
 
         const updatedScheduleEntrySession: ScheduleEntrySession = {
-          sessionStart: timesChangedEvent.newStart,
-          sessionEnd: timesChangedEvent.newEnd!
+          sessionStart: timeChangeEvent.newStart!,
+          sessionEnd: timeChangeEvent.newEnd!
         }
-        const eventId = timesChangedEvent.event.id as number;
+        const eventId = timeChangeEvent.event.id as number;
 
         this.userService.updateUserScheduleEntryTime(this.currentUser.id, eventId, updatedScheduleEntrySession)
           .subscribe(() => this.scheduleUpdateSuccessToast());
 
         return {
-          ...timesChangedEvent.event,
-          start: timesChangedEvent.newStart,
-          end: timesChangedEvent.newEnd,
+          ...timeChangeEvent.event,
+          start: timeChangeEvent.newStart,
+          end: timeChangeEvent.newEnd,
         };
       }
-      return iEvent;
+      return scheduleEntryEvent;
     });
   }
 
@@ -108,7 +104,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         colors.main.secondary = entryResponse.entryColor;
       }
 
-      const entryEvent: ScheduleEntryEvent = {
+      const entryEvent: ScheduleEntry = {
         id: entryResponse.id,
         title: this.currentUser.username,
         start: dayjs(entryResponse.sessionStart).toDate(),
@@ -135,13 +131,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteEvent(eventToDelete: CalendarEvent) {
+  deleteEvent(eventToDelete: CalendarEvent): void {
 
     this.loading = true;
-    this.logger.info("Trying to delete event with id ", eventToDelete.id);
 
-    this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number)
-      .subscribe(() => {
+    this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number).subscribe(() => {
 
         this.events = this.events.filter((event) => event.id !== eventToDelete.id);
         this.userEvents = this.userEvents.filter((event) => event.id !== eventToDelete.id);
@@ -155,12 +149,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   updateEvents(): void {
 
     this.loading = true;
-
     const eventsCopy = Object.assign([], this.userEvents);
-
     const scheduleEntries: ScheduleEntryRequest[] = eventsCopy.map(entry => this.mapToScheduleEntryRequest(entry));
-
-    this.logger.info("Sending schedule to save ", scheduleEntries);
 
     this.userService.updateEntryEvents(scheduleEntries).subscribe(() => {
       this.events.concat(eventsCopy);
@@ -170,7 +160,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  assignTeam(event: ScheduleEntryEvent) {
+  assignTeam(event: ScheduleEntry): void {
 
     const teamId = this.currentUser.currentTeamId;
 
@@ -180,7 +170,6 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
         teamOwnerId: this.currentUser.id,
         teamId: teamId
       };
-
       this.userService.assignTeamToMeetingWithMentor(event.id as number, teamMeetingRequest).subscribe((isAvailable) => {
 
         event.isAvailable = isAvailable;
@@ -191,16 +180,11 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  setView(view: CalendarView) {
-    this.view = view;
-  }
-
-  handleEvent(event: ScheduleEntryEvent): void {
+  handleEvent(event: ScheduleEntry): void {
     this.modalData = event;
   }
 
   canAssignTeam(): boolean {
-
     return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
   }
 
@@ -213,12 +197,14 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  joinMeeting(teamId: string | number | undefined) {
+  navigateToMeeting(teamId: string | number): void {
 
-    this.router.navigate(["hackathon", this.hackathonId, "team", teamId, "chat"]);
+    if (teamId) {
+      this.router.navigate(["hackathon", this.hackathonId, "team", teamId, "chat"]);
+    }
   }
 
-  canJoinToMeeting(teamId: string | number | undefined) {
+  canJoinToMeeting(teamId: string | number): boolean {
 
     if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
@@ -228,16 +214,10 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-    this.refresh.unsubscribe();
-  }
-
-  private getHackathonSchedule(hackathonId: number) {
+  private getHackathonSchedule(hackathonId: number): void {
 
     this.userService.getHackathonSchedule(hackathonId).subscribe(schedule => {
 
-      this.logger.info("Hackathon schedule received ", schedule);
       this.events = schedule.map(entry => this.mapToCalendarEvent(entry));
 
       if (this.currentUser) {
@@ -249,7 +229,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntryEvent {
+  private mapToCalendarEvent(entry: ScheduleEntryResponse): ScheduleEntry {
 
     colors.main = {
       primary: colors.main.primary,
@@ -270,14 +250,12 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       },
       isAvailable: entry.isAvailable,
       info: entry.info,
-    } as ScheduleEntryEvent;
+    } as ScheduleEntry;
   }
 
-  private scheduleUpdateSuccessToast() {
-    this.toastr.success("Schedule updated successfully");
-  }
 
-  private mapToScheduleEntryRequest(entry: ScheduleEntryEvent): ScheduleEntryRequest {
+  private mapToScheduleEntryRequest(entry: ScheduleEntry): ScheduleEntryRequest {
+
     return {
       id: entry.id,
       sessionStart: entry.start,
@@ -287,5 +265,22 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       teamId: entry.teamId,
       hackathonId: entry.hackathonId,
     } as ScheduleEntryRequest;
+  }
+
+  get showEvent(): boolean {
+    return dayjs(this.modalData.start).isBefore(dayjs());
+  }
+
+  setView(view: CalendarView): void {
+    this.view = view;
+  }
+
+  private scheduleUpdateSuccessToast(): void {
+    this.toastr.success("Schedule updated successfully");
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    this.refresh.unsubscribe();
   }
 }

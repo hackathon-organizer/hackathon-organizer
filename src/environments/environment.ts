@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  API_URL: "http://localhost:9090"
+  API_URL: "http://localhost:9090",
+  KEYCLOAK_URL: "http://localhost:8080"
 };
 
 /*

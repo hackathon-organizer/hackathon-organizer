@@ -8,7 +8,7 @@ import {ToastrModule, ToastrService} from "ngx-toastr";
 import {LoggerTestingModule} from "ngx-logger/testing";
 import {UserManager} from "../../../shared/UserManager";
 import {Tag} from "../../../team/model/Team";
-import {ScheduleEntryRequest, ScheduleEntryResponse} from "../../../mentor/model/ScheduleEntryEvent";
+import {ScheduleEntryRequest, ScheduleEntryResponse} from "../../../mentor/model/ScheduleEntry";
 import {environment} from "../../../../environments/environment";
 
 describe('UserService', () => {

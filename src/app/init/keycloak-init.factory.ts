@@ -1,4 +1,5 @@
 import {KeycloakService} from "keycloak-angular";
+import {environment} from "../../environments/environment";
 
 export function initializeKeycloak(
   keycloak: KeycloakService
@@ -6,14 +7,13 @@ export function initializeKeycloak(
   return () =>
     keycloak.init({
       config: {
-        url: 'http://localhost:8080' + '/auth',
+        url: environment.KEYCLOAK_URL + '/auth',
         realm: 'hackathon-organizer',
         clientId: 'hackathon-organizer-client',
 
       },
       initOptions: {
         redirectUri: window.location.origin,
-        // checkLoginIframe: false,
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri:
           window.location.origin + '/assets/silent-check-sso.html'

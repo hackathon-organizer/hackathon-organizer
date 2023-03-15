@@ -1,6 +1,6 @@
 import {CalendarEvent} from "angular-calendar";
 
-export interface ScheduleEntryEvent extends CalendarEvent {
+export interface ScheduleEntry extends CalendarEvent {
   hackathonId?: number;
   isAvailable?: boolean;
   info?: string;
