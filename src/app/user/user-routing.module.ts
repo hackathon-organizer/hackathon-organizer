@@ -1,7 +1,6 @@
 import {RouterModule, Routes} from "@angular/router";
 import {NgModule} from "@angular/core";
 import {UserProfileComponent} from "./user-profile/user-profile.component";
-import {MentorModule} from "../mentor/mentor.module";
 
 
 const routes: Routes = [
@@ -11,7 +10,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule, MentorModule],
+  exports: [RouterModule],
 })
 export class UserRoutingModule {
   static components = [

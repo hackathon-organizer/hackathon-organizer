@@ -1,17 +1,13 @@
 <section id="user-profile">
 
   <div class="grid grid-cols-2 gap-4">
-
     <div class="m-12 flex justify-center" id="profile-image-wrapper">
-
       <div class="avatar">
         <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
           <img alt="profile image" src="{{ avatarUrl }}"/>
         </div>
       </div>
-
     </div>
-
 
     <div class="flex flex-col text-2xl" id="user-data">
 
@@ -34,21 +30,22 @@
       </div>
 
       <div *ngIf="isUserIsHackathonParticipant" class="flex justify-around">
-        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile"
-                class="btn btn-info my-5">Set as mentor
+        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
+          Set as mentor
         </button>
-        <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile"
-                class="btn btn-info my-5">Set as jury
+        <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
+          Set as jury
         </button>
 
-        <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon || !currentUser?.currentTeamId ||
-currentUser?.currentTeamId===user.currentTeamId"
-                class="btn btn-info my-5">Invite to team
+        <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon ||
+         !currentUser?.currentTeamId || currentUser?.currentTeamId===user.currentTeamId" class="btn btn-info my-5">
+          Invite to team
         </button>
       </div>
 
       <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn"
-              routerLink="/hackathon/{{ currentUser?.currentHackathonId }}/schedule">Go to my schedule
+              routerLink="/hackathon/{{ currentUser?.currentHackathonId }}/schedule">
+        Go to my schedule
       </button>
     </div>
 
@@ -143,7 +140,7 @@ currentUser?.currentTeamId===user.currentTeamId"
                  for="edit-modal">✕</label>
 
           <h3 class="font-bold text-lg text-center">Profile edit</h3>
-          <form (ngSubmit)="save()" [formGroup]="userEditForm" novalidate>
+          <form (ngSubmit)="saveProfile()" [formGroup]="userEditForm" novalidate>
             <span class="font-bold text-lg">About: </span>
             <textarea class="ho-textarea-primary mt-2" formControlName="description"
                       placeholder="User description" rows="5"></textarea>
