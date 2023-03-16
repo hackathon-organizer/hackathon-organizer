@@ -48,7 +48,6 @@ export class TeamFormComponent implements OnInit, OnDestroy {
       this.hackathonId = params['id'];
 
       if (this.router.url.includes("edit")) {
-
         this.teamId = params['teamId'];
         this.loadFormData();
         this.editMode = true;
@@ -58,7 +57,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  saveTeam() {
+  saveTeam(): void {
     this.loadingCreate = true;
 
     if (this.hackathonId && this.user) {
@@ -76,8 +75,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
           });
       } else {
 
-        this.teamService.createTeam(team).pipe(
-          concatMap((createdTeam: TeamResponse) => {
+        this.teamService.createTeam(team).pipe(concatMap((createdTeam: TeamResponse) => {
 
             this.user.currentTeamId = createdTeam.id;
 
@@ -97,14 +95,6 @@ export class TeamFormComponent implements OnInit, OnDestroy {
         });
       }
     }
-  }
-
-  markTag(index: number): void {
-    this.tags[index].isSelected = !this.tags[index].isSelected;
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   private initFrom(): void {
@@ -131,6 +121,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
     tags.forEach(tag => {
       group.addControl(String(tag.id), this.formBuilder.control(tag.isSelected));
     });
+
     return group;
   }
 
@@ -173,4 +164,11 @@ export class TeamFormComponent implements OnInit, OnDestroy {
     return this.tags.filter(tag => tag.isSelected);
   }
 
+  markTag(index: number): void {
+    this.tags[index].isSelected = !this.tags[index].isSelected;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 }

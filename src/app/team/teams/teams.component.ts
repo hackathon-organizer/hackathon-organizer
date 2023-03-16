@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {TeamService} from "../../core/services/team-service/team.service";
 import {debounceTime, finalize, Subscription, switchMap} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -11,32 +11,26 @@ import {FormControl} from "@angular/forms";
   templateUrl: './teams.component.html',
   styleUrls: []
 })
-export class TeamsComponent implements OnInit {
+export class TeamsComponent implements OnInit, OnDestroy {
 
   hackathonId: number = 0;
   teams: TeamResponse[] = [];
   loading = true;
   teamNameControl: FormControl = new FormControl();
+  private subscription: Subscription = new Subscription();
   paginationConfig: PaginationInstance = {
     itemsPerPage: 10,
     currentPage: 1,
     totalItems: 0
   };
-  private routeSubscription: Subscription = new Subscription();
 
-  constructor(private teamsService: TeamService, private route: ActivatedRoute) {
-  }
-
-  get currentPageNumber() {
-    return this.paginationConfig.currentPage;
-  }
-
-  get teamsCount() {
-    return this.paginationConfig.totalItems;
+  constructor(private teamsService: TeamService,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
-    this.routeSubscription = this.route.params.subscribe(params => {
+
+    this.subscription = this.route.params.subscribe(params => {
       this.hackathonId = params['id'];
       this.getHackathonTeams(params['id'], 1);
     });
@@ -71,5 +65,17 @@ export class TeamsComponent implements OnInit {
     this.loading = true;
     this.paginationConfig.currentPage = page;
     this.getHackathonTeams(this.hackathonId, page);
+  }
+
+  get currentPageNumber() {
+    return this.paginationConfig.currentPage;
+  }
+
+  get teamsCount() {
+    return this.paginationConfig.totalItems;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

@@ -30,26 +30,9 @@ export class TeamProfileComponent implements OnInit {
               private toastr: ToastrService) {
   }
 
-  get isUserTeamMember() {
-    return UserManager.isUserTeamMember(this.teamId);
-  }
-
-  get isUserHackathonMember() {
-    return UserManager.isUserHackathonMember(this.hackathonId);
-  }
-
-  get isOwner() {
-    return this.userService.isUserTeamOwner(this.teamId);
-  }
-
-  get isHackathonMember() {
-    return UserManager.isUserHackathonMember(this.hackathonId);
-  }
-
   ngOnInit(): void {
 
-    this.routeSubscription = this.route.params.pipe(
-      concatMap(params => {
+    this.routeSubscription = this.route.params.pipe(concatMap(params => {
 
         this.hackathonId = params['id'];
         this.teamId = params['teamId'];
@@ -65,7 +48,7 @@ export class TeamProfileComponent implements OnInit {
     });
   }
 
-  joinToTeam() {
+  joinToTeam(): void {
 
     this.teamService.addUserToTeam(this.teamId, UserManager.currentUserFromStorage.id).pipe(
       concatMap(() => this.userService.updateUserMembership({
@@ -82,7 +65,7 @@ export class TeamProfileComponent implements OnInit {
     });
   }
 
-  openOrCloseTeamForMembers() {
+  openOrCloseTeamForMembers(): void {
 
     if (this.isOwner && this.team) {
 
@@ -90,7 +73,6 @@ export class TeamProfileComponent implements OnInit {
 
       this.teamService.openOrCloseTeamForMembers(this.teamId, teamStatus).subscribe((isOpen) => {
         this.team!.isOpen = isOpen;
-
         this.toastr.success(`Team is now ${this.team!.isOpen ? 'open' : 'closed'} for new members`);
       });
     } else {
@@ -98,11 +80,27 @@ export class TeamProfileComponent implements OnInit {
     }
   }
 
-  getTeamMembers() {
+  getTeamMembers(): Subscription {
     return this.userService.getMembersByTeamId(this.teamId).subscribe(members => this.teamMembers = members);
   }
 
-  redirectToTeamEdit() {
+  navigateToTeamEdit(): void {
     this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
+  }
+
+  get isUserTeamMember(): boolean {
+    return UserManager.isUserTeamMember(this.teamId);
+  }
+
+  get isUserHackathonMember(): boolean {
+    return UserManager.isUserHackathonMember(this.hackathonId);
+  }
+
+  get isOwner(): boolean {
+    return this.userService.isUserTeamOwner(this.teamId);
+  }
+
+  get isHackathonMember(): boolean {
+    return UserManager.isUserHackathonMember(this.hackathonId);
   }
 }

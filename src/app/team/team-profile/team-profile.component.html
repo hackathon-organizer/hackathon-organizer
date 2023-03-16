@@ -27,7 +27,7 @@
           <button class="btn btn-accent">Join team chat</button>
         </a>
 
-        <button (click)="redirectToTeamEdit()" *ngIf="isOwner" class="btn btn-accent m-3">Edit team</button>
+        <button (click)="navigateToTeamEdit()" *ngIf="isOwner" class="btn btn-accent m-3">Edit team</button>
 
         <a class="m-3" routerLink="/hackathon/{{ hackathonId }}/participants">
           <button class="btn btn-success">Invite users</button>

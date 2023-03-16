@@ -26,8 +26,7 @@
                 class="error-message">
           The team name must be longer than 5 characters.</span>
 
-          <textarea [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched
-          ||
+          <textarea [ngClass]="{'is-invalid': (newTeamForm.get('description')?.touched ||
           newTeamForm.get('description')?.dirty) &&
           !newTeamForm.get('description')?.valid }" class="ho-textarea-primary" formControlName="description"
                     id="descriptionId" placeholder="Description (required)"
@@ -55,6 +54,7 @@
           <ng-container *ngIf="loadingCreate">
             <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
           </ng-container>
+
           <input [disabled]="!newTeamForm.valid || loadingCreate" [value]="editMode ? 'Save' : 'Create'"
                  class="btn btn-primary"
                  type="submit">

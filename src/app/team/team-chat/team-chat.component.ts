@@ -9,6 +9,7 @@ import {NGXLogger} from "ngx-logger";
 import {OpenVidu, Publisher, Session, StreamEvent, StreamManager, Subscriber, VideoInsertMode} from 'openvidu-browser';
 import {UserManager} from "../../shared/UserManager";
 import {BasicMessage, ChatMessage} from "../model/Chat";
+import {UserResponse} from "../../user/model/User";
 
 @Component({
   selector: 'ho-team-chat',
@@ -24,7 +25,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   chatEntry: string = "";
   chatMessages: string = "";
   chatRoomId?: number;
-  users: any[] = [];
+  users: UserResponse[] = [];
   OV!: OpenVidu;
   session!: Session;
   publisher!: StreamManager;
@@ -52,30 +53,26 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       this.teamService.getTeamById(params['teamId']).subscribe(team => {
 
         this.chatRoomId = team.teamChatRoomId;
-
         this.chatService.connect(this.chatRoomId);
         this.chatService.messages.subscribe(message => this.messageHandler(message));
 
         this.chatService.getChatRoomMessages(this.chatRoomId).subscribe(messages => {
-
           messages.forEach(message => this.updateChat(message));
         });
       })
     });
   }
 
-  joinSession() {
+  joinSession(): void {
 
     this.inCall = true;
 
     this.OV = new OpenVidu();
-
     this.session = this.OV.initSession();
 
     this.session.on('streamCreated', (event: StreamEvent) => {
 
       let subscriber: Subscriber = this.session.subscribe(event.stream, undefined);
-
       this.subscribers.push(subscriber);
 
       if (subscriber.stream.hasAudio) {
@@ -110,10 +107,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
         });
 
         this.session.publish(publisher);
-
         this.mainStreamManager = publisher;
         this.publisher = publisher;
-
         this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
       })
       .catch(error => {
@@ -121,13 +116,14 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  toggleAudiSharing() {
-    this.audioActive = !this.audioActive;
+  toggleAudiSharing(): void {
 
+    this.audioActive = !this.audioActive;
     this.updatePublisher();
   }
 
-  toggleVideoSharing() {
+  toggleVideoSharing(): void {
+
     this.videoActive = !this.videoActive;
 
     if (this.videoActive) {
@@ -149,7 +145,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.updatePublisher();
   }
 
-  startSharingScreen() {
+  startSharingScreen(): void {
     if (this.publisher instanceof Publisher) {
       this.session.unpublish(this.publisher);
     }
@@ -195,7 +191,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       return this.sessionToken;
     } else {
       this.logger.info("No token found for session: ", this.session);
-      throw new Error("No token found. Please refresh page.");
+      throw new Error("No token found. Please try again.");
     }
   }
 
@@ -205,11 +201,11 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
       return this.sessionId;
     } else {
       this.logger.info("No session found");
-      throw new Error("No session found. Please refresh page.")
+      throw new Error("No session found. Please try again.")
     }
   }
 
-  leaveSession() {
+  leaveSession(): void {
 
     if (this.publisher instanceof Publisher) {
       this.session.unpublish(this.publisher);
@@ -225,7 +221,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     this.inCall = false;
   }
 
-  sendTextMessage() {
+  sendTextMessage(): void {
 
     if (this.chatRoomId) {
       const chatMessage: ChatMessage = {
@@ -247,6 +243,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
   }
 
   toggleFullscreen() {
+
     const remoteVideo = this.remoteVideo.nativeElement;
 
     if (remoteVideo.requestFullscreen) {
@@ -260,13 +257,7 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-
-    this.leaveSession();
-    this.routeSubscription.unsubscribe();
-  }
-
-  private messageHandler(message: BasicMessage) {
+  private messageHandler(message: BasicMessage): void {
 
     switch (message.messageType) {
       case MessageType.SESSION: {
@@ -295,7 +286,8 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private updatePublisher() {
+  private updatePublisher(): void {
+
     if (this.publisher instanceof Publisher) {
       this.session.unpublish(this.publisher);
     }
@@ -312,26 +304,30 @@ export class TeamChatComponent implements AfterViewInit, OnDestroy {
     });
 
     this.session.publish(newPublisher);
-
     this.mainStreamManager = newPublisher;
     this.publisher = newPublisher;
-
     this.mainStreamManager.addVideoElement(this.localVideo.nativeElement);
   }
 
   private deleteSubscriber(streamManager: StreamManager): void {
+
     let index = this.subscribers.indexOf(streamManager, 0);
     if (index > -1) {
       this.subscribers.splice(index, 1);
     }
   }
 
-  private updateChatParticipants(users: any[]) {
+  private updateChatParticipants(users: UserResponse[]): void {
     this.users = users;
   }
 
-  private updateChat(message: ChatMessage) {
-
+  private updateChat(message: ChatMessage): void {
     this.chatMessages += message.username + ": " + message.entryText + '\n';
+  }
+
+  ngOnDestroy(): void {
+
+    this.leaveSession();
+    this.routeSubscription.unsubscribe();
   }
 }
