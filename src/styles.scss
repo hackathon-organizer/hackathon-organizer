@@ -68,6 +68,14 @@
   box-shadow: 0 0 0 2px hsl(var(--b1));
 }
 
+.mobile-view-table-row {
+  @apply hidden md:table-row;
+}
+
+.mobile-view-table-cell {
+  @apply hidden md:table-row;
+}
+
 @tailwind components;
 @tailwind utilities;
 

@@ -10,7 +10,7 @@
 
     <table *ngIf="!loading" class="table w-full">
       <thead>
-      <tr>
+      <tr class="mobile-view-table-row">
         <th></th>
         <th>Name</th>
         <th>Participants number</th>
@@ -18,18 +18,21 @@
         <th>End Date</th>
         <th></th>
       </tr>
+      <tr class="md:hidden">
+        <th>Name</th>
+      </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let hackathon of hackathons | paginate: paginationConfig; index as i;">
-        <th>
+      <tr class="flex flex-col md:table-row" *ngFor="let hackathon of hackathons | paginate: paginationConfig; index as i;">
+        <td class="hidden md:table-cell">
           <span *ngIf="currentPageNumber==0">{{(i + 1)}}</span>
           <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
-        </th>
+        </td>
         <td>
           <div class="flex items-center space-x-3">
             <div class="avatar">
               <div class="mask mask-squircle w-12 h-12">
-                <img alt="Avatar Tailwind CSS Component" src="https://placeimg.com/80/80/people"/>
+                <img alt="Avatar" src="https://placeimg.com/80/80/people"/>
               </div>
             </div>
             <div>
@@ -37,20 +40,19 @@
             </div>
           </div>
         </td>
-        <td>
+        <td class="mobile-view-table-cell">
           {{ hackathon.hackathonParticipantsNumber }}
         </td>
-        <td>{{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <td>{{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <th>
+        <td class="mobile-view-table-cell">{{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td class="mobile-view-table-cell">{{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td class="mx-auto">
           <a routerLink="/hackathons/{{ hackathon.id }}">
             <button class="btn btn-outline btn-md">Details</button>
           </a>
-        </th>
+        </td>
       </tr>
       </tbody>
     </table>
   </div>
-
   <ho-pagination (pageChangeEvent)="onPageChange($event)" [config]="paginationConfig"></ho-pagination>
 </section>
