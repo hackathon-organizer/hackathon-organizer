@@ -4,13 +4,13 @@ import {HomepageComponent} from "./core/homepage/homepage.component";
 
 const routes: Routes = [
   {path: '', component: HomepageComponent},
-  { path: '**', redirectTo: '' },
+  //{ path: '**', redirectTo: '' },
   {
     path: 'user',
     loadChildren: () => import('./user/user.module').then((m) => m.UserModule)
   },
   {
-    path: 'hackathon',
+    path: 'hackathons',
     loadChildren: () => import('./hackathon/hackathon.module').then((m) => m.HackathonModule)
   },
   {

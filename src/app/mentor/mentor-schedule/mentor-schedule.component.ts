@@ -197,14 +197,14 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  navigateToMeeting(teamId: string | number): void {
+  navigateToMeeting(teamId: string | number | undefined): void {
 
     if (teamId) {
       this.router.navigate(["hackathon", this.hackathonId, "team", teamId, "chat"]);
     }
   }
 
-  canJoinToMeeting(teamId: string | number): boolean {
+  canJoinToMeeting(teamId: string | number | undefined): boolean {
 
     if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
