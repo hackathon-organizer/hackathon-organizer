@@ -43,9 +43,6 @@ export class CustomDateFormatter extends CalendarNativeDateFormatter {
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA
   ],
-  exports: [
-    MentorScheduleComponent
-  ],
   imports: [
     CommonModule,
     MentorRoutingModule,

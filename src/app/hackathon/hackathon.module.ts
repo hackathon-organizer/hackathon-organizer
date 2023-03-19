@@ -7,16 +7,10 @@ import {RouterModule} from "@angular/router";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {NgxPaginationModule} from "ngx-pagination";
 import {SharedModule} from "../shared/shared.module";
-import {LeaderboardComponent} from './leaderboard/leaderboard.component';
 
 @NgModule({
   declarations: [
     HackathonRoutingModule.components,
-    LeaderboardComponent,
-  ],
-  exports: [
-    HackathonsComponent,
-    HackathonRoutingModule
   ],
   imports: [
     CommonModule,
@@ -25,7 +19,8 @@ import {LeaderboardComponent} from './leaderboard/leaderboard.component';
     RouterModule,
     FlatpickrModule,
     NgxPaginationModule,
-    SharedModule
+    SharedModule,
+    HackathonRoutingModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

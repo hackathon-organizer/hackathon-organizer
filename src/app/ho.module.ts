@@ -24,10 +24,7 @@ import {ApiInterceptor} from "./core/interceptors/api.interceptor";
 
 @NgModule({
   declarations: [
-    MenuComponent,
-    HoComponent,
-    FooterComponent,
-    HomepageComponent
+    HoRoutingModule.components
   ],
   imports: [
     BrowserModule,
@@ -35,10 +32,6 @@ import {ApiInterceptor} from "./core/interceptors/api.interceptor";
     HttpClientModule,
     KeycloakAngularModule,
     HoRoutingModule,
-    TeamModule,
-    HackathonModule,
-    UserModule,
-    MentorModule,
     LoggerModule.forRoot({
       serverLoggingUrl: '/api/logs',
       level: NgxLoggerLevel.DEBUG,

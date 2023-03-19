@@ -33,10 +33,10 @@
     </button>
 
     <ng-container *ngIf="userLoaded">
-      <a *ngIf="userTeamId" routerLink="/hackathon/{{ userHackathonId }}/team/{{ userTeamId }}">
+      <a *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
         <button class="btn mr-3">Go to my team</button>
       </a>
-      <a routerLink="/hackathon/new">
+      <a routerLink="/hackathons/new">
         <button class="btn mr-3">Create hackathon</button>
       </a>
 

@@ -1,6 +1,9 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {HomepageComponent} from "./core/homepage/homepage.component";
+import {MenuComponent} from "./core/menu/menu.component";
+import {HoComponent} from "./ho.component";
+import {FooterComponent} from "./core/footer/footer.component";
 
 const routes: Routes = [
   {path: '', component: HomepageComponent},
@@ -12,11 +15,7 @@ const routes: Routes = [
   {
     path: 'hackathons',
     loadChildren: () => import('./hackathon/hackathon.module').then((m) => m.HackathonModule)
-  },
-  {
-    path: 'team',
-    loadChildren: () => import('./team/team.module').then((m) => m.TeamModule)
-  },
+  }
 ];
 
 @NgModule({
@@ -24,4 +23,5 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class HoRoutingModule {
+  static components = [MenuComponent, HoComponent, FooterComponent, HomepageComponent];
 }

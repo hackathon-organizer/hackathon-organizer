@@ -50,7 +50,7 @@ export class HackathonFormComponent implements OnInit {
         user.currentHackathonId = hackathonResponse.id;
         UserManager.updateUserInStorage(user);
 
-        this.router.navigateByUrl('/hackathon/' + hackathonResponse.id);
+        this.router.navigateByUrl('/hackathons/' + hackathonResponse.id);
 
         return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
       })).pipe(finalize(() => this.loading = false))

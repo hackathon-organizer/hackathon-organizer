@@ -24,7 +24,7 @@
       </thead>
       <tbody>
       <tr class="flex flex-col md:table-row" *ngFor="let hackathon of hackathons | paginate: paginationConfig; index as i;">
-        <td class="hidden md:table-cell">
+        <td class="mobile-view-table-cell">
           <span *ngIf="currentPageNumber==0">{{(i + 1)}}</span>
           <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
         </td>

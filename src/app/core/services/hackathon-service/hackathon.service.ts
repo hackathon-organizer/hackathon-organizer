@@ -26,8 +26,10 @@ export class HackathonService {
 
   createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
-    hackathon = this.formatAndValidateDate(hackathon);
-    return this.http.post<HackathonResponse>(this.BASE_URL_UPDATE, hackathon);
+    console.log(hackathon)
+
+    //hackathon = this.formatAndValidateDate(hackathon);
+    return this.http.post<HackathonResponse>(this.BASE_URL_UPDATE.slice(0, -1), hackathon);
   }
 
   getHackathonDetailsById(id: number): Observable<HackathonResponse> {
@@ -84,6 +86,13 @@ export class HackathonService {
 
   getLeaderboard(hackathonId: number): Observable<TeamResponse[]> {
     return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/leaderboard');
+  }
+
+  uploadFile(file: File, hackathonId: number) {
+    return this.http.post(this.BASE_URL_UPDATE + hackathonId + '/files/logos', file,  {
+      reportProgress: true,
+      observe: 'events'
+    });
   }
 
   private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {

@@ -224,7 +224,7 @@ export class UserService {
 
   private openNotificationWebSocketConnection(): void {
 
-    const WS_API_URL = environment.API_URL.replace(new RegExp("(http|https)?:\\/\\/(\\S+)"), "ws://");
+    const WS_API_URL = environment.API_URL.replace(new RegExp("(http|https)"), "ws");
 
     const client = new Client({
       brokerURL: WS_API_URL + '/hackathon-websocket?sessionId=' + this.user.id,

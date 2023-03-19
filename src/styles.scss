@@ -73,7 +73,7 @@
 }
 
 .mobile-view-table-cell {
-  @apply hidden md:table-row;
+  @apply hidden md:table-cell;
 }
 
 @tailwind components;

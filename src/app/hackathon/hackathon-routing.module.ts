@@ -16,24 +16,26 @@ import {AuthGuard} from "../guard/auth.guard";
 import {TeamOwnerRoleGuard} from "../guard/team-owner-role.guard";
 import {OrganizerRoleGuard} from "../guard/organizer-role.guard";
 import {JuryRoleGuard} from "../guard/jury-role.guard";
-import {TeamModule} from "../team/team.module";
 
 
 const routes: Routes = [
   {path: '', component: HackathonsComponent},
   {path: 'new', component: HackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
-  {path: ':id/participants', component: UserListComponent, canActivate: [AuthGuard]},
-  {path: ':id/team', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
-  {path: ':id/team/:teamId/edit', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
-      canActivate: [AuthGuard, TeamOwnerRoleGuard]},
-  {path: ':id/teams', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
-  {path: ':id/team/:teamId', loadChildren: () => import('../team/team.module').then(m => m.TeamModule)},
-  {path: ':id/team/:teamId/chat', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
-      canActivate: [AuthGuard]},
-  {path: ':id/team/:teamId/invite', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
-      canActivate: [AuthGuard]},
-  {path: ':id/schedule', component: MentorScheduleComponent},
+  {path: ':id/participants', loadChildren: () => import('../user/user.module').then(m => m.UserModule),
+    component: UserListComponent, canActivate: [AuthGuard]},
+  {path: ':id/teams', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+    component: TeamsComponent},
+  {path: ':id/teams/:teamId/edit', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      component: TeamFormComponent, canActivate: [AuthGuard, TeamOwnerRoleGuard]},
+  {path: ':id/teams/:teamId', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+  component: TeamProfileComponent},
+  {path: ':id/teams/:teamId/chat', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      component:TeamChatComponent, canActivate: [AuthGuard]},
+  {path: ':id/teams/:teamId/invite', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+      component: TeamProfileComponent, canActivate: [AuthGuard]},
+  {path: ':id/schedule', loadChildren: () => import('../mentor/mentor.module').then(m => m.MentorModule),
+    component: MentorScheduleComponent},
   {
     path: ':id/rating',
     component: HackathonRatingFormComponent,

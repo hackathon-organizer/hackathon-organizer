@@ -46,6 +46,7 @@ describe('HackathonService', () => {
     eventEndDate: new Date(),
     description: 'A test hackathon',
     hackathonParticipantsNumber: 1,
+    logoImgPath: "",
     isActive: true
   };
 
