@@ -28,7 +28,7 @@ export class HackathonService {
 
     console.log(hackathon)
 
-    //hackathon = this.formatAndValidateDate(hackathon);
+    hackathon = this.validateDate(hackathon);
     return this.http.post<HackathonResponse>(this.BASE_URL_UPDATE.slice(0, -1), hackathon);
   }
 
@@ -89,13 +89,17 @@ export class HackathonService {
   }
 
   uploadFile(file: File, hackathonId: number) {
-    return this.http.post(this.BASE_URL_UPDATE + hackathonId + '/files/logos', file,  {
+
+    const data: FormData = new FormData();
+    data.append('file', file);
+
+    return this.http.post(this.BASE_URL_UPDATE + hackathonId + '/files', data,  {
       reportProgress: true,
       observe: 'events'
     });
   }
 
-  private formatAndValidateDate(hackathon: HackathonRequest): HackathonRequest {
+  private validateDate(hackathon: HackathonRequest): HackathonRequest {
 
     const startDate = dayjs(hackathon.eventStartDate);
     const endDate = dayjs(hackathon.eventEndDate);
@@ -103,9 +107,6 @@ export class HackathonService {
     if (endDate.isBefore(startDate)) {
       this.errorHandler.handleError(new Error("Provide correct hackathon dates"));
     }
-
-    hackathon.eventStartDate = dayjs(hackathon.eventStartDate).format("HH:mm:ss DD-MM-YYYY");
-    hackathon.eventEndDate = dayjs(hackathon.eventEndDate).format("HH:mm:ss DD-MM-YYYY");
 
     return hackathon;
   }

@@ -4,7 +4,7 @@ export interface HackathonResponse {
   description: string;
   isActive: boolean;
   hackathonParticipantsNumber: number;
-  logoImgPath: string;
+  logoName: string;
   eventStartDate: Date | string;
   eventEndDate: Date | string;
 }

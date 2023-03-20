@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, finalize, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -8,6 +8,7 @@ import {ToastrService} from "ngx-toastr";
 import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
 import {HttpEventType} from "@angular/common/http";
+import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -19,14 +20,16 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   hackathon!: HackathonResponse;
   loading = false;
   isLoggedIn = false;
-  uploadProgress = 0;
+  uploadProgress: number | undefined;
   private subscription: Subscription = new Subscription();
   private uploadSubscription: Subscription = new Subscription();
+  logoUrl: string = "https://via.placeholder.com/800x400";
 
   constructor(private hackathonService: HackathonService,
               private userService: UserService,
               private route: ActivatedRoute,
-              private toastr: ToastrService) {
+              private toastr: ToastrService,
+              private ref: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
@@ -35,6 +38,10 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
       .pipe(concatMap((params) => this.hackathonService.getHackathonDetailsById(params['id']))
       ).subscribe(hackathon => {
         this.hackathon = hackathon;
+
+        if (hackathon.logoName) {
+          this.logoUrl = `${environment.API_URL}/api/v1/read/hackathons/files/${hackathon.logoName}`;
+        }
       });
 
     this.userService.isLoggedIn().then((isLoggedIn) => {
@@ -61,30 +68,39 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   }
 
   isUserHackathonParticipant(): boolean {
-    return UserManager.isUserHackathonMember(this.hackathon.id);
+    return UserManager.isUserHackathonMember(this.hackathon.id!);
   }
 
   isUserJury(): boolean {
-    return this.userService.isUserJury(this.hackathon.id);
+    return this.userService.isUserJury(this.hackathon.id!);
   }
 
   isUserOrganizer(): boolean {
-    return this.userService.isUserOrganizer(this.hackathon.id);
+    return this.userService.isUserOrganizer(this.hackathon.id!);
   }
 
   isActive(): boolean {
     return dayjs().isBefore(this.hackathon.eventStartDate);
   }
 
-  onFileSelected(event: any) {
+  onFileSelected(event: any): void {
 
     if (event.target.files[0]) {
 
       const file: File = event.target.files[0];
 
-      this.uploadSubscription = this.hackathonService.uploadFile(file, this.hackathon.id).subscribe(event => {
-        if (event.type == HttpEventType.UploadProgress) {
+      this.uploadSubscription = this.hackathonService.uploadFile(file, this.hackathon.id)
+        .pipe(finalize(() => {
+          this.uploadProgress = undefined;
+        }))
+        .subscribe(event => {
+        if (event.type === HttpEventType.UploadProgress) {
           this.uploadProgress = Math.round(100 * (event.loaded / event.total!));
+
+          if (this.uploadProgress === 100) {
+            this.toastr.success("File uploaded successfully");
+            this.logoUrl = this.logoUrl.replace(new RegExp("[^\\/]+$"), file.name);
+          }
         }
       });
     }
