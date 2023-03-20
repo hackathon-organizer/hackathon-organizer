@@ -1,9 +1,9 @@
 <section id="hackathon-profile">
 
   <div class="flex justify-center items-center flex-col">
-    <h1 *ngIf="hackathon?.name" class="text-7xl font-bold mb-8">{{ hackathon.name }}</h1>
+    <h1 *ngIf="hackathon?.name" class="text-2xl break-words md:text-7xl font-bold mb-8">{{ hackathon.name }}</h1>
 
-    <img *ngIf="hackathon.logoName" [src]="logoUrl">
+    <img [src]="logoUrl" class="object-cover max-h-[50rem] rounded-lg">
     <input *ngIf="isUserOrganizer()" (change)="onFileSelected($event)" type="file" accept="image/*"
            class="mt-3 file-input file-input-bordered file-input-primary w-full max-w-xs"/>
 
@@ -15,51 +15,53 @@
     <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
   </ng-container>
 
-  <div *ngIf="hackathon" class="mt-12 flex justify-center space-x-5">
+  <div *ngIf="hackathon" class="mt-12 flex flex-col justify-center items-center md:flex-row md:space-x-5 space-y-4 md:space-y-0">
 
-    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathons/{{ hackathon.id }}/team">
-      <button class="btn btn-outline btn-success">
+    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathons/{{ hackathon.id }}/team" class="w-full md:w-auto">
+      <button class="btn btn-outline btn-success w-full">
         Create team
       </button>
     </a>
 
     <button (click)="joinHackathon()" *ngIf="isActive() && !isUserHackathonParticipant() && isLoggedIn"
-            [disabled]="loading" class="btn btn-outline btn-accent">
+            [disabled]="loading" class="btn btn-outline btn-accent w-full md:w-auto">
       Join hackathon
     </button>
 
-    <a routerLink="/hackathons/{{ hackathon.id }}/teams">
-      <button class="btn btn-outline btn-info">
+    <a routerLink="/hackathons/{{ hackathon.id }}/teams" class="w-full md:w-auto">
+      <button class="btn btn-outline btn-info w-full">
         Show teams
       </button>
     </a>
 
-    <a [class.pointer-events-none]="!isLoggedIn" routerLink="/hackathons/{{ hackathon.id }}/participants">
-      <button [disabled]="!isLoggedIn" class="btn btn-outline btn-info">
+    <a [class.pointer-events-none]="!isLoggedIn" routerLink="/hackathons/{{ hackathon.id }}/participants"
+       class="w-full md:w-auto">
+      <button [disabled]="!isLoggedIn" class="btn btn-outline btn-info w-full">
         Show participants
       </button>
     </a>
 
-    <a routerLink="/hackathons/{{ hackathon.id }}/schedule">
-      <button class="btn btn-outline btn-info">
+    <a routerLink="/hackathons/{{ hackathon.id }}/schedule" class="w-full md:w-auto">
+      <button class="btn btn-outline btn-info w-full">
         Show schedule
       </button>
     </a>
 
-    <a *ngIf="isUserJury() || isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/rating">
-      <button class="btn btn-outline btn-secondary">
+    <a *ngIf="isUserJury() || isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/rating"
+       class="w-full md:w-auto">
+      <button class="btn btn-outline btn-secondary w-full">
         Rate teams
       </button>
     </a>
 
-    <a *ngIf="isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/rating-criteria">
-      <button class="btn btn-outline btn-secondary">
+    <a *ngIf="isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/rating-criteria" class="w-full md:w-auto">
+      <button class="btn btn-outline btn-secondary w-full">
         Update hackathon rating criteria
       </button>
     </a>
 
-    <a *ngIf="isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/leaderboard">
-      <button class="btn btn-outline btn-info">
+    <a *ngIf="isUserOrganizer()" routerLink="/hackathons/{{ hackathon.id }}/leaderboard" class="w-full md:w-auto">
+      <button class="btn btn-outline btn-info w-full">
         Leaderboard
       </button>
     </a>

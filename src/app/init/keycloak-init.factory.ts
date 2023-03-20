@@ -15,8 +15,8 @@ export function initializeKeycloak(
       initOptions: {
         redirectUri: window.location.origin,
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/assets/silent-check-sso.html'
+        silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html',
+        checkLoginIframe: false
       },
       loadUserProfileAtStartUp: true
     });
