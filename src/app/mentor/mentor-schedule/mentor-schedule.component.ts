@@ -59,7 +59,7 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
     this.subscription = this.route.params.subscribe(params => {
       this.hackathonId = params["id"];
-      this.getHackathonSchedule(this.hackathonId!)
+      this.getHackathonSchedule(this.hackathonId!);
     });
   }
 
@@ -70,21 +70,32 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
         const updatedScheduleEntrySession: ScheduleEntrySession = {
           sessionStart: timeChangeEvent.newStart!,
-          sessionEnd: timeChangeEvent.newEnd!
+          sessionEnd: timeChangeEvent.newEnd!,
+          hackathonId: this.hackathonId!
         }
         const eventId = timeChangeEvent.event.id as number;
 
         this.userService.updateUserScheduleEntryTime(this.currentUser.id, eventId, updatedScheduleEntrySession)
           .subscribe(() => this.scheduleUpdateSuccessToast());
 
-        return {
-          ...timeChangeEvent.event,
-          start: timeChangeEvent.newStart,
-          end: timeChangeEvent.newEnd,
-        };
+        scheduleEntryEvent.start = timeChangeEvent.newStart;
+        scheduleEntryEvent.end = timeChangeEvent.newEnd;
+
+        this.updateUserEvent(scheduleEntryEvent);
       }
       return scheduleEntryEvent;
     });
+
+    this.refresh.next();
+  }
+
+  updateUserEvent(entryEvent: ScheduleEntry): void {
+    let event = this.userEvents.find(event => event.id === entryEvent.id);
+
+    if (event) {
+      event.start = entryEvent.start;
+      event.end = entryEvent.end;
+    }
   }
 
   addEvent(): void {
@@ -92,8 +103,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     this.loading = true;
 
     const entryEvent: ScheduleEntryRequest = {
-      sessionStart: dayjs().toDate(),
-      sessionEnd: dayjs().add(1, 'hour').toDate(),
+      sessionStart: dayjs().add(1, 'hour').toISOString(),
+      sessionEnd: dayjs().add(2, 'hour').toISOString(),
       entryColor: colors.main.secondary,
       hackathonId: this.hackathonId ? this.hackathonId : Number(this.currentUser.currentHackathonId)
     };
@@ -107,8 +118,8 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
       const entryEvent: ScheduleEntry = {
         id: entryResponse.id,
         title: this.currentUser.username,
-        start: dayjs(entryResponse.sessionStart).toDate(),
-        end: dayjs(entryResponse.sessionEnd).toDate(),
+        start: new Date(dayjs(entryResponse.sessionStart).toISOString()),
+        end: new Date(dayjs(entryResponse.sessionEnd).toISOString()),
         color: colors.main,
         draggable: this.currentUser?.id === entryResponse.userId,
         resizable: {
@@ -149,14 +160,20 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   updateEvents(): void {
 
     this.loading = true;
-    const eventsCopy = Object.assign([], this.userEvents);
-    const scheduleEntries: ScheduleEntryRequest[] = eventsCopy.map(entry => this.mapToScheduleEntryRequest(entry));
+
+    const scheduleEntries: ScheduleEntryRequest[] = this.userEvents.map(event => {
+
+      const idx = this.events.findIndex(e => e.id === event.id);
+      this.events[idx] = event;
+
+      return this.mapToScheduleEntryRequest(event)
+    });
 
     this.userService.updateEntryEvents(scheduleEntries).subscribe(() => {
-      this.events.concat(eventsCopy);
 
       this.loading = false;
       this.scheduleUpdateSuccessToast();
+      this.refresh.next();
     });
   }
 

@@ -21,8 +21,8 @@ export interface ScheduleEntryResponse {
 
 export interface ScheduleEntryRequest {
   id?: number;
-  sessionStart: Date;
-  sessionEnd: Date;
+  sessionStart: Date | string;
+  sessionEnd: Date | string;
   hackathonId: number;
   entryColor?: string;
   info?: string;
@@ -34,7 +34,8 @@ export interface TeamMeetingRequest {
 }
 
 export interface ScheduleEntrySession {
-  sessionStart: Date,
-  sessionEnd: Date
+  hackathonId: number;
+  sessionStart: Date | string;
+  sessionEnd: Date | string
 }
 

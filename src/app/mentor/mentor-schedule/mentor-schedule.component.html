@@ -127,7 +127,9 @@
     </div>
 
     <div class="modal-action">
-      <label (click)="updateEvents()" [class.btn-disabled]="loading" class="btn btn-success" for="update-event-modal">Save</label>
+      <label (click)="updateEvents()" [class.btn-disabled]="loading" class="btn btn-success" for="update-event-modal">
+        Save
+      </label>
     </div>
 
     <ng-container *ngIf="loading">
@@ -214,8 +216,9 @@
         <span *ngIf="weekEvent.event.isAvailable; else notAvailable">AVAILABLE</span>
         <ng-template #notAvailable>NOT AVAILABLE</ng-template>
       </div>
-      <label (click)="handleEvent(weekEvent)" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1" for="event-modal">Show
-        details</label>
+      <label (click)="handleEvent(weekEvent)" class="btn btn-info btn-sm sm:btn-sm md:btn-md my-1" for="event-modal">
+        Show details
+      </label>
     </div>
   </div>
 </ng-template>

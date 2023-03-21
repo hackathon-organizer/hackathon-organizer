@@ -21,6 +21,7 @@ import {MeetingNotification, Notification, TeamInvitationNotification} from "../
 import {Role} from "../../../user/model/Role";
 import {ToastrService} from "ngx-toastr";
 import {environment} from "../../../../environments/environment";
+import {Router} from "@angular/router";
 
 
 @Injectable({
@@ -156,7 +157,6 @@ export class UserService {
   }
 
   login(): void {
-
     this.keycloakService.login()
       .then(success => this.logger.info("Login successful", success))
       .catch(error => this.logger.info("Login error", error));
