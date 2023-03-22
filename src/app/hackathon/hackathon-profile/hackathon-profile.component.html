@@ -15,9 +15,11 @@
     <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
   </ng-container>
 
-  <div *ngIf="hackathon" class="mt-12 flex flex-col justify-center items-center md:flex-row md:space-x-5 space-y-4 md:space-y-0">
+  <div *ngIf="hackathon"
+       class="mt-12 flex flex-col justify-center items-center md:flex-row md:space-x-5 space-y-4 md:space-y-0">
 
-    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathons/{{ hackathon.id }}/team" class="w-full md:w-auto">
+    <a *ngIf="isUserHackathonParticipant()" routerLink="/hackathons/{{ hackathon.id }}/teams/new"
+       class="w-full md:w-auto">
       <button class="btn btn-outline btn-success w-full">
         Create team
       </button>

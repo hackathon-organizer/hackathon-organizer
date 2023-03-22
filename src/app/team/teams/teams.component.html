@@ -3,7 +3,7 @@
   <h3 class="text-center text-5xl mb-8">Browse teams</h3>
 
   <div class="flex justify-center" id="team-search">
-    <input [formControl]="teamNameControl" class="input input-primary w-3/5 mb-6" placeholder="Search team" type="text">
+    <input [formControl]="teamNameControl" class="input input-primary w-4/5 md:w-3/5 mb-6" placeholder="Search team" type="text">
   </div>
 
   <div class="overflow-x-auto w-full min-h-screen">
@@ -14,26 +14,29 @@
 
     <table *ngIf="!loading" class="table w-full">
       <thead>
-      <tr>
+      <tr class="mobile-view-table-row">
         <th>Number</th>
         <th>Name</th>
         <th>Tags</th>
         <th></th>
         <th></th>
       </tr>
+      <tr class="md:hidden">
+        <th>Name and tags</th>
+      </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let team of teams | paginate: paginationConfig; index as i;" class="h-20">
-        <th>
+      <tr class=" flex flex-col md:table-row" *ngFor="let team of teams | paginate: paginationConfig; index as i;">
+        <td class="mobile-view-table-cell">
           <span *ngIf="currentPageNumber==0">{{(i + 1)}}</span>
           <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
-        </th>
-        <th>
+        </td>
+        <td class="mx-auto">
           {{ team.name }}
-        </th>
+        </td>
         <td>
-          <div class="flex flex-wrap my-2">
-            <div *ngFor="let tag of team.tags | slice:0:10" class="h-8">
+          <div class="grid grid-cols-3 md:grid-cols-5">
+            <div *ngFor="let tag of team.tags | slice:0:10" class="">
               <label class="pill-small">
                 <span class="appearance-none" type="checkbox">{{ tag.name }}</span>
               </label>
@@ -41,12 +44,11 @@
             <span *ngIf="team.tags.length > 10">&nbsp;&nbsp;+{{ team.tags.length - 10 }}</span>
           </div>
         </td>
-        <th></th>
-        <th>
-          <a routerLink="/hackathon/{{ hackathonId }}/team/{{ team.id }}">
-            <button class="btn btn-outline">Details</button>
+        <td class="mx-auto">
+          <a routerLink="/hackathons/{{ hackathonId }}/teams/{{ team.id }}">
+            <button class="btn btn-outline mx-auto">Details</button>
           </a>
-        </th>
+        </td>
       </tr>
       </tbody>
     </table>

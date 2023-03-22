@@ -33,10 +33,10 @@
     </button>
 
     <ng-container *ngIf="userLoaded">
-      <a *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
+      <a class="hidden" *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
         <button class="btn mr-3">Go to my team</button>
       </a>
-      <a routerLink="/hackathons/new">
+      <a class="hidden" routerLink="/hackathons/new">
         <button class="btn mr-3">Create hackathon</button>
       </a>
 
@@ -50,6 +50,16 @@
         </label>
         <ul class="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52" tabindex="0">
           <li><a routerLink="/user/{{ currentUserId }}">Profile</a></li>
+          <li class="md:hidden">
+            <a  *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
+            Go to my team
+          </a>
+          </li>
+          <li class="md:hidden">
+            <a routerLink="/hackathons/new">
+             Create hackathon
+            </a>
+          </li>
           <li><a (click)="logout()">Logout</a></li>
         </ul>
       </div>

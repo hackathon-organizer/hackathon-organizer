@@ -27,6 +27,10 @@ const routes: Routes = [
     component: UserListComponent, canActivate: [AuthGuard]
   },
   {
+    path: ':id/teams/new', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
+    component: TeamFormComponent
+  },
+  {
     path: ':id/teams', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
     component: TeamsComponent
   },

@@ -69,7 +69,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
         this.teamService.updateTeam(team, this.teamId).pipe(finalize(() => this.loadingCreate = false))
           .subscribe(updatedTeam => {
 
-            this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + updatedTeam.id);
+            this.router.navigateByUrl('/hackathons/' + this.hackathonId + '/teams/' + updatedTeam.id);
             UserManager.updateTeamInStorage(updatedTeam);
             this.toastr.success("Team " + team.name + " updated successfully");
           });
@@ -82,7 +82,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
             UserManager.updateUserInStorage(this.user);
             UserManager.updateTeamInStorage(createdTeam);
 
-            this.router.navigateByUrl('/hackathon/' + this.hackathonId + '/team/' + createdTeam.id);
+            this.router.navigateByUrl('/hackathons/' + this.hackathonId + '/teams/' + createdTeam.id);
 
             return this.userService.updateUserMembership({
               currentHackathonId: this.hackathonId,
