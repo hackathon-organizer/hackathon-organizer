@@ -41,7 +41,7 @@
 
           <span class="text-center mt-4">Select tags that will help find new team members:</span>
 
-          <div class="flex flex-wrap my-5">
+          <div class="flex flex-wrap my-5 max-h-96 overflow-y-auto">
             <div *ngFor="let tag of tags; let i = index" formGroupName="tags">
               <label [ngClass]="tag.isSelected ? 'btn-success' : 'btn-outline'"
                      class="flex items-center btn rounded-full m-2">

@@ -1,6 +1,6 @@
 <section id="criteria-form">
 
-  <div class="p-4 mx-auto w-4/5">
+  <div class="p-4 mx-auto w-full md:w-4/5">
 
     <h2 class="mb-6 text-center text-4xl">Rate teams</h2>
 
@@ -33,7 +33,7 @@
 
         <form [formGroup]="criteriaForm" class="space-y-6">
 
-          <div *ngFor="let criteria of criteria.controls; let i = index" class="mx-12" formArrayName="criteria">
+          <div *ngFor="let criteria of criteria.controls; let i = index" class="md:mx-12" formArrayName="criteria">
 
             <div [formGroupName]="i">
               <h5 class="mb-4 text-xl text-center">{{ criteria.value.name }}</h5>

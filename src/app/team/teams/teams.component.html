@@ -35,7 +35,7 @@
           {{ team.name }}
         </td>
         <td>
-          <div class="grid grid-cols-3 md:grid-cols-5">
+          <div class="grid grid-cols-3 md:grid-cols-5 gap-2">
             <div *ngFor="let tag of team.tags | slice:0:10" class="">
               <label class="pill-small">
                 <span class="appearance-none" type="checkbox">{{ tag.name }}</span>
