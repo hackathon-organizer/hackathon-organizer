@@ -18,6 +18,7 @@
     <div class="navbar-center hidden lg:flex" data-theme="dark">
       <ul class="menu menu-horizontal p-0">
         <li><a routerLink="/hackathons">Hackathons</a></li>
+        <li><a routerLink="/hackathons/new">Create hackathon</a></li>
       </ul>
     </div>
   </div>
@@ -50,15 +51,15 @@
         </label>
         <ul class="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52" tabindex="0">
           <li><a routerLink="/user/{{ currentUserId }}">Profile</a></li>
-          <li class="md:hidden">
-            <a  *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
+          <li *ngIf="checkIfUserHasMentorOrOrganizerRole()">
+            <a routerLink="/hackathons/{{ user?.currentHackathonId }}/schedule">
+              Go to my schedule
+            </a>
+          </li>
+          <li>
+            <a *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/teams/{{ userTeamId }}">
             Go to my team
           </a>
-          </li>
-          <li class="md:hidden">
-            <a routerLink="/hackathons/new">
-             Create hackathon
-            </a>
           </li>
           <li><a (click)="logout()">Logout</a></li>
         </ul>

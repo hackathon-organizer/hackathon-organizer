@@ -85,7 +85,7 @@ export class TeamProfileComponent implements OnInit {
   }
 
   navigateToTeamEdit(): void {
-    this.router.navigate([`/hackathon/${this.hackathonId}/team/${this.teamId}/edit`]);
+    this.router.navigate([`/hackathons/${this.hackathonId}/teams/${this.teamId}/edit`]);
   }
 
   get isUserTeamMember(): boolean {

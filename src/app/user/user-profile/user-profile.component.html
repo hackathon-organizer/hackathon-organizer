@@ -1,36 +1,44 @@
 <section id="user-profile">
 
-  <div class="grid grid-cols-2 gap-4">
-    <div class="m-12 flex justify-center" id="profile-image-wrapper">
-      <div class="avatar">
-        <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img alt="profile image" src="{{ avatarUrl }}"/>
+  <div class="flex flex-col">
+    <div class="flex flex-col md:flex-row">
+      <div class="m-12 flex justify-center md:w-2/5" id="profile-image-wrapper">
+        <div class="avatar">
+          <div class="max-h-48 w-48 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <img alt="profile image" src="{{ avatarUrl }}"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col text-2xl md:w-3/5" id="user-data">
+
+        <div *ngIf="user" class="flex justify-between mt-6">
+          <h4>Username: {{ user.username }}</h4>
+
+          <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success hidden md:flex"
+                 for="edit-modal">Edit</label>
+        </div>
+
+        <div class="mt-4">
+          <h4 *ngIf="currentTeamName">Team: {{ currentTeamName }}</h4>
+          <h4 *ngIf="!currentTeamName">Team: -----</h4>
+        </div>
+
+        <div class="my-6" id="about">
+          <h4>About:</h4>
+          <p *ngIf="user?.description">{{ user.description }}</p>
+          <p *ngIf="!user?.description">No description</p>
         </div>
       </div>
     </div>
 
-    <div class="flex flex-col text-2xl" id="user-data">
+      <div *ngIf="isUserIsHackathonParticipant" class="flex flex-col md:flex-row justify-around">
 
-      <div *ngIf="user" class="flex justify-between mt-6">
-        <h4>Username: {{ user.username }}</h4>
-
-        <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success"
+        <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success md:hidden"
                for="edit-modal">Edit</label>
-      </div>
 
-      <div class="mt-4">
-        <h4 *ngIf="currentTeamName">Team: {{ currentTeamName }}</h4>
-        <h4 *ngIf="!currentTeamName">Team: -----</h4>
-      </div>
-
-      <div class="my-6" id="about">
-        <h4>About:</h4>
-        <p *ngIf="user?.description">{{ user.description }}</p>
-        <p *ngIf="!user?.description">No description</p>
-      </div>
-
-      <div *ngIf="isUserIsHackathonParticipant" class="flex justify-around">
-        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
+        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile"
+                class="btn btn-info my-5">
           Set as mentor
         </button>
         <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
@@ -42,11 +50,6 @@
           Invite to team
         </button>
       </div>
-
-      <button *ngIf="checkIfUserHasMentorOrOrganizerRole() && isThisMyProfile" class="btn"
-              routerLink="/hackathon/{{ currentUser?.currentHackathonId }}/schedule">
-        Go to my schedule
-      </button>
     </div>
 
     <div class="col-span-2">
@@ -63,7 +66,7 @@
       </div>
     </div>
 
-    <div id="teams-suggestions">
+    <div class="my-4 md:w-3/5" id="teams-suggestions">
       <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
         <input (click)="getUserTeamSuggestions()" type="checkbox"/>
         <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
@@ -95,10 +98,10 @@
             </a>
           </div>
         </div>
-      </div>
+
     </div>
 
-    <div *ngIf="isThisMyProfile" id="notifications">
+    <div *ngIf="isThisMyProfile" id="notifications" class="md:mt-4 md:w-3/5">
 
       <span class="text-xl font-medium">Notifications:</span>
 

@@ -73,15 +73,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  checkIfUserHasMentorOrOrganizerRole(): boolean {
-
-    if (this.currentUser?.currentHackathonId) {
-      return this.userService.isUserMentorOrOrganizer(this.currentUser.currentHackathonId);
-    } else {
-      return false;
-    }
-  }
-
   inviteToTeam(): void {
 
     const teamId = this.userService.user.currentTeamId!;

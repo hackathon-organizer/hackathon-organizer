@@ -63,4 +63,13 @@ export class MenuComponent implements OnInit {
       this.notifications = notifications
     });
   }
+
+  checkIfUserHasMentorOrOrganizerRole(): boolean {
+
+    if (this.user?.currentHackathonId) {
+      return this.userService.isUserMentorOrOrganizer(this.user.currentHackathonId);
+    } else {
+      return false;
+    }
+  }
 }
