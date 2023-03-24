@@ -40,9 +40,8 @@
   border-radius: 10px;
 }
 
-
 .video-button {
-  @apply p-4 flex justify-center items-center hover:scale-110;
+  @apply p-1 md:p-4 flex justify-center items-center hover:scale-110;
 }
 
 .pill {

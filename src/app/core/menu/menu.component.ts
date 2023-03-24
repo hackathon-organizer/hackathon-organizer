@@ -58,6 +58,10 @@ export class MenuComponent implements OnInit {
     this.userService.login();
   }
 
+  signUp(): void {
+    this.userService.signUp();
+  }
+
   private loadNotifications(): void {
     this.userService.userNotificationsObservable.subscribe(notifications => {
       this.notifications = notifications

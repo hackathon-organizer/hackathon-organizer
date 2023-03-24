@@ -25,7 +25,7 @@
         <div *ngIf="isHackathonMember && isUserTeamMember"
              class="mt-10 flex flex-col md:flex-row justify-center items-center">
 
-          <a class="m-3 w-full md:w-auto" routerLink="/hackathon/{{ hackathonId }}/team/{{ teamId }}/chat">
+          <a class="m-3 w-full md:w-auto" routerLink="/hackathons/{{ hackathonId }}/teams/{{ teamId }}/chat">
             <button class="btn btn-accent w-full">
               Join team chat
             </button>
@@ -35,7 +35,7 @@
             Edit team
           </button>
 
-          <a class="m-3 w-full md:w-auto" routerLink="/hackathon/{{ hackathonId }}/participants">
+          <a class="m-3 w-full md:w-auto" routerLink="/hackathons/{{ hackathonId }}/participants">
             <button class="btn btn-success w-full">
               Invite users
             </button>

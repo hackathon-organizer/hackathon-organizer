@@ -1,6 +1,7 @@
 <div class="navbar ho-section mt-6" data-theme="dark">
   <div>
-    <a class="btn btn-ghost normal-case text-xl" routerLink="/">Hackathon Organizer</a>
+    <a class="hidden md:flex btn btn-ghost normal-case text-xl" routerLink="/">Hackathon Organizer</a>
+    <a class="md:hidden btn btn-ghost normal-case text-xl" routerLink="/">HO</a>
   </div>
 
   <div class="flex-1 justify-center" data-theme="dark">
@@ -12,6 +13,7 @@
       </label>
       <ul class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52" tabindex="0">
         <li><a routerLink="/hackathons">Hackathons</a></li>
+        <li><a routerLink="/hackathons/new">Create hackathon</a></li>
       </ul>
     </div>
 
@@ -32,15 +34,11 @@
     <button (click)="login()" *ngIf="!userLoaded" [disabled]="userLoaded || loading" class="btn btn-info p-3">
       Login
     </button>
+    <button (click)="signUp()" *ngIf="!userLoaded" [disabled]="userLoaded || loading" class="btn btn-success p-3">
+      Sign up
+    </button>
 
     <ng-container *ngIf="userLoaded">
-      <a class="hidden" *ngIf="userTeamId" routerLink="/hackathons/{{ userHackathonId }}/team/{{ userTeamId }}">
-        <button class="btn mr-3">Go to my team</button>
-      </a>
-      <a class="hidden" routerLink="/hackathons/new">
-        <button class="btn mr-3">Create hackathon</button>
-      </a>
-
       <div class="dropdown dropdown-end">
         <label class="btn btn-ghost btn-circle avatar" tabindex="0">
           <div [ngClass]="notifications.length > 0 ? 'notification' : ''" class="avatar">
@@ -52,7 +50,7 @@
         <ul class="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52" tabindex="0">
           <li><a routerLink="/user/{{ currentUserId }}">Profile</a></li>
           <li *ngIf="checkIfUserHasMentorOrOrganizerRole()">
-            <a routerLink="/hackathons/{{ user?.currentHackathonId }}/schedule">
+            <a routerLink="/hackathons/{{ user.currentHackathonId }}/schedule">
               Go to my schedule
             </a>
           </li>

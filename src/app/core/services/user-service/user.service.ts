@@ -171,6 +171,10 @@ export class UserService {
     sessionStorage.clear();
   }
 
+  signUp(): void {
+    this.keycloakService.register().then(() => this.toastr.success("Account created successfully"));
+  }
+
   isLoggedIn(): Promise<boolean> {
     return this.keycloakService.isLoggedIn();
   }
