@@ -5,7 +5,8 @@
 export const environment = {
   production: false,
   API_URL: "http://localhost:9090",
-  KEYCLOAK_URL: "http://localhost:8080"
+  KEYCLOAK_URL: "http://localhost:8080",
+  REDIRECT_URL: "http://localhost:4200/"
 };
 
 /*

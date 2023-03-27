@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpEvent} from "@angular/common/http";
 import {Observable} from "rxjs";
 import * as dayjs from "dayjs";
 import {UserService} from "../user-service/user.service";
@@ -27,10 +27,15 @@ export class HackathonService {
   createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
     hackathon = this.validateDate(hackathon);
+    console.log(hackathon)
     return this.http.post<HackathonResponse>(this.BASE_URL_UPDATE.slice(0, -1), hackathon);
   }
 
-  getHackathonDetailsById(id: number): Observable<HackathonResponse> {
+  updateHackathon(hackathon: HackathonRequest, hackathonId: number): Observable<HackathonResponse> {
+    return this.http.put<HackathonResponse>(this.BASE_URL_UPDATE + hackathonId, hackathon);
+  }
+
+  getHackathonById(id: number): Observable<HackathonResponse> {
     return this.http.get<HackathonResponse>(this.BASE_URL_READ + id);
   }
 
@@ -86,12 +91,12 @@ export class HackathonService {
     return this.http.get<TeamResponse[]>(this.BASE_URL_READ + hackathonId + '/leaderboard');
   }
 
-  uploadFile(file: File, hackathonId: number) {
+  uploadFile(file: File, hackathonId: number): Observable<HttpEvent<void>> {
 
     const data: FormData = new FormData();
     data.append('file', file);
 
-    return this.http.post(this.BASE_URL_UPDATE + hackathonId + '/files', data,  {
+    return this.http.post<void>(this.BASE_URL_UPDATE + hackathonId + '/files', data,  {
       reportProgress: true,
       observe: 'events'
     });

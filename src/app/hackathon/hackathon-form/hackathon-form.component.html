@@ -3,9 +3,9 @@
   <div class="p-4 mx-auto w-full md:w-4/5">
     <div class="p-4 lg:p-8">
 
-      <h2 class="text-center mb-6 text-4xl">Create new hackathon</h2>
+      <h2 class="text-center mb-6 text-4xl">{{ editMode ? 'Update hackathon' : 'Create new hackathon'}}</h2>
 
-      <form (ngSubmit)="createHackathon()" [formGroup]="newHackathonForm"
+      <form (ngSubmit)="saveHackathon()" [formGroup]="newHackathonForm"
             class="flex flex-col items-center justify-center space-y-4" id="create-hackathon-form"
             novalidate>
         <input [ngClass]="{'is-invalid': (newHackathonForm.get('hackathonName')?.touched ||
@@ -83,7 +83,8 @@
         <ng-container *ngIf="loading">
           <img alt="Loading spinner" class="mx-auto max-h-12" src="assets/spinner.svg"/>
         </ng-container>
-        <input [disabled]="!newHackathonForm.valid || loading" class="btn btn-primary" type="submit" value="Create">
+        <input [disabled]="!newHackathonForm.valid || loading" class="btn btn-primary" type="submit"
+               [value]="editMode ? 'Save' : 'Create'">
 
       </form>
     </div>

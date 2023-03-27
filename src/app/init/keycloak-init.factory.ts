@@ -10,7 +10,6 @@ export function initializeKeycloak(
         url: environment.KEYCLOAK_URL + '/auth',
         realm: 'hackathon-organizer',
         clientId: 'hackathon-organizer-client',
-
       },
       initOptions: {
         redirectUri: window.location.origin,

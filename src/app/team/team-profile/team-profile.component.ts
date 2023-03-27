@@ -60,8 +60,10 @@ export class TeamProfileComponent implements OnInit {
       this.user.currentTeamId = this.teamId;
       this.userService.fetchAndUpdateTeamInStorage(this.user);
 
-      this.toastr.success("Successfully joined to team");
-      this.router.navigate(["/hackathon/", this.hackathonId, "/team/", this.teamId]);
+      this.router.navigate(["/hackathons/", this.hackathonId, "teams", this.teamId]).then(() => {
+        this.toastr.success("Successfully joined to team");
+        this.userService.updateUserData();
+      });
     });
   }
 

@@ -77,21 +77,26 @@ export class TeamFormComponent implements OnInit, OnDestroy {
 
         this.teamService.createTeam(team).pipe(concatMap((createdTeam: TeamResponse) => {
 
-            this.user.currentTeamId = createdTeam.id;
+          this.user.currentTeamId = createdTeam.id;
+          this.teamId = createdTeam.id;
 
-            UserManager.updateUserInStorage(this.user);
-            UserManager.updateTeamInStorage(createdTeam);
+          UserManager.updateUserInStorage(this.user);
+          UserManager.updateTeamInStorage(createdTeam);
 
-            this.router.navigateByUrl('/hackathons/' + this.hackathonId + '/teams/' + createdTeam.id);
-
-            return this.userService.updateUserMembership({
-              currentHackathonId: this.hackathonId,
-              currentTeamId: createdTeam.id
-            });
-          })).pipe(finalize(() => this.loadingCreate = false)).subscribe(() => {
+          return this.userService.updateUserMembership({
+            currentHackathonId: this.hackathonId,
+            currentTeamId: createdTeam.id
+          });
+        })).pipe(finalize(() => {
+          this.loadingCreate = false;
+          this.loading = false;
+        })).subscribe(() => {
 
           this.loadingCreate = false;
-          this.toastr.success("Team " + team.name + " created successfully");
+          this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
+            window.location.reload();
+            this.toastr.success("Team " + team.name + " created successfully");
+          });
         });
       }
     }
@@ -127,22 +132,24 @@ export class TeamFormComponent implements OnInit, OnDestroy {
 
   private loadFormData(): void {
 
-    this.teamService.getTeamById(this.teamId!).subscribe(team => {
+    if (this.teamId) {
+      this.teamService.getTeamById(this.teamId).subscribe(teamResponse => {
 
-      this.newTeamForm.get('teamName')?.patchValue(team.name);
-      this.newTeamForm.get('description')?.patchValue(team.description);
+        this.newTeamForm.get('teamName')?.patchValue(teamResponse.name);
+        this.newTeamForm.get('description')?.patchValue(teamResponse.description);
 
-      team.tags.forEach(teamTag => {
-        const tagToMark = this.tags.find(tag => tag.id === teamTag.id);
+        teamResponse.tags.forEach(teamTag => {
+          const tagToMark = this.tags.find(tag => tag.id === teamTag.id);
 
-        if (tagToMark) {
-          tagToMark.isSelected = true;
-        }
+          if (tagToMark) {
+            tagToMark.isSelected = true;
+          }
+        });
+        this.newTeamForm.get('tags')?.patchValue(this.buildTagsFormGroup(this.tags));
+
+        this.loading = false;
       });
-      this.newTeamForm.get('tags')?.patchValue(this.buildTagsFormGroup(this.tags));
-
-      this.loading = false;
-    })
+    }
   }
 
   private buildTeam(): TeamRequest {

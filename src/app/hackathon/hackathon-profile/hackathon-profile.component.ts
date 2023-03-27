@@ -23,6 +23,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   uploadProgress: number | undefined;
   private subscription: Subscription = new Subscription();
   private uploadSubscription: Subscription = new Subscription();
+  fileName: string = "No file chosen";
   logoUrl: string = "https://via.placeholder.com/800x400";
 
   constructor(private hackathonService: HackathonService,
@@ -35,7 +36,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     this.subscription = this.route.params
-      .pipe(concatMap((params) => this.hackathonService.getHackathonDetailsById(params['id']))
+      .pipe(concatMap((params) => this.hackathonService.getHackathonById(params['id']))
       ).subscribe(hackathon => {
         this.hackathon = hackathon;
 
@@ -44,9 +45,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.userService.isLoggedIn().then((isLoggedIn) => {
-      this.isLoggedIn = isLoggedIn
-    });
+    this.userService.isLoggedIn().then((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
 
   joinHackathon(): void {
@@ -63,7 +62,8 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
       )).pipe(finalize(() => this.loading = false))
       .subscribe(() => {
         user.currentHackathonId = this.hackathon.id;
-        this.toastr.success("You are now member of hackathon " + this.hackathon.name);
+        this.toastr.success("You are now participant of hackathon " + this.hackathon.name);
+        this.userService.updateUserData();
       });
   }
 
@@ -88,6 +88,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
     if (event.target.files[0]) {
 
       const file: File = event.target.files[0];
+      this.fileName = file.name;
 
       this.uploadSubscription = this.hackathonService.uploadFile(file, this.hackathon.id)
         .pipe(finalize(() => {
@@ -109,5 +110,9 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.uploadSubscription.unsubscribe();
+  }
+
+  callFileUpload() {
+    document.getElementById('file-upload')!.click();
   }
 }

@@ -75,7 +75,7 @@ describe('HackathonService', () => {
 
   it('should return hackathon by id', () => {
 
-    service.getHackathonDetailsById(1).subscribe(response => {
+    service.getHackathonById(1).subscribe(response => {
       expect(response).toEqual(mockHackathonResponse);
     });
 

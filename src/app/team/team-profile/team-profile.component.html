@@ -48,7 +48,7 @@
 
         </div>
 
-        <button (click)="joinToTeam()" *ngIf="!isOwner && isUserHackathonMember"
+        <button (click)="joinToTeam()" *ngIf="!isOwner && isUserHackathonMember && !isUserTeamMember"
                 class="btn btn-success m-4 w-3/5 mx-auto w-full md:w-auto">
           Join to team
         </button>

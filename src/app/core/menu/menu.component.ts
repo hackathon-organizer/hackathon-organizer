@@ -24,11 +24,9 @@ export class MenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.userService.isLoggedIn().then(isLoggedIn => {
 
       if (isLoggedIn) {
-
         this.userService.userLoadedObservable.subscribe(userLoaded => {
           if (userLoaded) {
             this.userLoaded = true;

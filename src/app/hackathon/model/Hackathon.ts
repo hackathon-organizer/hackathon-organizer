@@ -2,6 +2,7 @@ export interface HackathonResponse {
   id: number;
   name: string;
   description: string;
+  organizerInfo?: string;
   isActive: boolean;
   hackathonParticipantsNumber: number;
   logoName: string;

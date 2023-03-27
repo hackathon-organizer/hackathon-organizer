@@ -46,15 +46,19 @@
         </button>
 
         <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon ||
-         !currentUser?.currentTeamId || currentUser?.currentTeamId===user.currentTeamId" class="btn btn-info my-5">
+         !currentUser?.currentTeamId || currentUser?.currentTeamId === user.currentTeamId" class="btn btn-info my-5">
           Invite to team
         </button>
       </div>
     </div>
 
-    <div class="col-span-2">
+    <div>
       <div class="flex flex-col">
-        <h4 class="text-3xl font-bold mb-5">Tags</h4>
+        <h4 class="text-3xl font-bold mb-5">Tags:</h4>
+
+        <span class="text-xl" *ngIf="user.tags.length < 1 || !currentUser?.tags">
+          No tags selected yet
+        </span>
 
         <div *ngIf="user" class="flex flex-wrap my-5">
           <div *ngFor="let tag of user.tags;">

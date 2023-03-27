@@ -22,6 +22,7 @@ const routes: Routes = [
   {path: '', component: HackathonsComponent},
   {path: 'new', component: HackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
+  {path: ':id/edit', component: HackathonFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard]},
   {
     path: ':id/participants', loadChildren: () => import('../user/user.module').then(m => m.UserModule),
     component: UserListComponent, canActivate: [AuthGuard]
