@@ -17,7 +17,7 @@ export class TeamService {
   constructor(private http: HttpClient) {
   }
 
-  updateInvitationStatus(teamInvitationNotification: TeamInvitationNotification, accepted: boolean) {
+  updateInvitationStatus(teamInvitationNotification: TeamInvitationNotification, toUserId: number, accepted: boolean) {
 
     if (accepted) {
       teamInvitationNotification.invitationStatus = "ACCEPTED";
@@ -30,6 +30,7 @@ export class TeamService {
       id: teamInvitationNotification.id,
       fromUserName: teamInvitationNotification.fromUserName,
       invitationStatus: teamInvitationNotification.invitationStatus,
+      toUserId: toUserId,
       teamName: teamInvitationNotification.teamName,
       teamId: teamId
     } as TeamInvitationRequest;

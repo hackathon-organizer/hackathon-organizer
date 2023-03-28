@@ -8,6 +8,7 @@ import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {concatMap, finalize, Subscription} from "rxjs";
 import {HackathonRequest} from "../model/Hackathon";
+import {KeycloakService} from "keycloak-angular";
 
 @Component({
   selector: 'ho-hackathon-form',
@@ -28,8 +29,7 @@ export class HackathonFormComponent implements OnInit {
     private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastr: ToastrService
-  ) {
+    private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
@@ -77,8 +77,9 @@ export class HackathonFormComponent implements OnInit {
           return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id})
         })).pipe(finalize(() => this.loading = false))
         .subscribe(() => {
+
+          this.userService.refreshToken();
           this.router.navigate(['/hackathons/' + this.hackathonId]).then(() => {
-            window.location.reload();
             this.toastr.success("Hackathon " + hackathon.name + " created successfully");
           });
         });

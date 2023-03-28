@@ -280,6 +280,15 @@ export class UserService {
     }).catch((error) => new Error("Can't get user keycloak id: " + error));
   }
 
+  refreshToken(): void {
+    this.keycloakService.getKeycloakInstance().updateToken(50).then((refreshed) => {
+      if (refreshed){
+        this.logger.info("Token refreshed")
+      }else {
+        this.logger.info("Token not refreshed")
+      }});
+  }
+
   private sendNoTagsNotification(userData: UserResponse): void {
 
     if (userData.tags.length < 1) {

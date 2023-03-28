@@ -18,7 +18,7 @@
         <th>End Date</th>
         <th></th>
       </tr>
-      <tr class="md:hidden whitespace-normal">
+      <tr class="md:hidden whitespace-normal max-w-xs">
         <th>Name</th>
       </tr>
       </thead>
@@ -29,7 +29,7 @@
           <span *ngIf="currentPageNumber>0">{{((currentPageNumber - 1) * 10) + (i + 1)}}</span>
         </td>
         <td>
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-3 max-w-xs truncate">
             <div class="avatar">
               <div class="mask mask-squircle w-12 h-12">
                 <img alt="Avatar"
@@ -37,7 +37,7 @@
               </div>
             </div>
             <div>
-              <div class="font-bold whitespace-normal truncate max-w-[60rem]">{{ hackathon.name }}</div>
+              <span class="font-bold whitespace-normal">{{ hackathon.name }}</span>
             </div>
           </div>
         </td>

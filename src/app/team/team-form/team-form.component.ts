@@ -91,10 +91,9 @@ export class TeamFormComponent implements OnInit, OnDestroy {
           this.loadingCreate = false;
           this.loading = false;
         })).subscribe(() => {
-
+          this.userService.refreshToken();
           this.loadingCreate = false;
           this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
-            window.location.reload();
             this.toastr.success("Team " + team.name + " created successfully");
           });
         });

@@ -93,7 +93,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     if (accepted) {
 
-      this.teamService.updateInvitationStatus(invitation, accepted).pipe(concatMap(() =>
+      this.teamService.updateInvitationStatus(invitation, this.currentUser!.id, accepted).pipe(concatMap(() =>
         this.userService.updateUserMembership({
           currentHackathonId: this.currentUser?.currentHackathonId,
           currentTeamId: invitation.teamId

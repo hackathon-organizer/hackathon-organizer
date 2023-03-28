@@ -45,6 +45,9 @@ export class MenuComponent implements OnInit {
       }
 
       this.loadNotifications();
+    }).catch(() => {
+      this.userService.logout();
+      this.loading = false;
     });
   }
 
