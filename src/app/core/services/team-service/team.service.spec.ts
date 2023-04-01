@@ -95,11 +95,12 @@ describe('TeamService', () => {
       id: 1,
       fromUserName: 'user1',
       invitationStatus: 'ACCEPTED',
+      toUserId: 1,
       teamName: 'team1',
       teamId: 1
     };
 
-    service.updateInvitationStatus(teamInvitationNotification, accepted)
+    service.updateInvitationStatus(teamInvitationNotification, 1, accepted)
       .subscribe(actual => {
         expect(actual).toEqual(expected);
       });
@@ -117,11 +118,12 @@ describe('TeamService', () => {
       id: 1,
       fromUserName: 'user1',
       invitationStatus: 'REJECTED',
+      toUserId: 1,
       teamName: 'team1',
       teamId: 1
     };
 
-    service.updateInvitationStatus(teamInvitationNotification, accepted)
+    service.updateInvitationStatus(teamInvitationNotification, 1, accepted)
       .subscribe(actual => {
         expect(actual).toEqual(expected);
       });
@@ -139,10 +141,7 @@ describe('TeamService', () => {
     const username = 'user1';
     const expected = {message: 'Invitation sent'};
 
-    service.sendTeamInvitation(userId, teamId, username)
-      .subscribe(actual => {
-        expect(actual).toEqual(expected);
-      });
+    service.sendTeamInvitation(userId, teamId, username).subscribe();
 
     const req = httpMock.expectOne(BASE_URL_UPDATE + '1/invitations?username=user1');
     expect(req.request.method).toBe('POST');

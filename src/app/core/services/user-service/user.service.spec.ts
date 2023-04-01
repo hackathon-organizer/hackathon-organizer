@@ -61,8 +61,8 @@ describe('UserService', () => {
   const expectedScheduleEntryResponse: ScheduleEntryResponse[] = [{
     id: 1,
     userId: 1,
-    sessionStart: mockScheduleRequests[0].sessionStart,
-    sessionEnd: mockScheduleRequests[0].sessionEnd,
+    sessionStart: mockScheduleRequests[0].sessionStart as Date,
+    sessionEnd: mockScheduleRequests[0].sessionEnd as Date,
     teamId: 1,
     isAvailable: true
   }];
@@ -130,6 +130,8 @@ describe('UserService', () => {
   it('should send a PATCH request to update user profile', () => {
     const updatedUser: UserDetails = {description: "desc", tags: []};
 
+    UserManager.updateUserInStorage(mockUserResponse);
+
     service.updateUserProfile(updatedUser).subscribe(response => {
       expect(response).toEqual(mockUserResponsePage);
     });
@@ -196,6 +198,7 @@ describe('UserService', () => {
 
   it('should make a GET request to the correct URL with the given hackathon ID', () => {
     const hackathonId = 1;
+    UserManager.updateUserInStorage(mockUserResponse);
 
     service.getUserSchedule(hackathonId).subscribe((response) => {
       expect(response).toEqual(expectedScheduleEntryResponse);

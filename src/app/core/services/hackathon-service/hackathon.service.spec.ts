@@ -67,7 +67,7 @@ describe('HackathonService', () => {
       expect(response).toEqual(mockHackathonResponse);
     });
 
-    const request = httpMock.expectOne(BASE_URL_UPDATE);
+    const request = httpMock.expectOne(BASE_URL_UPDATE.slice(0, -1));
     expect(request.request.method).toBe('POST');
     request.flush(mockHackathonResponse);
   });

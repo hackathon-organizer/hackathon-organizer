@@ -38,9 +38,9 @@ export class TeamService {
     return this.http.patch(this.BASE_URL_UPDATE + teamId + '/invitations', invitationRequest);
   }
 
-  sendTeamInvitation(userId: number, teamId: number, username: string): Observable<any> {
+  sendTeamInvitation(userId: number, teamId: number, username: string): Observable<void> {
 
-    return this.http.post(this.BASE_URL_UPDATE + teamId + "/invitations", userId, {
+    return this.http.post<void>(this.BASE_URL_UPDATE + teamId + "/invitations", userId, {
       params: {
         username: username
       }
