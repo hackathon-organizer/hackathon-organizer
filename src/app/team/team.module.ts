@@ -7,13 +7,6 @@ import {TeamRoutingModule} from "./team-routing.module";
 import {RouterModule} from "@angular/router";
 import {TeamChatComponent} from './team-chat/team-chat.component';
 import {NgxPaginationModule} from "ngx-pagination";
-import {OpenViduAngularConfig} from "openvidu-angular";
-import {environment} from "../../environments/environment.prod";
-
-
-const config: OpenViduAngularConfig = {
-  production: environment.production
-};
 
 @NgModule({
   declarations: [
