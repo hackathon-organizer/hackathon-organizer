@@ -4,14 +4,14 @@ import {HoRoutingModule} from './ho-routing.module';
 import {HoComponent} from './ho.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
-import {CustomDateFormatter, MentorModule} from "./mentor/mentor.module";
+import {CustomDateFormatter} from "./mentor/mentor.module";
 import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calendar';
 import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
 import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ApiInterceptor} from "./core/interceptors/api.interceptor";
-import {AuthModule, LogLevel} from "angular-auth-oidc-client";
+import {AuthInterceptor, AuthModule, LogLevel} from "angular-auth-oidc-client";
 import {environment} from "../environments/environment.prod";
 
 @NgModule({
@@ -47,6 +47,7 @@ import {environment} from "../environments/environment.prod";
         clientId: 'hackathon-organizer-client',
         scope: 'openid profile email offline_access',
         responseType: 'code',
+        renewTimeBeforeTokenExpiresInSeconds: 10,
         silentRenew: true,
         useRefreshToken: true,
         logLevel: LogLevel.Debug,
@@ -55,6 +56,11 @@ import {environment} from "../environments/environment.prod";
   ],
 
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       multi: true,
