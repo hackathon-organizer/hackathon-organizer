@@ -7,7 +7,6 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 import {Tag, TeamResponse} from "../../team/model/Team";
 import {ToastrService} from "ngx-toastr";
 import {UserManager} from "../../shared/UserManager";
-import {KeycloakService} from "keycloak-angular";
 import {NotificationType} from "../model/NotificationType";
 import {MeetingNotification, Notification, TeamInvitationNotification} from "../../team/model/Notifications";
 import {UserResponse} from "../model/User";
@@ -39,7 +38,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute,
               private router: Router,
               private userService: UserService,
-              private keycloakService: KeycloakService,
               private teamService: TeamService,
               private formBuilder: FormBuilder,
               private toastr: ToastrService) {
@@ -61,7 +59,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       this.user = userResponse;
       this.currentUser = UserManager.currentUserFromStorage;
       this.isThisMyProfile = this.checkIfThisMyProfile();
-      this.isUserOrganizer = this.userService.isUserOrganizer(this.user.currentHackathonId as number);
+      this.isUserOrganizer = false;
+        //= this.userService.isUserOrganizer(this.user.currentHackathonId as number);
       this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
       if (this.currentUser?.id === this.user.id && UserManager.currentUserTeamFromStorage) {
@@ -166,7 +165,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   setUserRole(role: Role): void {
 
-    if (this.currentUser?.currentHackathonId && this.userService.isUserOrganizer(this.currentUser.currentHackathonId)) {
+    if (this.currentUser?.currentHackathonId
+      //&& this.userService.isUserOrganizer(this.currentUser.currentHackathonId)
+    ) {
       this.userService.updateUserRole(this.user.id, role)
         .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
     }

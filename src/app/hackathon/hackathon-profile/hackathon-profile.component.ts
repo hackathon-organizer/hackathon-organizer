@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, finalize, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -29,8 +29,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   constructor(private hackathonService: HackathonService,
               private userService: UserService,
               private route: ActivatedRoute,
-              private toastr: ToastrService,
-              private ref: ChangeDetectorRef) {
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
@@ -45,7 +44,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.userService.isLoggedIn().then((isLoggedIn) => this.isLoggedIn = isLoggedIn);
+    //this.userService.isLoggedIn().subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
 
   joinHackathon(): void {
@@ -72,11 +71,13 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   }
 
   isUserJury(): boolean {
-    return this.userService.isUserJury(this.hackathon.id!);
+    //return this.userService.isUserJury(this.hackathon.id!);
+    return false
   }
 
   isUserOrganizer(): boolean {
-    return this.userService.isUserOrganizer(this.hackathon.id!);
+   // return this.userService.isUserOrganizer(this.hackathon.id!);
+    return false
   }
 
   isActive(): boolean {

@@ -8,7 +8,6 @@ import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 import {concatMap, finalize, Subscription} from "rxjs";
 import {HackathonRequest} from "../model/Hackathon";
-import {KeycloakService} from "keycloak-angular";
 
 @Component({
   selector: 'ho-hackathon-form',

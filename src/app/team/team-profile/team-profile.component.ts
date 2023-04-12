@@ -99,7 +99,8 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner(): boolean {
-    return this.userService.isUserTeamOwner(this.teamId);
+    //return this.userService.isUserTeamOwner(this.teamId);
+    return false;
   }
 
   get isHackathonMember(): boolean {

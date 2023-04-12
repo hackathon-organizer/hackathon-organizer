@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {KeycloakEventType, KeycloakService} from "keycloak-angular";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
 import {NGXLogger} from "ngx-logger";
@@ -21,6 +20,7 @@ import {MeetingNotification, Notification, TeamInvitationNotification} from "../
 import {Role} from "../../../user/model/Role";
 import {ToastrService} from "ngx-toastr";
 import {environment} from "../../../../environments/environment";
+import {OidcSecurityService} from "angular-auth-oidc-client";
 
 
 @Injectable({
@@ -38,8 +38,8 @@ export class UserService {
   userLoadedObservable = this.userLoaded.asObservable();
 
   constructor(private http: HttpClient,
-              private keycloakService: KeycloakService,
               private logger: NGXLogger,
+              private oidcSecurityService: OidcSecurityService,
               private toastr: ToastrService,
               private teamService: TeamService) {
 
@@ -155,74 +155,77 @@ export class UserService {
     this.userNotifications.value.splice(toRemoveIdx, 1);
   }
 
-  login(): void {
-    this.keycloakService.login()
-      .then(success => this.logger.info("Login successful", success))
-      .catch(error => this.logger.info("Login error", error));
+  // login(): void {
+  //   this.keycloakService.login()
+  //     .then(success => this.logger.info("Login successful", success))
+  //     .catch(error => this.logger.info("Login error", error));
+  // }
+  //
+  // logout(): void {
+  //
+  //   this.keycloakService.logout(environment.REDIRECT_URL)
+  //     .then(success => this.logger.info("Logout successful", success))
+  //     .catch(error => this.logger.info("Logout error", error));
+  //
+  //   sessionStorage.clear();
+  // }
+  //
+  // signUp(): void {
+  //   this.keycloakService.register({
+  //     redirectUri: environment.REDIRECT_URL,
+  //   }).then(() => this.toastr.success("Account created successfully"));
+  // }
+
+  isLoggedIn() {
+    //return await this.keycloakService.isLoggedIn();
+    return this.oidcSecurityService.isAuthenticated$;
   }
 
-  logout(): void {
-
-    this.keycloakService.logout(environment.REDIRECT_URL)
-      .then(success => this.logger.info("Logout successful", success))
-      .catch(error => this.logger.info("Logout error", error));
-
-    sessionStorage.clear();
+  isUserJury(hackathonId: number) {
+    // return this.keycloakService.getUserRoles().includes(Role.JURY) &&
+    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
-  signUp(): void {
-    this.keycloakService.register().then(() => this.toastr.success("Account created successfully"));
-  }
-
-  isLoggedIn(): Promise<boolean> {
-    return this.keycloakService.isLoggedIn();
-  }
-
-  isUserJury(hackathonId: number): boolean {
-    return this.keycloakService.getUserRoles().includes(Role.JURY) &&
-      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserOrganizer(hackathonId: number): boolean {
-    return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
-      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
+  isUserOrganizer(hackathonId: number) {
+    // return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
+    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserMentor(hackathonId: number) {
-    return this.keycloakService.getUserRoles().includes(Role.MENTOR) &&
-      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
+    // return this.keycloakService.getUserRoles().includes(Role.MENTOR) &&
+    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
   isUserTeamOwner(teamId: number) {
-    return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
-      Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
+    // return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
+    //   Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
   }
 
   isUserTeamOwnerInHackathon(hackathonId: number) {
-    return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
-      Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
+    // return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
+    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
   }
 
-  isUserMentorOrOrganizer(hackathonId: number): boolean {
+  isUserMentorOrOrganizer(hackathonId: number) {
 
-    const userRoles = this.keycloakService.getUserRoles();
-
-    if (userRoles) {
-      return userRoles.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
-        Number(this.user?.currentHackathonId) === Number(hackathonId);
-    } else {
-      return false;
-    }
+    // const userRoles = this.keycloakService.getUserRoles();
+    //
+    // if (userRoles) {
+    //   return userRoles.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
+    //     Number(this.user?.currentHackathonId) === Number(hackathonId);
+    // } else {
+    //   return false;
+    // }
   }
 
-  isUserHackathonOwner(hackathonId: number): boolean {
-    return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
-      Number(this.user.currentHackathonId) === Number(hackathonId);
+  isUserHackathonOwner(hackathonId: number) {
+    // return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
+    //   Number(this.user.currentHackathonId) === Number(hackathonId);
   }
 
-  private async getKeycloakUserId(): Promise<string | undefined> {
-    let userDetails = await this.keycloakService.loadUserProfile();
-    return userDetails.id;
+  private async getKeycloakUserId() {
+    //let userDetails = await this.keycloakService.loadUserProfile();
+    return this.oidcSecurityService.getIdToken();
   }
 
   private openNotificationWebSocketConnection(): void {
@@ -281,12 +284,14 @@ export class UserService {
   }
 
   refreshToken(): void {
-    this.keycloakService.getKeycloakInstance().updateToken(50).then((refreshed) => {
-      if (refreshed){
-        this.logger.info("Token refreshed")
-      }else {
-        this.logger.info("Token not refreshed")
-      }});
+
+    // this.keycloakService.getKeycloakInstance().updateToken(50).then((refreshed) => {
+    //   if (refreshed) {
+    //     this.logger.info("Token refreshed")
+    //   } else {
+    //     this.logger.info("Token not refreshed")
+    //   }
+    // });
   }
 
   private sendNoTagsNotification(userData: UserResponse): void {
@@ -314,8 +319,8 @@ export class UserService {
 
   private sendUserScheduleNotification(index = 0): void {
 
-    if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
-      this.getUserSchedule(this.user.currentHackathonId).subscribe(schedule => {
+ //   if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
+      this.getUserSchedule(this.user!.currentHackathonId!).subscribe(schedule => {
 
         let meeting = schedule[index];
 
@@ -345,7 +350,7 @@ export class UserService {
           });
         }
       });
-    }
+    //}
   }
 
   private getUserId(): number {

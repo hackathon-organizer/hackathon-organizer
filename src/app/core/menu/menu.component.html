@@ -31,12 +31,23 @@
 
   <div class="flex-none gap-2">
 
+<<<<<<< HEAD
     <button (click)="login()" *ngIf="!userLoaded" [disabled]="userLoaded || loading" class="btn btn-info p-3">
       Login
     </button>
     <button (click)="signUp()" *ngIf="!userLoaded" [disabled]="userLoaded || loading" class="btn btn-success p-3">
       Sign up
     </button>
+=======
+<!--    <ng-container *ngIf="!loginButtonLock">-->
+      <button (click)="login()"  class="btn btn-info p-3">
+        Login
+      </button>
+<!--      <button (click)="signUp()"  class="btn btn-success p-3">-->
+<!--        Sign up-->
+<!--      </button>-->
+<!--    </ng-container>-->
+>>>>>>> aed55a4 (change kc auth lib)
 
     <ng-container *ngIf="userLoaded">
       <div class="dropdown dropdown-end">

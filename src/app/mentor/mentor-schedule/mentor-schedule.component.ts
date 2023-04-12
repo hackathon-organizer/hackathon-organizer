@@ -202,13 +202,15 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   canAssignTeam(): boolean {
-    return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
+   // return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
+    return true;
   }
 
   canEditSchedule(): boolean {
 
     if (this.hackathonId) {
-      return this.userService.isUserMentorOrOrganizer(this.hackathonId);
+      return true;
+     // return this.userService.isUserMentorOrOrganizer(this.hackathonId);
     } else {
       return false;
     }
@@ -226,9 +228,12 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
     } else {
-      return this.userService.isUserMentorOrOrganizer(this.hackathonId!) && !this.modalData.isAvailable &&
-        dayjs().isBetween(dayjs(this.modalData.start).subtract(15, "minutes"), dayjs(this.modalData.end));
+      return false;
     }
+    // else {
+    //   return this.userService.isUserMentorOrOrganizer(this.hackathonId!) && !this.modalData.isAvailable &&
+    //     dayjs().isBetween(dayjs(this.modalData.start).subtract(15, "minutes"), dayjs(this.modalData.end));
+    // }
   }
 
   private getHackathonSchedule(hackathonId: number): void {

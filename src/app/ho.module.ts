@@ -1,18 +1,8 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
-
-
 import {HoRoutingModule} from './ho-routing.module';
-import {MenuComponent} from './core/menu/menu.component';
 import {HoComponent} from './ho.component';
-import {FooterComponent} from './core/footer/footer.component';
-import {HackathonModule} from "./hackathon/hackathon.module";
-import {UserModule} from "./user/user.module";
-import {initializeKeycloak} from "./init/keycloak-init.factory";
-import {KeycloakAngularModule, KeycloakService} from "keycloak-angular";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
-import {TeamModule} from "./team/team.module";
-import {HomepageComponent} from './core/homepage/homepage.component';
 import {LoggerModule, NgxLoggerLevel} from "ngx-logger";
 import {CustomDateFormatter, MentorModule} from "./mentor/mentor.module";
 import {CalendarDateFormatter, CalendarModule, DateAdapter} from 'angular-calendar';
@@ -21,6 +11,8 @@ import {FlatpickrModule} from "angularx-flatpickr";
 import {ToastrModule} from "ngx-toastr";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ApiInterceptor} from "./core/interceptors/api.interceptor";
+import {AuthModule, LogLevel} from "angular-auth-oidc-client";
+import {environment} from "../environments/environment.prod";
 
 @NgModule({
   declarations: [
@@ -30,7 +22,6 @@ import {ApiInterceptor} from "./core/interceptors/api.interceptor";
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    KeycloakAngularModule,
     HoRoutingModule,
     LoggerModule.forRoot({
       serverLoggingUrl: '/api/logs',
@@ -47,16 +38,23 @@ import {ApiInterceptor} from "./core/interceptors/api.interceptor";
       }
     }),
     FlatpickrModule.forRoot(),
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    AuthModule.forRoot({
+      config: {
+        authority: environment.KEYCLOAK_URL + 'realms/hackathon-organizer',
+        redirectUrl: window.location.origin,
+        postLogoutRedirectUri: window.location.origin,
+        clientId: 'hackathon-organizer-client',
+        scope: 'openid profile email offline_access',
+        responseType: 'code',
+        silentRenew: true,
+        useRefreshToken: true,
+        logLevel: LogLevel.Debug,
+      },
+    }),
   ],
 
   providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      multi: true,
-      deps: [KeycloakService],
-    },
     {
       provide: HTTP_INTERCEPTORS,
       multi: true,
