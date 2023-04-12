@@ -28,14 +28,16 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/_redirects",
+              "src/_headers"
             ],
             "styles": [
 
               "src/styles.scss",
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/angular-calendar/css/angular-calendar.css",
-              "node_modules/flatpickr/dist/flatpickr.css",
+              "node_modules/flatpickr/dist/flatpickr.css"
             ],
             "scripts": []
           },
@@ -106,7 +108,7 @@
               "src/styles.scss",
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/angular-calendar/css/angular-calendar.css",
-              "node_modules/flatpickr/dist/flatpickr.css",
+              "node_modules/flatpickr/dist/flatpickr.css"
             ],
             "scripts": []
           }
