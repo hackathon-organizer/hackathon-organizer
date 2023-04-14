@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {concatMap, finalize, Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
@@ -9,6 +9,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
 import {HttpEventType} from "@angular/common/http";
 import {environment} from "../../../environments/environment";
+import {Role} from "../../user/model/Role";
 
 @Component({
   selector: 'ho-hackathon-profile',
@@ -44,7 +45,7 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
         }
       });
 
-    //this.userService.isLoggedIn().subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
+    this.userService.userLoadedObservable.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
 
   joinHackathon(): void {
@@ -71,13 +72,11 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   }
 
   isUserJury(): boolean {
-    //return this.userService.isUserJury(this.hackathon.id!);
-    return false
+    return this.userService.checkUserAccessAndMembership(this.hackathon.id, Role.JURY);
   }
 
   isUserOrganizer(): boolean {
-   // return this.userService.isUserOrganizer(this.hackathon.id!);
-    return false
+    return this.userService.checkUserAccessAndMembership(this.hackathon.id, Role.ORGANIZER);
   }
 
   isActive(): boolean {
@@ -96,24 +95,24 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
           this.uploadProgress = undefined;
         }))
         .subscribe(event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          this.uploadProgress = Math.round(100 * (event.loaded / event.total!));
+          if (event.type === HttpEventType.UploadProgress) {
+            this.uploadProgress = Math.round(100 * (event.loaded / event.total!));
 
-          if (this.uploadProgress === 100) {
-            this.toastr.success("File uploaded successfully");
-            this.logoUrl = this.logoUrl.replace(new RegExp("[^\\/]+$"), file.name);
+            if (this.uploadProgress === 100) {
+              this.toastr.success("File uploaded successfully");
+              this.logoUrl = this.logoUrl.replace(new RegExp("[^\\/]+$"), file.name);
+            }
           }
-        }
-      });
+        });
     }
+  }
+
+  callFileUpload() {
+    document.getElementById('file-upload')!.click();
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.uploadSubscription.unsubscribe();
-  }
-
-  callFileUpload() {
-    document.getElementById('file-upload')!.click();
   }
 }

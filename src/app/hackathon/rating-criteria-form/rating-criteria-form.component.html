@@ -23,10 +23,11 @@
           criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.dirty) &&
           !criteriaForm.get('criteria')?.get(i.toString())?.get('name')?.valid }" class="ho-input-primary"
                        formControlName="name" id="nameId"
-                       placeholder="Type criteria here"
+                       placeholder="Type criteria name here"
                        type="text"/>
 
-                <button (click)="removeCriteria(i)" [disabled]="loading" class="md:ml-4 mt-3 w-1/3 mx-auto md:w-auto md:mt-0 btn btn-error">
+                <button (click)="removeCriteria(i)" [disabled]="loading"
+                        class="md:ml-4 mt-3 w-1/3 md:w-auto md:mt-0 btn btn-error">
                   Remove
                 </button>
               </div>

@@ -73,24 +73,24 @@ export class HackathonRatingFormComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.loading = false))
       .subscribe((answersResponse: CriteriaAnswer[]) => {
 
-      answersResponse.forEach(answer => {
-        const index = this.answers.findIndex(ans => ans.id === answer.id);
+        answersResponse.forEach(answer => {
+          const index = this.answers.findIndex(ans => ans.id === answer.id);
 
-        if (index != -1) {
-          this.answers[index] = answer;
-        } else {
-          this.answers.push(answer);
+          if (index != -1) {
+            this.answers[index] = answer;
+          } else {
+            this.answers.push(answer);
+          }
+        });
+
+        if (this.teamsNumber < this.teams.length - 1) {
+          this.currentTeam = this.teams[++this.teamsNumber];
+          this.currentTeamId = this.currentTeam.id;
         }
+
+        this.updateFormValues();
+        this.toastr.success("Rating saved for team " + this.currentTeam?.name);
       });
-
-      if (this.teamsNumber < this.teams.length - 1) {
-        this.currentTeam = this.teams[++this.teamsNumber];
-        this.currentTeamId = this.currentTeam.id;
-      }
-
-      this.updateFormValues();
-      this.toastr.success("Rating saved for team " + this.currentTeam?.name);
-    });
   }
 
   previousTeam() {

@@ -32,76 +32,76 @@
       </div>
     </div>
 
-      <div *ngIf="isUserIsHackathonParticipant" class="flex flex-col md:flex-row justify-around">
+    <div *ngIf="isUserIsHackathonParticipant" class="flex flex-col md:flex-row justify-around">
 
-        <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success md:hidden"
-               for="edit-modal">Edit</label>
+      <label (click)="editProfile()" *ngIf="isThisMyProfile" class="btn btn-outline btn-success md:hidden"
+             for="edit-modal">Edit</label>
 
-        <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile"
-                class="btn btn-info my-5">
-          Set as mentor
-        </button>
-        <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
-          Set as jury
-        </button>
+      <button (click)="setUserRole(Role.MENTOR)" *ngIf="isUserOrganizer && !isThisMyProfile"
+              class="btn btn-info my-5">
+        Set as mentor
+      </button>
+      <button (click)="setUserRole(Role.JURY)" *ngIf="isUserOrganizer && !isThisMyProfile" class="btn btn-info my-5">
+        Set as jury
+      </button>
 
-        <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon ||
+      <button (click)="inviteToTeam()" [disabled]="isThisMyProfile || isUserNotInMyHackathon ||
          !currentUser?.currentTeamId || currentUser?.currentTeamId === user.currentTeamId" class="btn btn-info my-5">
-          Invite to team
-        </button>
-      </div>
+        Invite to team
+      </button>
     </div>
+  </div>
 
-    <div>
-      <div class="flex flex-col">
-        <h4 class="text-3xl font-bold mb-5">Tags:</h4>
+  <div>
+    <div class="flex flex-col">
+      <h4 class="text-3xl font-bold mb-5">Tags:</h4>
 
-        <span class="text-xl" *ngIf="user.tags.length < 1 || !currentUser?.tags">
+      <span class="text-xl" *ngIf="user && user.tags.length < 1 || currentUser && currentUser.tags.length < 1">
           No tags selected yet
-        </span>
+      </span>
 
-        <div *ngIf="user" class="flex flex-wrap my-5">
-          <div *ngFor="let tag of user.tags;">
-            <label class="pill">
-              <span class="appearance-none" type="checkbox">{{ tag.name }}</span>
-            </label>
-          </div>
+      <div *ngIf="user" class="flex flex-wrap my-5">
+        <div *ngFor="let tag of user.tags;">
+          <label class="pill">
+            <span class="appearance-none" type="checkbox">{{ tag.name }}</span>
+          </label>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="my-4 md:w-3/5" id="teams-suggestions">
-      <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
-        <input (click)="getUserTeamSuggestions()" type="checkbox"/>
-        <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
-          Show matching teams
+  <div class="my-4 md:w-3/5" id="teams-suggestions">
+    <div *ngIf="isThisMyProfile" class="collapse collapse-arrow">
+      <input (click)="getUserTeamSuggestions()" type="checkbox"/>
+      <div class="collapse-title text-xl font-medium border border-primary rounded-lg">
+        Show matching teams
+      </div>
+      <div class="collapse-content">
+
+        <ng-container *ngIf="loading">
+          <img alt="Loading spinner" class="mx-auto mt-24" src="assets/spinner.svg"/>
+        </ng-container>
+
+        <div *ngIf="teamSuggestions.length < 1 && !loading" class="w-full text-center mt-4">
+          <span class="text-2xl">Nothing found :(</span>
         </div>
-        <div class="collapse-content">
 
-          <ng-container *ngIf="loading">
-            <img alt="Loading spinner" class="mx-auto mt-24" src="assets/spinner.svg"/>
-          </ng-container>
+        <div *ngFor="let team of teamSuggestions; index as i"
+             class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary">
 
-          <div *ngIf="teamSuggestions.length < 1 && !loading" class="w-full text-center mt-4">
-            <span class="text-2xl">Nothing found :(</span>
-          </div>
-
-          <div *ngFor="let team of teamSuggestions; index as i"
-               class="flex items-center justify-between my-2 border-x-2 px-3 border-l-secondary border-r-secondary">
-
-            <span class="mr-2">{{(i + 1)}}</span>
-            <span class="max-w-10 truncate">{{ team.name }}</span>
-            <div class="flex flex-wrap">
-              <div *ngFor="let tag of team.tags | slice:0:3">
-                <div class="pill-small justify-self-end">{{ tag.name }}</div>
-              </div>
-              <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
+          <span class="mr-2">{{(i + 1)}}</span>
+          <span class="max-w-10 truncate">{{ team.name }}</span>
+          <div class="flex flex-wrap">
+            <div *ngFor="let tag of team.tags | slice:0:3">
+              <div class="pill-small justify-self-end">{{ tag.name }}</div>
             </div>
-            <a routerLink="{{ getTeamUrl(team.id) }}">
-              <button class="btn">Show details</button>
-            </a>
+            <span *ngIf="team.tags.length > 3">&nbsp;&nbsp;+{{ team.tags.length - 3 }}</span>
           </div>
+          <a routerLink="{{ getTeamUrl(team.id) }}">
+            <button class="btn">Show details</button>
+          </a>
         </div>
+      </div>
 
     </div>
 

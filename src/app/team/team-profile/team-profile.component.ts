@@ -7,6 +7,7 @@ import {TeamResponse} from "../model/Team";
 import {ToastrService} from "ngx-toastr";
 import {UserManager} from "../../shared/UserManager";
 import {UserResponse} from "../../user/model/User";
+import {Role} from "../../user/model/Role";
 
 @Component({
   selector: 'ho-team-profile',
@@ -42,7 +43,7 @@ export class TeamProfileComponent implements OnInit {
     ).subscribe(teamResponse => {
       this.team = teamResponse;
 
-      if (this.isHackathonMember) {
+      if (this.isUserHackathonMember) {
         this.getTeamMembers();
       }
     });
@@ -99,11 +100,6 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner(): boolean {
-    //return this.userService.isUserTeamOwner(this.teamId);
-    return false;
-  }
-
-  get isHackathonMember(): boolean {
-    return UserManager.isUserHackathonMember(this.hackathonId);
+    return this.userService.checkUserAccessAndMembership(this.hackathonId, Role.TEAM_OWNER);
   }
 }

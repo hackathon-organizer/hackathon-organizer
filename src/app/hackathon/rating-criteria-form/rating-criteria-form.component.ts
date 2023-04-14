@@ -66,9 +66,9 @@ export class RatingCriteriaFormComponent implements OnInit, OnDestroy {
         .pipe(finalize(() => this.loading = false))
         .subscribe((criteriaResponse) => {
 
-        this.criteria.patchValue(criteriaResponse);
-        this.toastr.success("Criteria created successfully");
-      });
+          this.criteria.patchValue(criteriaResponse);
+          this.toastr.success("Criteria created successfully");
+        });
     }
   }
 

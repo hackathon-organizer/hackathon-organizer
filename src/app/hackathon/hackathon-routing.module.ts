@@ -22,7 +22,7 @@ const routes: Routes = [
   {path: '', component: HackathonsComponent},
   {path: 'new', component: HackathonFormComponent, canActivate: [AuthGuard]},
   {path: ':id', component: HackathonProfileComponent},
-  {path: ':id/edit', component: HackathonFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard]},
+  {path: ':id/edit', component: HackathonFormComponent, canActivate: [OrganizerRoleGuard]},
   {
     path: ':id/participants', loadChildren: () => import('../user/user.module').then(m => m.UserModule),
     component: UserListComponent, canActivate: [AuthGuard]
@@ -37,7 +37,7 @@ const routes: Routes = [
   },
   {
     path: ':id/teams/:teamId/edit', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
-    component: TeamFormComponent, canActivate: [AuthGuard, TeamOwnerRoleGuard]
+    component: TeamFormComponent, canActivate: [TeamOwnerRoleGuard]
   },
   {
     path: ':id/teams/:teamId', loadChildren: () => import('../team/team.module').then(m => m.TeamModule),
@@ -58,9 +58,9 @@ const routes: Routes = [
   {
     path: ':id/rating',
     component: HackathonRatingFormComponent,
-    canActivate: [AuthGuard, OrganizerRoleGuard, JuryRoleGuard]
+    canActivate: [OrganizerRoleGuard, JuryRoleGuard]
   },
-  {path: ':id/rating-criteria', component: RatingCriteriaFormComponent, canActivate: [AuthGuard, OrganizerRoleGuard]},
+  {path: ':id/rating-criteria', component: RatingCriteriaFormComponent, canActivate: [OrganizerRoleGuard]},
   {path: ':id/leaderboard', component: LeaderboardComponent, canActivate: [AuthGuard]}
 ];
 

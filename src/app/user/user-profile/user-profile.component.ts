@@ -52,15 +52,18 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.params.pipe(concatMap(params => {
 
         this.userProfileId = params["id"];
-        return this.userService.getUserById(params["id"])
+        return this.userService.getUserById(params["id"]);
       })
     ).subscribe(userResponse => {
 
       this.user = userResponse;
       this.currentUser = UserManager.currentUserFromStorage;
       this.isThisMyProfile = this.checkIfThisMyProfile();
-      this.isUserOrganizer = false;
-        //= this.userService.isUserOrganizer(this.user.currentHackathonId as number);
+
+      if (this.user.currentHackathonId) {
+        this.isUserOrganizer = this.userService.checkUserAccessAndMembership(this.user.currentHackathonId, Role.ORGANIZER);
+      }
+
       this.avatarUrl = `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${userResponse.username}&length=1`;
 
       if (this.currentUser?.id === this.user.id && UserManager.currentUserTeamFromStorage) {
@@ -90,23 +93,23 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const invitation: TeamInvitationNotification = this.notificationsArray[invitationIndex] as TeamInvitationNotification;
 
-    if (accepted) {
+    this.teamService.updateInvitationStatus(invitation, this.currentUser!.id, accepted).pipe(concatMap(() =>
+      this.userService.updateUserMembership({
+        currentHackathonId: this.currentUser?.currentHackathonId,
+        currentTeamId: invitation.teamId
+      })
+    )).subscribe(() => {
 
-      this.teamService.updateInvitationStatus(invitation, this.currentUser!.id, accepted).pipe(concatMap(() =>
-        this.userService.updateUserMembership({
-          currentHackathonId: this.currentUser?.currentHackathonId,
-          currentTeamId: invitation.teamId
-        })
-      )).subscribe(() => {
-
+      if (accepted) {
         this.currentUser!.currentTeamId = invitation.teamId;
         this.userService.fetchAndUpdateTeamInStorage(this.currentUser!);
         this.currentTeamName = invitation.teamName;
         this.toastr.success("You are now member of team " + invitation.teamName);
-      });
-    } else {
-      this.toastr.success("Invitation rejected");
-    }
+      } else {
+        this.toastr.success("Invitation to team " + invitation.teamName + " rejected");
+      }
+    });
+
     this.notificationsArray.splice(invitationIndex, 1);
   }
 

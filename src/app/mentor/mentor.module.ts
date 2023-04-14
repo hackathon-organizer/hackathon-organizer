@@ -1,6 +1,5 @@
 import {CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MentorScheduleComponent} from './mentor-schedule/mentor-schedule.component';
 import {MentorRoutingModule} from "./mentor-routing.module";
 import {
   CalendarDateFormatter,

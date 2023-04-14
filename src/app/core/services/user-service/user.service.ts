@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from "rxjs";
+import {BehaviorSubject, finalize, Observable, take} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
@@ -21,7 +21,11 @@ import {Role} from "../../../user/model/Role";
 import {ToastrService} from "ngx-toastr";
 import {environment} from "../../../../environments/environment";
 import {OidcSecurityService} from "angular-auth-oidc-client";
+import jwtDecode, {JwtPayload} from "jwt-decode";
 
+type userAccess = {
+  roles: string[];
+};
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +38,9 @@ export class UserService {
   user!: UserResponse;
   private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
+  private accessToken: string = "";
+  private isUserAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  isUserAuthenticatedObservable = this.isUserAuthenticated.asObservable();
   private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   userLoadedObservable = this.userLoaded.asObservable();
 
@@ -155,79 +162,6 @@ export class UserService {
     this.userNotifications.value.splice(toRemoveIdx, 1);
   }
 
-  // login(): void {
-  //   this.keycloakService.login()
-  //     .then(success => this.logger.info("Login successful", success))
-  //     .catch(error => this.logger.info("Login error", error));
-  // }
-  //
-  // logout(): void {
-  //
-  //   this.keycloakService.logout(environment.REDIRECT_URL)
-  //     .then(success => this.logger.info("Logout successful", success))
-  //     .catch(error => this.logger.info("Logout error", error));
-  //
-  //   sessionStorage.clear();
-  // }
-  //
-  // signUp(): void {
-  //   this.keycloakService.register({
-  //     redirectUri: environment.REDIRECT_URL,
-  //   }).then(() => this.toastr.success("Account created successfully"));
-  // }
-
-  isLoggedIn() {
-    //return await this.keycloakService.isLoggedIn();
-    return this.oidcSecurityService.isAuthenticated$;
-  }
-
-  isUserJury(hackathonId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.JURY) &&
-    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserOrganizer(hackathonId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
-    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserMentor(hackathonId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.MENTOR) &&
-    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserTeamOwner(teamId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
-    //   Number(UserManager.currentUserFromStorage.currentTeamId) === Number(teamId);
-  }
-
-  isUserTeamOwnerInHackathon(hackathonId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.TEAM_OWNER) &&
-    //   Number(UserManager.currentUserFromStorage.currentHackathonId) === Number(hackathonId);
-  }
-
-  isUserMentorOrOrganizer(hackathonId: number) {
-
-    // const userRoles = this.keycloakService.getUserRoles();
-    //
-    // if (userRoles) {
-    //   return userRoles.some(role => role === Role.ORGANIZER || role === Role.MENTOR) &&
-    //     Number(this.user?.currentHackathonId) === Number(hackathonId);
-    // } else {
-    //   return false;
-    // }
-  }
-
-  isUserHackathonOwner(hackathonId: number) {
-    // return this.keycloakService.getUserRoles().includes(Role.ORGANIZER) &&
-    //   Number(this.user.currentHackathonId) === Number(hackathonId);
-  }
-
-  private async getKeycloakUserId() {
-    //let userDetails = await this.keycloakService.loadUserProfile();
-    return this.oidcSecurityService.getIdToken();
-  }
-
   private openNotificationWebSocketConnection(): void {
 
     const WS_API_URL = environment.API_URL.replace(new RegExp("(http|https)"), "ws");
@@ -252,6 +186,7 @@ export class UserService {
         invite.notificationType = NotificationType.INVITATION;
         this.userNotifications.next(this.userNotifications.value.concat(invite));
 
+        this.toastr.info("Invitation to team " + invite.teamName + " received");
         this.logger.info("Invitation fetched: ", invite)
       });
     }
@@ -263,35 +198,59 @@ export class UserService {
     client.activate();
   }
 
+is!: boolean;
   updateUserData(): void {
 
-    this.getKeycloakUserId().then((keycloakId) => {
+      this.oidcSecurityService.checkAuth().pipe(take(1)).subscribe(isLoggedIn => {
 
-      this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
-        this.user = userData;
+        this.isUserAuthenticated.next(isLoggedIn.isAuthenticated)
 
-        UserManager.updateUserInStorage(userData);
-        this.userLoaded.next(true);
+        if (isLoggedIn.isAuthenticated) {
+          this.oidcSecurityService.userData$.subscribe((userProfile) => {
 
-        this.fetchAndUpdateTeamInStorage(userData);
-        this.sendNoTagsNotification(userData);
-        this.getUserTeamInvitations(userData);
-        this.sendUserScheduleNotification();
-        this.openNotificationWebSocketConnection();
+            const keycloakId = userProfile.userData.sub;
+            console.log(userProfile.userData)
+
+            this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
+              this.user = userData;
+
+              UserManager.updateUserInStorage(userData);
+              this.fetchAndUpdateTeamInStorage(userData);
+              this.userLoaded.next(true);
+              this.sendNoTagsNotification(userData);
+              this.getUserTeamInvitations(userData);
+              this.sendUserScheduleNotification();
+              this.openNotificationWebSocketConnection();
+            });
+
+          }, (error) => new Error("Can't get user keycloak id: " + error));
+
+          this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
+        }
       });
-
-    }).catch((error) => new Error("Can't get user keycloak id: " + error));
   }
 
-  refreshToken(): void {
+  checkUserAccess(...roles: Role[]): boolean {
 
-    // this.keycloakService.getKeycloakInstance().updateToken(50).then((refreshed) => {
-    //   if (refreshed) {
-    //     this.logger.info("Token refreshed")
-    //   } else {
-    //     this.logger.info("Token not refreshed")
-    //   }
-    // });
+    if (this.accessToken) {
+      const decodedToken = jwtDecode<JwtPayload & { realm_access: userAccess }>(this.accessToken);
+      return roles.every(role => decodedToken.realm_access.roles.includes(role));
+    } else {
+      return false;
+    }
+  }
+
+  checkUserAccessAndMembership(hackathonId: number, ...roles: Role[]): boolean {
+
+    if (this.accessToken) {
+    const currentUserHackathonId = this.user?.currentHackathonId;
+
+    const decodedToken = jwtDecode<JwtPayload & { realm_access: userAccess }>(this.accessToken);
+    return roles.every(role => decodedToken.realm_access.roles.includes(role)) &&
+      Number(currentUserHackathonId) === Number(hackathonId);
+    } else {
+      return false;
+    }
   }
 
   private sendNoTagsNotification(userData: UserResponse): void {
@@ -319,7 +278,7 @@ export class UserService {
 
   private sendUserScheduleNotification(index = 0): void {
 
- //   if (this.user.currentHackathonId && this.isUserMentorOrOrganizer(this.user.currentHackathonId)) {
+    if (this.user.currentHackathonId && this.checkUserAccess(Role.ORGANIZER) || this.checkUserAccess(Role.MENTOR)) {
       this.getUserSchedule(this.user!.currentHackathonId!).subscribe(schedule => {
 
         let meeting = schedule[index];
@@ -350,7 +309,7 @@ export class UserService {
           });
         }
       });
-    //}
+    }
   }
 
   private getUserId(): number {

@@ -96,7 +96,7 @@ export class HackathonService {
     const data: FormData = new FormData();
     data.append('file', file);
 
-    return this.http.post<void>(this.BASE_URL_UPDATE + hackathonId + '/files', data,  {
+    return this.http.post<void>(this.BASE_URL_UPDATE + hackathonId + '/files', data, {
       reportProgress: true,
       observe: 'events'
     });

@@ -3,7 +3,8 @@
   <div *ngIf="hackathon" class="flex justify-center items-center flex-col">
     <h1 class="text-2xl break-words md:text-7xl font-bold mb-8 truncate w-full">{{ hackathon.name }}</h1>
     <span class="mb-3 mx-auto">
-      {{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }} - {{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}
+      {{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }}
+      - {{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}
     </span>
 
     <img [src]="logoUrl" class="object-cover max-h-[50rem] rounded-lg">
@@ -12,7 +13,7 @@
       <button id="file-name" class="btn btn-primary mr-4 hidden sm:inline-block"> Choose logo file</button>
       {{ fileName }}</button>
     <input id="file-upload" *ngIf="isUserOrganizer()" (change)="onFileSelected($event)" type="file" accept="image/*"
-    class="hidden"/>
+           class="hidden"/>
     <progress class="progress progress-secondary w-56 mt-4" [value]="uploadProgress" *ngIf="uploadProgress" max="100">
     </progress>
   </div>

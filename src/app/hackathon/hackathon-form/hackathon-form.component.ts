@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
-import {ActivatedRoute, Route, Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {HackathonService} from "../../core/services/hackathon-service/hackathon.service";
 import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
@@ -77,7 +77,6 @@ export class HackathonFormComponent implements OnInit {
         })).pipe(finalize(() => this.loading = false))
         .subscribe(() => {
 
-          this.userService.refreshToken();
           this.router.navigate(['/hackathons/' + this.hackathonId]).then(() => {
             this.toastr.success("Hackathon " + hackathon.name + " created successfully");
           });

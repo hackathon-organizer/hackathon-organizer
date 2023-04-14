@@ -17,6 +17,7 @@ import {
 import {ToastrService} from "ngx-toastr";
 import {UserManager} from "../../shared/UserManager";
 import dayjs from "dayjs";
+import {Role} from "../../user/model/Role";
 
 let colors: Record<string, EventColor> = {
   main: {
@@ -148,13 +149,13 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
     this.userService.removeScheduleEntry(this.currentUser.id, eventToDelete.id as number).subscribe(() => {
 
-        this.events = this.events.filter((event) => event.id !== eventToDelete.id);
-        this.userEvents = this.userEvents.filter((event) => event.id !== eventToDelete.id);
-        this.scheduleUpdateSuccessToast();
+      this.events = this.events.filter((event) => event.id !== eventToDelete.id);
+      this.userEvents = this.userEvents.filter((event) => event.id !== eventToDelete.id);
+      this.scheduleUpdateSuccessToast();
 
-        this.refresh.next();
-        this.loading = false;
-      });
+      this.refresh.next();
+      this.loading = false;
+    });
   }
 
   updateEvents(): void {
@@ -202,18 +203,16 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
   }
 
   canAssignTeam(): boolean {
-   // return this.userService.isUserTeamOwnerInHackathon(this.hackathonId!);
-    return true;
-  }
-
-  canEditSchedule(): boolean {
 
     if (this.hackathonId) {
-      return true;
-     // return this.userService.isUserMentorOrOrganizer(this.hackathonId);
+      return this.userService.checkUserAccessAndMembership(this.hackathonId, Role.TEAM_OWNER);
     } else {
       return false;
     }
+  }
+
+  canEditSchedule(): boolean {
+      return this.checkIfUserIsMentorOrOrganizer();
   }
 
   navigateToMeeting(teamId: string | number | undefined): void {
@@ -228,12 +227,9 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
     if (teamId && UserManager.isUserTeamMember(Number(teamId)) && !this.modalData.isAvailable) {
       return true;
     } else {
-      return false;
+      return this.checkIfUserIsMentorOrOrganizer() && !this.modalData.isAvailable &&
+        dayjs().isBetween(dayjs(this.modalData.start).subtract(15, "minutes"), dayjs(this.modalData.end));
     }
-    // else {
-    //   return this.userService.isUserMentorOrOrganizer(this.hackathonId!) && !this.modalData.isAvailable &&
-    //     dayjs().isBetween(dayjs(this.modalData.start).subtract(15, "minutes"), dayjs(this.modalData.end));
-    // }
   }
 
   private getHackathonSchedule(hackathonId: number): void {
@@ -299,6 +295,16 @@ export class MentorScheduleComponent implements OnInit, OnDestroy {
 
   private scheduleUpdateSuccessToast(): void {
     this.toastr.success("Schedule updated successfully");
+  }
+
+  private checkIfUserIsMentorOrOrganizer(): boolean {
+
+    if (this.hackathonId) {
+      return this.userService.checkUserAccessAndMembership(this.hackathonId, Role.MENTOR) ||
+        this.userService.checkUserAccess(Role.ORGANIZER);
+    } else {
+      return false;
+    }
   }
 
   ngOnDestroy(): void {
