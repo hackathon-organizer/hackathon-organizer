@@ -55,14 +55,14 @@ import {environment} from "../environments/environment";
         autoUserInfo: false,
         logLevel: LogLevel.Debug,
         secureRoutes: [
-          // environment.API_URL + '/api/v1/write/hackathons',
-          // environment.API_URL + '/api/v1/read/hackathons',
-          // environment.API_URL + '/api/v1/write/teams',
-          // environment.API_URL + '/api/v1/read/teams/invitations',
-          // environment.API_URL + '/api/v1/read/teams/suggestions',
-          // environment.API_URL + '/api/v1/write/users',
-          // environment.API_URL + '/api/v1/read/users',
-          // environment.API_URL + '/api/v1/messages'
+          environment.API_URL + '/api/v1/write/hackathons',
+          environment.API_URL + '/api/v1/read/hackathons',
+          environment.API_URL + '/api/v1/write/teams',
+          environment.API_URL + '/api/v1/read/teams/invitations',
+          environment.API_URL + '/api/v1/read/teams/suggestions',
+          environment.API_URL + '/api/v1/write/users',
+          environment.API_URL + '/api/v1/read/users',
+          environment.API_URL + '/api/v1/messages'
         ]
       },
     }),
