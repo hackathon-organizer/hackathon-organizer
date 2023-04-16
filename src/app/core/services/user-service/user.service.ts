@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {BehaviorSubject, finalize, Observable, take} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Client, IMessage} from "@stomp/stompjs";
@@ -20,7 +20,7 @@ import {MeetingNotification, Notification, TeamInvitationNotification} from "../
 import {Role} from "../../../user/model/Role";
 import {ToastrService} from "ngx-toastr";
 import {environment} from "../../../../environments/environment";
-import {OidcSecurityService} from "angular-auth-oidc-client";
+import {LoginResponse, OidcSecurityService} from "angular-auth-oidc-client";
 import jwtDecode, {JwtPayload} from "jwt-decode";
 
 type userAccess = {
@@ -30,7 +30,7 @@ type userAccess = {
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class UserService implements OnDestroy {
 
   private BASE_URL_UPDATE = environment.API_URL + "/api/v1/write/users/";
   private BASE_URL_READ = environment.API_URL + "/api/v1/read/users/";
@@ -38,7 +38,7 @@ export class UserService {
   user!: UserResponse;
   private userNotifications: BehaviorSubject<Notification[]> = new BehaviorSubject<Notification[]>([]);
   userNotificationsObservable = this.userNotifications.asObservable();
-  private accessToken: string = "";
+  private accessToken?: string | null;
   private isUserAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   isUserAuthenticatedObservable = this.isUserAuthenticated.asObservable();
   private userLoaded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -253,6 +253,10 @@ is!: boolean;
     }
   }
 
+  refreshToken(): Observable<LoginResponse> {
+    return this.oidcSecurityService.forceRefreshSession();
+  }
+
   private sendNoTagsNotification(userData: UserResponse): void {
 
     if (userData.tags.length < 1) {
@@ -314,5 +318,9 @@ is!: boolean;
 
   private getUserId(): number {
     return UserManager.currentUserFromStorage.id;
+  }
+
+  ngOnDestroy(): void {
+    this.accessToken = null;
   }
 }

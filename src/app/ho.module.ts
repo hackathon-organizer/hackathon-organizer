@@ -52,7 +52,8 @@ import {environment} from "../environments/environment";
         useRefreshToken: true,
         ignoreNonceAfterRefresh: true,
         triggerRefreshWhenIdTokenExpired: false,
-        autoUserInfo: false,
+        autoUserInfo: true,
+        renewUserInfoAfterTokenRenew: true,
         logLevel: LogLevel.Debug,
         secureRoutes: [
           environment.API_URL + '/api/v1/write/hackathons',

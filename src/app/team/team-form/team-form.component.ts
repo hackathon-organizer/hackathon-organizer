@@ -4,7 +4,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest, TeamResponse} from "../model/Team";
-import {concatMap, finalize, Subscription} from "rxjs";
+import {concatMap, finalize, Subscription, switchMap} from "rxjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 
@@ -69,9 +69,10 @@ export class TeamFormComponent implements OnInit, OnDestroy {
         this.teamService.updateTeam(team, this.teamId).pipe(finalize(() => this.loadingCreate = false))
           .subscribe(updatedTeam => {
 
-            this.router.navigateByUrl('/hackathons/' + this.hackathonId + '/teams/' + updatedTeam.id);
             UserManager.updateTeamInStorage(updatedTeam);
-            this.toastr.success("Team " + team.name + " updated successfully");
+            this.router.navigateByUrl('/hackathons/' + this.hackathonId + '/teams/' + updatedTeam.id).then(() => {
+              this.toastr.success("Team " + team.name + " updated successfully");
+            });
           });
       } else {
 
@@ -87,14 +88,14 @@ export class TeamFormComponent implements OnInit, OnDestroy {
             currentHackathonId: this.hackathonId,
             currentTeamId: createdTeam.id
           });
-        })).pipe(finalize(() => {
+        }), switchMap(() => this.userService.refreshToken()), finalize(() => {
           this.loadingCreate = false;
           this.loading = false;
         })).subscribe(() => {
 
-          this.loadingCreate = false;
-          this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
-            this.toastr.success("Team " + team.name + " created successfully");
+            this.loadingCreate = false;
+            this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
+              this.toastr.success("Team " + team.name + " created successfully");
           });
         });
       }
