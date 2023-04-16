@@ -100,6 +100,6 @@ export class TeamProfileComponent implements OnInit {
   }
 
   get isOwner(): boolean {
-    return this.userService.checkUserAccessAndMembership(this.hackathonId, Role.TEAM_OWNER);
+    return this.userService.checkUserAccess(Role.TEAM_OWNER);
   }
 }

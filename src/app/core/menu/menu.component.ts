@@ -4,7 +4,6 @@ import {UserManager} from "../../shared/UserManager";
 import {Notification} from "../../team/model/Notifications";
 import {OidcSecurityService} from "angular-auth-oidc-client";
 import {Role} from "../../user/model/Role";
-import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'ho-menu',
@@ -52,13 +51,7 @@ export class MenuComponent implements OnInit {
   }
 
   signUp(): void {
-
-    this.oidcSecurityService.getAuthorizeUrl().subscribe(url => {
-      this.oidcSecurityService.authorize(undefined, {urlHandler() {
-          window.location.href = url!.replace("openid-connect/auth","openid-connect/registrations");
-        },
-      redirectUrl: environment.REDIRECT_URL})
-    });
+    this.oidcSecurityService.authorize(undefined, {customParams: {registrationRedirect: true}});
   }
 
   login() {
