@@ -72,11 +72,11 @@ export class HackathonProfileComponent implements OnInit, OnDestroy {
   }
 
   isUserJury(): boolean {
-    return this.userService.checkUserAccessAndMembership(this.hackathon.id, Role.JURY);
+    return this.userService.checkUserAccess(Role.JURY);
   }
 
   isUserOrganizer(): boolean {
-    return this.userService.checkUserAccessAndMembership(this.hackathon.id, Role.ORGANIZER);
+    return this.userService.checkUserAccess(Role.ORGANIZER);
   }
 
   isActive(): boolean {

@@ -1,5 +1,5 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {BehaviorSubject, finalize, Observable, take} from "rxjs";
+import {BehaviorSubject, Observable, take} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
@@ -198,36 +198,45 @@ export class UserService implements OnDestroy {
     client.activate();
   }
 
-is!: boolean;
   updateUserData(): void {
 
-      this.oidcSecurityService.checkAuth().pipe(take(1)).subscribe(isLoggedIn => {
+    // TODO update observables
 
-        this.isUserAuthenticated.next(isLoggedIn.isAuthenticated)
+    this.oidcSecurityService.checkAuth().pipe(take(1)).subscribe(isLoggedIn => {
 
-        if (isLoggedIn.isAuthenticated) {
-          this.oidcSecurityService.userData$.subscribe((userProfile) => {
+      this.isUserAuthenticated.next(isLoggedIn.isAuthenticated)
 
-            const keycloakId = userProfile.userData.sub;
-            console.log(userProfile.userData)
+      if (isLoggedIn.isAuthenticated) {
+        this.oidcSecurityService.userData$.pipe(take(1)).subscribe((userProfile) => {
 
-            this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).subscribe(userData => {
-              this.user = userData;
+          const keycloakId = userProfile.userData.sub;
 
-              UserManager.updateUserInStorage(userData);
-              this.fetchAndUpdateTeamInStorage(userData);
-              this.userLoaded.next(true);
-              this.sendNoTagsNotification(userData);
-              this.getUserTeamInvitations(userData);
-              this.sendUserScheduleNotification();
-              this.openNotificationWebSocketConnection();
+          this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId)
+            .pipe(take(1)).subscribe(userData => {
+
+            this.user = userData;
+
+            UserManager.updateUserInStorage(userData);
+            this.fetchAndUpdateTeamInStorage(userData);
+            this.userLoaded.next(true);
+            this.sendNoTagsNotification(userData);
+            this.getUserTeamInvitations(userData);
+            this.sendUserScheduleNotification();
+            this.openNotificationWebSocketConnection();
+          }, () => {
+            this.oidcSecurityService.logoffAndRevokeTokens().subscribe(() => {
+              this.isUserAuthenticated.next(false);
+              new Error("Can't load user profile. Try again later.");
             });
+          });
 
-          }, (error) => new Error("Can't get user keycloak id: " + error));
+        }, (error) => {
+          new Error("Can't get user with id: " + error)
+        });
 
-          this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
-        }
-      });
+        this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
+      }
+    });
   }
 
   checkUserAccess(...roles: Role[]): boolean {
@@ -243,11 +252,11 @@ is!: boolean;
   checkUserAccessAndMembership(hackathonId: number, ...roles: Role[]): boolean {
 
     if (this.accessToken) {
-    const currentUserHackathonId = this.user?.currentHackathonId;
+      const currentUserHackathonId = this.user?.currentHackathonId;
 
-    const decodedToken = jwtDecode<JwtPayload & { realm_access: userAccess }>(this.accessToken);
-    return roles.every(role => decodedToken.realm_access.roles.includes(role)) &&
-      Number(currentUserHackathonId) === Number(hackathonId);
+      const decodedToken = jwtDecode<JwtPayload & { realm_access: userAccess }>(this.accessToken);
+      return roles.every(role => decodedToken.realm_access.roles.includes(role)) &&
+        Number(currentUserHackathonId) === Number(hackathonId);
     } else {
       return false;
     }
@@ -318,6 +327,10 @@ is!: boolean;
 
   private getUserId(): number {
     return UserManager.currentUserFromStorage.id;
+  }
+
+  set refreshedToken(refreshedToken: string) {
+    this.accessToken = refreshedToken;
   }
 
   ngOnDestroy(): void {

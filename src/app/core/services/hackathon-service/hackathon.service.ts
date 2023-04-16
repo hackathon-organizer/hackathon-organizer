@@ -27,7 +27,6 @@ export class HackathonService {
   createHackathon(hackathon: HackathonRequest): Observable<HackathonResponse> {
 
     hackathon = this.validateDate(hackathon);
-    console.log(hackathon)
     return this.http.post<HackathonResponse>(this.BASE_URL_UPDATE.slice(0, -1), hackathon);
   }
 

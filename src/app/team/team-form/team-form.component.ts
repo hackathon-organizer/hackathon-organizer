@@ -4,7 +4,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TeamService} from "../../core/services/team-service/team.service";
 import {Tag, TeamRequest, TeamResponse} from "../model/Team";
-import {concatMap, finalize, Subscription, switchMap} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
 
@@ -37,7 +37,7 @@ export class TeamFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.initFrom();
+    this.initForm();
 
     this.teamService.getTags().pipe(concatMap(tagsResponse => {
 
@@ -88,21 +88,22 @@ export class TeamFormComponent implements OnInit, OnDestroy {
             currentHackathonId: this.hackathonId,
             currentTeamId: createdTeam.id
           });
-        }), switchMap(() => this.userService.refreshToken()), finalize(() => {
+        }), concatMap(() => this.userService.refreshToken()), finalize(() => {
           this.loadingCreate = false;
           this.loading = false;
-        })).subscribe(() => {
+        })).subscribe((loginResponse) => {
 
-            this.loadingCreate = false;
-            this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
-              this.toastr.success("Team " + team.name + " created successfully");
+          this.userService.refreshedToken = loginResponse.accessToken;
+          this.loadingCreate = false;
+          this.router.navigate(['/hackathons/', this.hackathonId, 'teams', this.teamId]).then(() => {
+            this.toastr.success("Team " + team.name + " created successfully");
           });
         });
       }
     }
   }
 
-  private initFrom(): void {
+  private initForm(): void {
 
     this.newTeamForm = this.formBuilder.group({
       teamName: ['', {

@@ -6,7 +6,7 @@ import {UserService} from "../../core/services/user-service/user.service";
 import dayjs from "dayjs";
 import {UserManager} from "../../shared/UserManager";
 import {ToastrService} from "ngx-toastr";
-import {concatMap, finalize, forkJoin, mergeMap, Subscription, switchMap} from "rxjs";
+import {concatMap, finalize, Subscription} from "rxjs";
 import {HackathonRequest} from "../model/Hackathon";
 
 @Component({
@@ -74,11 +74,13 @@ export class HackathonFormComponent implements OnInit {
 
           return this.userService.updateUserMembership({currentHackathonId: hackathonResponse.id});
         }),
-        switchMap(() => this.userService.refreshToken()), finalize(() => this.loading = false)
-      ).subscribe(() => {
-        this.router.navigate(['/hackathons/' + this.hackathonId]).then(() => {
-          this.toastr.success("Hackathon " + hackathon.name + " created successfully");
-        });
+        concatMap(() => this.userService.refreshToken()), finalize(() => this.loading = false)
+      ).subscribe((loginResponse) => {
+
+          this.userService.refreshedToken = loginResponse.accessToken;
+          this.router.navigate(['/hackathons/' + this.hackathonId]).then(() => {
+            this.toastr.success("Hackathon " + hackathon.name + " created successfully");
+          });
       });
     }
   }

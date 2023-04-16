@@ -1,9 +1,10 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserService} from "../services/user-service/user.service";
 import {UserManager} from "../../shared/UserManager";
 import {Notification} from "../../team/model/Notifications";
 import {OidcSecurityService} from "angular-auth-oidc-client";
 import {Role} from "../../user/model/Role";
+import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'ho-menu',
@@ -51,15 +52,20 @@ export class MenuComponent implements OnInit {
   }
 
   signUp(): void {
-    this.oidcSecurityService.getAuthorizeUrl().subscribe(url => console.log(url));
+
+    this.oidcSecurityService.getAuthorizeUrl().subscribe(url => {
+      this.oidcSecurityService.authorize(undefined, {urlHandler() {
+          window.location.href = url!.replace("openid-connect/auth","openid-connect/registrations");
+        },
+      redirectUrl: environment.REDIRECT_URL})
+    });
   }
 
   login() {
-    this.oidcSecurityService.authorize()
+    this.oidcSecurityService.authorize();
   }
 
   logout() {
-
     this.oidcSecurityService.logoffAndRevokeTokens().subscribe(() => {
       sessionStorage.clear();
     });
