@@ -48,7 +48,7 @@ export class TeamService {
   }
 
   createTeam(team: TeamRequest): Observable<TeamResponse> {
-    return this.http.post<TeamResponse>('http://localhost:9090/api/v1/write/teams', team);
+    return this.http.post<TeamResponse>(this.BASE_URL_UPDATE, team);
   }
 
   getTags(): Observable<Tag[]> {
@@ -91,7 +91,7 @@ export class TeamService {
   public fetchUserInvites(hackathonId: number) {
 
     const userId = UserManager.currentUserFromStorage.id;
-    return this.http.get<TeamInvitationNotification[]>('http://localhost:9090/api/v1/read/teams/invitations/' + userId, {
+    return this.http.get<TeamInvitationNotification[]>(this.BASE_URL_READ + 'invitations/' + userId, {
       params: {
         hackathonId: hackathonId
       }
@@ -111,6 +111,6 @@ export class TeamService {
   }
 
   updateTeam(team: TeamRequest, teamId: number): Observable<TeamResponse> {
-    return this.http.put<TeamResponse>('http://localhost:9090/api/v1/write/teams/' + teamId, team);
+    return this.http.put<TeamResponse>(this.BASE_URL_UPDATE + teamId, team);
   }
 }
