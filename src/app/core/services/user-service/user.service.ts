@@ -1,5 +1,5 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {BehaviorSubject, Observable, take} from "rxjs";
+import {BehaviorSubject, catchError, concatMap, mergeMap, Observable, switchMap, take, tap, throwError} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Client, IMessage} from "@stomp/stompjs";
 import {UserDetails, UserMembershipRequest, UserResponse, UserResponsePage} from "../../../user/model/User";
@@ -200,41 +200,40 @@ export class UserService implements OnDestroy {
 
   updateUserData(): void {
 
-    // TODO update observables
-
     this.oidcSecurityService.checkAuth().pipe(take(1)).subscribe(isLoggedIn => {
 
-      this.isUserAuthenticated.next(isLoggedIn.isAuthenticated)
+      this.isUserAuthenticated.next(isLoggedIn.isAuthenticated);
 
       if (isLoggedIn.isAuthenticated) {
-        this.oidcSecurityService.userData$.pipe(take(1)).subscribe((userProfile) => {
+
+        this.oidcSecurityService.userData$.pipe(take(1), concatMap(userProfile => {
 
           const keycloakId = userProfile.userData.sub;
 
-          this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId)
-            .pipe(take(1)).subscribe(userData => {
-
-            this.user = userData;
-
-            UserManager.updateUserInStorage(userData);
-            this.fetchAndUpdateTeamInStorage(userData);
-            this.userLoaded.next(true);
-            this.sendNoTagsNotification(userData);
-            this.getUserTeamInvitations(userData);
-            this.sendUserScheduleNotification();
-            this.openNotificationWebSocketConnection();
-          }, () => {
-            this.oidcSecurityService.logoffAndRevokeTokens().subscribe(() => {
-              this.isUserAuthenticated.next(false);
-              new Error("Can't load user profile. Try again later.");
-            });
-          });
-
-        }, (error) => {
-          new Error("Can't get user with id: " + error)
+          return this.http.get<UserResponse>(this.BASE_URL_READ + 'keycloak/' + keycloakId).pipe(
+            take(1),
+            tap(userData => {
+              this.user = userData;
+              UserManager.updateUserInStorage(userData);
+              this.fetchAndUpdateTeamInStorage(userData);
+              this.userLoaded.next(true);
+              this.sendNoTagsNotification(userData);
+              this.getUserTeamInvitations(userData);
+              this.sendUserScheduleNotification();
+              this.openNotificationWebSocketConnection();
+            }),
+            catchError(() => {
+              return this.oidcSecurityService.logoffAndRevokeTokens().pipe(
+                tap(() => {
+                  this.isUserAuthenticated.next(false);
+                  throw new Error("Can't load user profile. Try again later.");
+                })
+              );
+            })
+          );
+        })).subscribe(() => {
+          this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
         });
-
-        this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
       }
     });
   }

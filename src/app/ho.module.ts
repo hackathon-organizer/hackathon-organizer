@@ -25,8 +25,8 @@ import {environment} from "../environments/environment";
     HoRoutingModule,
     LoggerModule.forRoot({
       serverLoggingUrl: '/api/logs',
-      level: NgxLoggerLevel.DEBUG,
-      serverLogLevel: NgxLoggerLevel.ERROR
+      level: environment.production ? NgxLoggerLevel.OFF : NgxLoggerLevel.DEBUG,
+      serverLogLevel: NgxLoggerLevel.OFF
     }),
     CalendarModule.forRoot({
       provide: DateAdapter,

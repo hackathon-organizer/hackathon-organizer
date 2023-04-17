@@ -88,7 +88,7 @@ export class TeamService {
     });
   }
 
-  public fetchUserInvites(hackathonId: number) {
+  public fetchUserInvites(hackathonId: number): Observable<TeamInvitationNotification[]> {
 
     const userId = UserManager.currentUserFromStorage.id;
     return this.http.get<TeamInvitationNotification[]>(this.BASE_URL_READ + 'invitations/' + userId, {
