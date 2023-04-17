@@ -54,7 +54,7 @@ import {environment} from "../environments/environment";
         triggerRefreshWhenIdTokenExpired: false,
         autoUserInfo: true,
         renewUserInfoAfterTokenRenew: true,
-        logLevel: LogLevel.Debug,
+        logLevel: environment.production ? LogLevel.None : LogLevel.Debug,
         secureRoutes: [
           environment.API_URL + '/api/v1/write/hackathons',
           environment.API_URL + '/api/v1/read/hackathons',
