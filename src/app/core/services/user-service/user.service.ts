@@ -164,7 +164,8 @@ export class UserService implements OnDestroy {
 
   private openNotificationWebSocketConnection(): void {
 
-    const WS_API_URL = environment.API_URL.replace(new RegExp("(http|https)"), "ws");
+    const WS_API_URL = environment.API_URL.replace(
+      new RegExp("(http|https)"), environment.production ? "wss" : "ws");
 
     const client = new Client({
       brokerURL: WS_API_URL + '/hackathon-websocket?sessionId=' + this.user.id,
@@ -232,9 +233,14 @@ export class UserService implements OnDestroy {
             })
           );
         })).subscribe(() => {
-          this.oidcSecurityService.getAccessToken().subscribe(token => this.accessToken = token);
+          this.logger.info("User data updated");
         });
       }
+    });
+
+    this.oidcSecurityService.getAccessToken().subscribe(token => {
+      this.logger.info("Access token updated");
+      this.accessToken = token;
     });
   }
 

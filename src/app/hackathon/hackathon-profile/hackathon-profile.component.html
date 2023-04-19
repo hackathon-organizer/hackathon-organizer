@@ -1,7 +1,7 @@
 <section id="hackathon-profile">
 
   <div *ngIf="hackathon" class="flex justify-center items-center flex-col">
-    <h1 class="text-2xl break-words md:text-7xl font-bold mb-8 truncate w-full">{{ hackathon.name }}</h1>
+    <h1 class="text-2xl break-words md:text-7xl font-bold mb-8 truncate w-full text-center">{{ hackathon.name }}</h1>
     <span class="mb-3 mx-auto">
       {{ hackathon.eventStartDate | date: 'dd/MM/yyyy HH:mm' }}
       - {{ hackathon.eventEndDate | date: 'dd/MM/yyyy HH:mm' }}

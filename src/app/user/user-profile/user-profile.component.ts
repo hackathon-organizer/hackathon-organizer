@@ -58,7 +58,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
       this.user = userResponse;
       this.currentUser = UserManager.currentUserFromStorage;
-      this.isThisMyProfile = this.checkIfThisMyProfile();
+      this.isThisMyProfile = this.checkIfThisIsMyProfile();
 
       if (this.user.currentHackathonId) {
         this.isUserOrganizer = this.userService.checkUserAccessAndMembership(this.user.currentHackathonId, Role.ORGANIZER);
@@ -93,18 +93,22 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     const invitation: TeamInvitationNotification = this.notificationsArray[invitationIndex] as TeamInvitationNotification;
 
-    this.teamService.updateInvitationStatus(invitation, this.currentUser!.id, accepted).pipe(concatMap(() =>
-      this.userService.updateUserMembership({
+    this.teamService.updateInvitationStatus(invitation, this.currentUser!.id, accepted).pipe(concatMap(() => {
+      return this.userService.updateUserMembership({
         currentHackathonId: this.currentUser?.currentHackathonId,
         currentTeamId: invitation.teamId
-      })
-    )).subscribe(() => {
+      });
+    })).subscribe(() => {
 
       if (accepted) {
         this.currentUser!.currentTeamId = invitation.teamId;
         this.userService.fetchAndUpdateTeamInStorage(this.currentUser!);
         this.currentTeamName = invitation.teamName;
-        this.toastr.success("You are now member of team " + invitation.teamName);
+
+        this.router.navigate(["/hackathons/", this.currentUser?.currentHackathonId,
+          "/teams/", this.currentUser?.currentTeamId]).then(() => {
+          this.toastr.success("You are now member of team " + invitation.teamName);
+        });
       } else {
         this.toastr.success("Invitation to team " + invitation.teamName + " rejected");
       }
@@ -168,11 +172,14 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   setUserRole(role: Role): void {
 
-    if (this.currentUser?.currentHackathonId
-      //&& this.userService.isUserOrganizer(this.currentUser.currentHackathonId)
+    if (this.currentUser?.currentHackathonId && this.userService.checkUserAccess(Role.ORGANIZER)
     ) {
       this.userService.updateUserRole(this.user.id, role)
-        .subscribe(() => this.toastr.success("Role changed for user " + this.user.username));
+        .subscribe(() => {
+
+
+          this.toastr.success("Role changed for user " + this.user.username)
+        });
     }
   }
 
@@ -206,7 +213,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     return this.tags.filter(tag => tag.isSelected);
   }
 
-  private checkIfThisMyProfile(): boolean {
+  private checkIfThisIsMyProfile(): boolean {
     return Number(this.currentUser?.id) === Number(this.userProfileId);
   }
 
