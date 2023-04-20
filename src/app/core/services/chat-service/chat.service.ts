@@ -51,7 +51,7 @@ export class ChatService {
     const username = UserManager.currentUserFromStorage.username;
 
     const WS_API_URL = this.API_URL.replace(
-      new RegExp("(http|https)"), environment.production ? "wss" : "ws");
+      new RegExp("(https|http)"), environment.production ? "wss" : "ws");
 
     return webSocket({
       url: WS_API_URL + '/messages-websocket?username=' + username + '&chatId=' + chatId,

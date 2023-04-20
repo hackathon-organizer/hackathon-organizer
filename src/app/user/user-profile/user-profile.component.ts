@@ -104,6 +104,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.currentUser!.currentTeamId = invitation.teamId;
         this.userService.fetchAndUpdateTeamInStorage(this.currentUser!);
         this.currentTeamName = invitation.teamName;
+        this.userService.updateUserData();
 
         this.router.navigate(["/hackathons/", this.currentUser?.currentHackathonId,
           "/teams/", this.currentUser?.currentTeamId]).then(() => {
@@ -164,7 +165,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   getTeamUrl(teamId: number): string {
 
     if (this.user.currentTeamId && teamId) {
-      return `/hackathon/${this.user.currentHackathonId}/team/${teamId}`;
+      return `/hackathons/${this.user.currentHackathonId}/teams/${teamId}`;
     } else {
       return "/";
     }
